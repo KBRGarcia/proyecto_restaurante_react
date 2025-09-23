@@ -1,0 +1,40 @@
+# Archivos de configuración de base de datos (comentar si quieres incluir configuración de ejemplo)
+# includes/db.php
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Archivos de editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Archivos temporales de PHP
+*.log
+*.tmp
+
+# Archivos de backup
+*.backup
+*.bak
+*.old
+
+# Archivos de configuración local
+config.local.php
+.env
+
+# Carpetas de dependencias (si usas Composer en el futuro)
+vendor/
+
+# Archivos de XAMPP que podrían generarse
+.htaccess.backup
+
+# Archivos de Windows
+desktop.ini
+ehthumbs.db
+
+# Archivos de cache
+cache/
+temp/
