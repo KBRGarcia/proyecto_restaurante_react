@@ -4,13 +4,21 @@ Un sistema completo de gestión de restaurante desarrollado con PHP, MySQL, Boot
 
 ## 🚀 Características Principales
 
-- ✅ **Sistema de usuarios** con 3 niveles (Admin, Empleado, Cliente)
-- ✅ **Menú interactivo** con carrito de compras
-- ✅ **Dashboard administrativo** con estadísticas
-- ✅ **Integración React + PHP** para interfaces modernas
-- ✅ **Diseño responsive** moderno
-- ✅ **Sistema de seguridad** robusto
-- ✅ **Base de datos** normalizada
+### ✅ Ya Implementado
+- ✅ **Sistema de autenticación** completo (Login/Register/Logout)
+- ✅ **React Router** para navegación SPA
+- ✅ **Context API** para gestión de estado global
+- ✅ **Rutas protegidas** por autenticación y roles
+- ✅ **Menú de productos** con filtros por categoría
+- ✅ **API REST** en PHP con tokens de sesión
+- ✅ **Navbar dinámico** según estado de usuario
+- ✅ **Diseño responsive** moderno con Bootstrap 5
+
+### 🔜 Por Implementar
+- 🔜 **Carrito de compras** completo
+- 🔜 **Sistema de órdenes** y historial
+- 🔜 **Dashboard administrativo** React
+- 🔜 **Gestión de productos** (CRUD)
 
 ## 🛠️ Tecnologías
 
@@ -35,16 +43,23 @@ Un sistema completo de gestión de restaurante desarrollado con PHP, MySQL, Boot
    npm install
    ```
 
-4. **Iniciar servidor de desarrollo React:**
+4. **Crear tabla de sesiones en MySQL:**
+   - Abre phpMyAdmin (`http://localhost/phpmyadmin`)
+   - Selecciona `restaurante_db`
+   - Ejecuta el SQL de `sql/sessions_table.sql`
+
+5. **Iniciar servidor de desarrollo React:**
    ```bash
    npm run dev
    ```
-   - Abre `http://localhost:3000` para React standalone
-   - O integra en páginas PHP (ver `GUIA_REACT_INTEGRACION.md`)
 
-5. **Usuario por defecto:**
-   - **Email:** admin@restaurante.com
-   - **Password:** password
+6. **Abrir la aplicación:**
+   - React App: `http://localhost:3000`
+   - Backend PHP: Tu servidor XAMPP
+
+7. **Usuarios de prueba:**
+   - **Admin:** admin@restaurante.com / password
+   - **Cliente:** Crea tu cuenta en `/register`
 
 ## 📁 Estructura del Proyecto
 
@@ -66,17 +81,24 @@ proyecto_restaurante/
 └── GUIA_REACT_INTEGRACION.md # 🆕 Guía de integración React
 ```
 
-## 📱 Páginas Disponibles
+## 📱 Rutas de la Aplicación React
 
-### Versión PHP Tradicional
-- **🏠 Inicio** - Landing page moderna (`index.php`)
-- **📖 Menú** - Catálogo de productos con filtros (`menu.php`)
-- **🔐 Login/Registro** - Autenticación de usuarios (`login.php`, `registro.php`)
-- **📊 Dashboard** - Panel administrativo (`dashboard.php`)
+### Rutas Públicas (No requieren login)
+- **`/`** - Página de inicio (Landing page)
+- **`/menu`** - Menú de productos con filtros
+- **`/login`** - Iniciar sesión
+- **`/register`** - Crear cuenta
 
-### Versión React (Nueva)
-- **⚛️ React App** - `http://localhost:3000` (modo desarrollo)
-- **🔌 React + PHP** - Ver `ejemplo_integracion.php`
+### Rutas Protegidas (Requieren autenticación)
+- **`/carrito`** - Carrito de compras (en desarrollo)
+- **`/mis-ordenes`** - Historial de órdenes (en desarrollo)
+- **`/perfil`** - Perfil de usuario (en desarrollo)
+
+### Rutas Admin (Solo rol admin)
+- **`/dashboard`** - Panel administrativo (en desarrollo)
+
+### Versión PHP Tradicional (Aún disponible)
+- `index.php`, `menu.php`, `login.php`, `dashboard.php`, etc.
 
 ## 🎯 Comandos Disponibles
 
@@ -91,19 +113,31 @@ npm run build      # Genera archivos optimizados en /dist
 npm run preview    # Previsualiza el build de producción
 ```
 
+## 🎯 Inicio Rápido
+
+### Para empezar con el sistema de autenticación:
+
+1. **Lee primero:** 📄 **`EMPEZAR_AQUI.md`** ⭐
+2. Ejecuta: `npm install react-router-dom`
+3. Crea la tabla `sessions` en MySQL
+4. Ejecuta: `npm run dev`
+5. Abre: `http://localhost:3000`
+
+### Documentación completa:
+- **`EMPEZAR_AQUI.md`** - ⭐ Inicio rápido de autenticación
+- **`INSTRUCCIONES_IMPLEMENTACION.md`** - Guía paso a paso
+- **`GUIA_IMPLEMENTACION_COMPLETA.md`** - Arquitectura completa
+
 ## 🔧 Solución de Problemas
 
-### ❌ Error: "ECONNREFUSED" o "Error de conexión con el servidor"
+### ❌ Error: "ECONNREFUSED"
+**Solución:** Lee `SIGUE_ESTOS_PASOS.md`
 
-**Solución rápida:**
-1. Asegúrate que Apache y MySQL estén corriendo en XAMPP
-2. Prueba la API: `http://localhost/codigos-ika%20XAMPP/proyecto_restaurante_react/api/test.php`
-3. Lee: **`SIGUE_ESTOS_PASOS.md`** para solución paso a paso
+### ❌ Error: "Cannot find module 'react-router-dom'"
+**Solución:** `npm install react-router-dom`
 
-**Documentación completa:**
-- `SIGUE_ESTOS_PASOS.md` - Solución paso a paso
-- `COMO_RESOLVER_ERROR.md` - Guía detallada de errores
-- `SOLUCION_ERROR_CONEXION.md` - Troubleshooting avanzado
+### ❌ Error: "Table 'sessions' doesn't exist"
+**Solución:** Ejecuta `sql/sessions_table.sql` en phpMyAdmin
 
 ## 📄 Licencia
 

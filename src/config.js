@@ -17,9 +17,22 @@ export const API_BASE_URL = isDevelopment
 
 // Endpoints específicos
 export const API_ENDPOINTS = {
+  // Productos
   productos: `${API_BASE_URL}/productos.php`,
   categorias: `${API_BASE_URL}/categorias.php`,
+  
+  // Autenticación
+  login: `${API_BASE_URL}/auth/login.php`,
+  register: `${API_BASE_URL}/auth/register.php`,
+  logout: `${API_BASE_URL}/auth/logout.php`,
+  me: `${API_BASE_URL}/auth/me.php`,
+  
+  // Carrito
   carrito: `${API_BASE_URL}/carrito.php`,
+  
+  // Órdenes
+  ordenes: `${API_BASE_URL}/ordenes.php`,
+  ordenDetalle: (id) => `${API_BASE_URL}/ordenes.php?id=${id}`,
 }
 
 // Configuración general
