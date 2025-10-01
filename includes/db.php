@@ -2,7 +2,7 @@
 $host = "localhost";
 $user = "root";
 $pass = "";
-$db   = "proyecto_restaurante";
+$db   = "proyecto_restaurante_react";
 
 $conn = new mysqli($host, $user, $pass, $db);
 

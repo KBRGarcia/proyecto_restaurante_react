@@ -1,5 +1,5 @@
-CREATE DATABASE IF NOT EXISTS proyecto_restaurante;
-USE proyecto_restaurante;
+CREATE DATABASE IF NOT EXISTS proyecto_restaurante_react;
+USE proyecto_restaurante_react;
 
 -- Tabla de usuarios con campos adicionales
 CREATE TABLE usuarios (
