@@ -1,40 +1,44 @@
-# Archivos de configuración de base de datos (comentar si quieres incluir configuración de ejemplo)
-# includes/db.php
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# Archivos de sistema
+# Build
+dist/
+dist-ssr/
+*.local
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea
 .DS_Store
-Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 
-# Archivos de editor
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# Archivos temporales de PHP
-*.log
-*.tmp
-
-# Archivos de backup
-*.backup
-*.bak
-*.old
-
-# Archivos de configuración local
-config.local.php
+# Environment
 .env
+.env.local
+.env.production
 
-# Carpetas de dependencias (si usas Composer en el futuro)
+# PHP
 vendor/
+composer.lock
 
-# Archivos de XAMPP que podrían generarse
-.htaccess.backup
+# Database
+*.sql.backup
+*.sql.gz
 
-# Archivos de Windows
-desktop.ini
-ehthumbs.db
+# Logs
+*.log
+logs/
 
-# Archivos de cache
-cache/
-temp/
+# OS
+Thumbs.db
+.DS_Store
