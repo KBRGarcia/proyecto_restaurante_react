@@ -23,10 +23,6 @@ function HomePage() {
               <i className="fas fa-book-open me-2"></i>
               Ver Nuestro Menú
             </Link>
-            <Link to="/register" className="btn btn-outline-light btn-lg">
-              <i className="fas fa-user-plus me-2"></i>
-              Crear Cuenta
-            </Link>
           </div>
         </div>
       </section>

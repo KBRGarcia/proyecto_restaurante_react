@@ -10,6 +10,7 @@ import HomePage from './pages/HomePage.tsx'
 import PerfilPage from './pages/PerfilPage.tsx'
 import ConfiguracionPage from './pages/ConfiguracionPage.tsx'
 import CartPage from './pages/CartPage.tsx'
+import MisOrdenesPage from './pages/MisOrdenesPage.tsx'
 import './App.css'
 
 /**
@@ -65,10 +66,7 @@ function App() {
               path="/mis-ordenes" 
               element={
                 <ProtectedRoute>
-                  <div className="container mt-5">
-                    <h1>Mis Órdenes</h1>
-                    <p>Próximamente...</p>
-                  </div>
+                  <MisOrdenesPage />
                 </ProtectedRoute>
               } 
             />
