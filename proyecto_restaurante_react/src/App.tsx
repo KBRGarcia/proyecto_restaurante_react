@@ -11,6 +11,7 @@ import PerfilPage from './pages/PerfilPage.tsx'
 import ConfiguracionPage from './pages/ConfiguracionPage.tsx'
 import CartPage from './pages/CartPage.tsx'
 import MisOrdenesPage from './pages/MisOrdenesPage.tsx'
+import CheckoutPage from './pages/CheckoutPage.tsx'
 import './App.css'
 
 /**
@@ -58,6 +59,15 @@ function App() {
               element={
                 <ProtectedRoute>
                   <CartPage />
+                </ProtectedRoute>
+              } 
+            />
+            
+            <Route 
+              path="/checkout" 
+              element={
+                <ProtectedRoute>
+                  <CheckoutPage />
                 </ProtectedRoute>
               } 
             />

@@ -1,10 +1,31 @@
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 
 /**
  * Página de Inicio
  * Landing page del restaurante
+ * 
+ * Fuente: https://react.dev/reference/react/useEffect
  */
 function HomePage() {
+  const [mostrarNotificacion, setMostrarNotificacion] = useState(false)
+
+  /**
+   * Verificar si hay notificación de pago exitoso
+   */
+  useEffect(() => {
+    const paymentSuccess = localStorage.getItem('paymentSuccess')
+    if (paymentSuccess === 'true') {
+      setMostrarNotificacion(true)
+      localStorage.removeItem('paymentSuccess')
+      
+      // Ocultar notificación después de 5 segundos
+      setTimeout(() => {
+        setMostrarNotificacion(false)
+      }, 5000)
+    }
+  }, [])
+
   return (
     <div>
       {/* Hero Section */}
@@ -142,6 +163,50 @@ function HomePage() {
           </p>
         </div>
       </footer>
+
+      {/* Notificación de pago exitoso */}
+      {mostrarNotificacion && (
+        <div 
+          className="position-fixed top-0 start-50 translate-middle-x mt-3" 
+          style={{ zIndex: 9999 }}
+        >
+          <div className="alert alert-success alert-dismissible fade show shadow-lg payment-success-notification" role="alert">
+            <div className="d-flex align-items-center">
+              <div className="me-3">
+                <i className="fas fa-check-circle fa-3x text-success"></i>
+              </div>
+              <div className="flex-grow-1">
+                <h4 className="alert-heading mb-1">
+                  <i className="fas fa-party-horn me-2"></i>
+                  ¡Pago Exitoso!
+                </h4>
+                <p className="mb-1">
+                  <strong>El pago se procesó con éxito</strong>
+                </p>
+                <small className="text-muted">
+                  <i className="fas fa-info-circle me-1"></i>
+                  Tu pedido está siendo preparado. Recibirás una confirmación por correo.
+                </small>
+              </div>
+              <button 
+                type="button" 
+                className="btn-close" 
+                onClick={() => setMostrarNotificacion(false)}
+                aria-label="Close"
+              ></button>
+            </div>
+            <div className="progress mt-2" style={{ height: '3px' }}>
+              <div 
+                className="progress-bar bg-success" 
+                style={{ 
+                  animation: 'progressBar 5s linear forwards',
+                  width: '100%'
+                }}
+              ></div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

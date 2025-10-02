@@ -413,3 +413,337 @@ input[type="number"]::-webkit-outer-spin-button {
   opacity: 0.7;
 }
 
+/* === ESTILOS DE CHECKOUT Y PAGOS === */
+
+/* Payment Method Cards */
+.payment-method-card {
+  padding: 1.25rem;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.payment-method-card:hover {
+  border-color: #0d6efd;
+  box-shadow: 0 4px 12px rgba(13, 110, 253, 0.1);
+  transform: translateY(-2px);
+}
+
+.payment-method-card.selected {
+  border-color: #28a745;
+  background: linear-gradient(135deg, #f8fff9 0%, #ffffff 100%);
+  box-shadow: 0 6px 20px rgba(40, 167, 69, 0.2);
+}
+
+.payment-method-card:focus {
+  outline: none;
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* Payment Icon */
+.payment-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.payment-check {
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
+}
+
+.payment-method-card.selected .payment-check {
+  animation: checkBounce 0.5s ease;
+}
+
+@keyframes checkBounce {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+}
+
+/* Payment Form */
+.payment-form {
+  animation: fadeInForm 0.4s ease-out;
+}
+
+@keyframes fadeInForm {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Input focus states */
+.payment-form input:focus {
+  border-color: #28a745;
+  box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+
+.payment-form .is-invalid:focus {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+/* Input groups for card */
+.input-group-text {
+  background: #f8f9fa;
+  border-left: 0;
+}
+
+/* Card number formatting */
+.payment-form input[placeholder*="1234"] {
+  font-family: 'Courier New', monospace;
+  letter-spacing: 2px;
+  font-size: 1.1rem;
+}
+
+/* CVV input */
+.payment-form input[placeholder*="123"] {
+  font-family: 'Courier New', monospace;
+  letter-spacing: 3px;
+  font-size: 1.2rem;
+  text-align: center;
+}
+
+/* Payment Success Notification */
+.payment-success-notification {
+  min-width: 400px;
+  max-width: 500px;
+  border-left: 5px solid #28a745;
+  animation: slideInDown 0.5s ease-out, shake 0.5s ease 0.5s;
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(-50%) translateY(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-50%) translateY(-5px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(-50%) translateY(5px);
+  }
+}
+
+@keyframes progressBar {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+
+/* Secure badge */
+.secure-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+  border-radius: 50px;
+  font-size: 0.875rem;
+  animation: pulse 2s infinite;
+}
+
+/* Processing overlay */
+.processing-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9998;
+}
+
+.processing-card {
+  background: white;
+  padding: 3rem;
+  border-radius: 16px;
+  text-align: center;
+  animation: zoomIn 0.3s ease;
+}
+
+/* Checkout summary sticky */
+.checkout-summary-sticky {
+  position: sticky;
+  top: 20px;
+}
+
+/* Order items summary in checkout */
+.order-items-summary {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.order-items-summary::-webkit-scrollbar {
+  width: 6px;
+}
+
+.order-items-summary::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.order-items-summary::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+.order-items-summary::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Payment method icons */
+.payment-methods-grid .fab,
+.payment-methods-grid .fas {
+  transition: transform 0.3s ease;
+}
+
+.payment-method-card:hover .fab,
+.payment-method-card:hover .fas {
+  transform: scale(1.1);
+}
+
+/* Responsive checkout */
+@media (max-width: 768px) {
+  .payment-success-notification {
+    min-width: 90%;
+    max-width: 95%;
+    margin: 0 1rem;
+  }
+  
+  .payment-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 1.25rem;
+  }
+  
+  .payment-form input[placeholder*="1234"] {
+    font-size: 0.95rem;
+    letter-spacing: 1px;
+  }
+  
+  .checkout-summary-sticky {
+    position: relative;
+    top: 0;
+  }
+}
+
+/* Security indicators */
+.security-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  background: #e7f5ff;
+  border: 1px solid #a5d8ff;
+  border-radius: 50px;
+  color: #0c8599;
+  font-size: 0.75rem;
+}
+
+/* Card type indicators */
+.card-type-visa {
+  color: #1a1f71;
+}
+
+.card-type-mastercard {
+  color: #eb001b;
+}
+
+/* Button processing state */
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.spinner-border-sm {
+  width: 1rem;
+  height: 1rem;
+  border-width: 0.15em;
+}
+
+/* Alert animations */
+.alert {
+  animation: alertFadeIn 0.3s ease;
+}
+
+@keyframes alertFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Payment logos */
+.payment-logos {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.payment-logos i {
+  font-size: 2rem;
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+.payment-logos i:hover {
+  opacity: 1;
+}
+
+/* Form validation feedback */
+.invalid-feedback {
+  display: block;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.is-invalid {
+  border-color: #dc3545 !important;
+  padding-right: calc(1.5em + 0.75rem);
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right calc(0.375em + 0.1875rem) center;
+  background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+

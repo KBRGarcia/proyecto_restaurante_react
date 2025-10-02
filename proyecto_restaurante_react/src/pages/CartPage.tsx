@@ -68,8 +68,7 @@ function CartPage() {
    * Proceder al checkout
    */
   const handleProcederPago = () => {
-    // TODO: Implementar lógica de checkout
-    alert('Funcionalidad de pago en desarrollo')
+    navigate('/checkout')
   }
 
   // Renderizar carrito vacío

@@ -189,3 +189,45 @@ export interface ShowPasswordState {
   confirmacion: boolean
 }
 
+// === TIPOS DE PAGO ===
+export type MetodoPago = 'tarjeta' | 'paypal' | 'zinli' | 'zelle'
+export type TipoTarjeta = 'visa' | 'mastercard'
+
+export interface DatosTarjeta {
+  numeroTarjeta: string
+  nombreTitular: string
+  fechaExpiracion: string
+  cvv: string
+  tipoTarjeta?: TipoTarjeta
+}
+
+export interface DatosPayPal {
+  correo: string
+  password: string
+}
+
+export interface DatosZinli {
+  numeroTelefono: string
+  pin: string
+}
+
+export interface DatosZelle {
+  correoZelle: string
+  nombreCompleto: string
+}
+
+export interface DatosPago {
+  metodoPago: MetodoPago
+  tarjeta?: DatosTarjeta
+  paypal?: DatosPayPal
+  zinli?: DatosZinli
+  zelle?: DatosZelle
+}
+
+export interface ResultadoPago {
+  success: boolean
+  mensaje: string
+  transaccionId?: string
+  fecha?: string
+}
+
