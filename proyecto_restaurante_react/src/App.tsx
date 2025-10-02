@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext.tsx'
+import { CartProvider } from './contexts/CartContext.tsx'
 import Navbar from './components/Navbar.tsx'
 import Login from './components/Login.tsx'
 import Register from './components/Register.tsx'
@@ -8,6 +9,7 @@ import MenuPage from './pages/MenuPage.tsx'
 import HomePage from './pages/HomePage.tsx'
 import PerfilPage from './pages/PerfilPage.tsx'
 import ConfiguracionPage from './pages/ConfiguracionPage.tsx'
+import CartPage from './pages/CartPage.tsx'
 import './App.css'
 
 /**
@@ -20,10 +22,11 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <div className="app">
-          <Navbar />
-          
-          <Routes>
+        <CartProvider>
+          <div className="app">
+            <Navbar />
+            
+            <Routes>
             {/* Rutas públicas */}
             <Route path="/" element={<HomePage />} />
             <Route path="/menu" element={<MenuPage />} />
@@ -53,10 +56,7 @@ function App() {
               path="/carrito" 
               element={
                 <ProtectedRoute>
-                  <div className="container mt-5">
-                    <h1>Carrito de Compras</h1>
-                    <p>Próximamente...</p>
-                  </div>
+                  <CartPage />
                 </ProtectedRoute>
               } 
             />
@@ -96,8 +96,9 @@ function App() {
                 </div>
               } 
             />
-          </Routes>
-        </div>
+            </Routes>
+          </div>
+        </CartProvider>
       </AuthProvider>
     </Router>
   )

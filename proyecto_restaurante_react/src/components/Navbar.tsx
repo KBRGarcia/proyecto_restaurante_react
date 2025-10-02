@@ -1,12 +1,16 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext.tsx'
+import { useCart } from '../contexts/CartContext.tsx'
 
 /**
  * Componente de Navbar
  * Muestra el menú de navegación con opciones según el estado de autenticación
+ * 
+ * Fuente: https://react-bootstrap.github.io/components/navbar/
  */
 function Navbar() {
   const { usuario, logout, estaAutenticado } = useAuth()
+  const { cantidadTotal } = useCart()
   const navigate = useNavigate()
 
   const handleLogout = async () => {
@@ -71,9 +75,11 @@ function Navbar() {
             <li className="nav-item">
               <Link className="nav-link position-relative" to="/carrito">
                 <i className="fas fa-shopping-cart fa-lg"></i>
-                <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary">
-                  0
-                </span>
+                {cantidadTotal > 0 && (
+                  <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary">
+                    {cantidadTotal > 99 ? '99+' : cantidadTotal}
+                  </span>
+                )}
               </Link>
             </li>
 

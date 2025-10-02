@@ -117,6 +117,22 @@ export interface ItemCarrito {
   precio: number
   cantidad: number
   imagen?: string
+  descripcion?: string
+  tiempo_preparacion?: number
+}
+
+export interface CartContextType {
+  items: ItemCarrito[]
+  cantidadTotal: number
+  subtotal: number
+  impuestos: number
+  total: number
+  agregarItem: (producto: Producto, cantidad?: number) => void
+  eliminarItem: (productoId: number) => void
+  actualizarCantidad: (productoId: number, cantidad: number) => void
+  vaciarCarrito: () => void
+  estaEnCarrito: (productoId: number) => boolean
+  obtenerCantidad: (productoId: number) => number
 }
 
 // === TIPOS DE ÓRDENES ===

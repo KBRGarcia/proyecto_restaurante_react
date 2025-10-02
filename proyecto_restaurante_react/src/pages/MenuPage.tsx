@@ -3,6 +3,7 @@ import ProductCard from '../components/ProductCard.tsx'
 import FilterBar from '../components/FilterBar.tsx'
 import LoadingSpinner from '../components/LoadingSpinner.tsx'
 import ErrorMessage from '../components/ErrorMessage.tsx'
+import { useCart } from '../contexts/CartContext.tsx'
 import { API_ENDPOINTS } from '../config.ts'
 import type { Producto, Categoria, ApiResponse } from '../types.ts'
 
@@ -11,11 +12,14 @@ import type { Producto, Categoria, ApiResponse } from '../types.ts'
  * Muestra todos los productos del restaurante con filtros
  */
 function MenuPage() {
+  const { agregarItem } = useCart()
   const [productos, setProductos] = useState<Producto[]>([])
   const [categorias, setCategorias] = useState<Categoria[]>([])
   const [categoriaActiva, setCategoriaActiva] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [showToast, setShowToast] = useState(false)
+  const [lastAddedProduct, setLastAddedProduct] = useState<string>('')
 
   useEffect(() => {
     cargarDatos()
@@ -64,9 +68,14 @@ function MenuPage() {
   }
 
   const handleAddToCart = async (producto: Producto) => {
-    // TODO: Implementar lógica del carrito
-    console.log('Producto agregado:', producto.nombre)
-    alert(`${producto.nombre} agregado al carrito`)
+    agregarItem(producto)
+    setLastAddedProduct(producto.nombre)
+    setShowToast(true)
+    
+    // Ocultar toast después de 3 segundos
+    setTimeout(() => {
+      setShowToast(false)
+    }, 3000)
   }
 
   const productosFiltrados = categoriaActiva === null
@@ -126,6 +135,32 @@ function MenuPage() {
         <div className="alert alert-info text-center">
           <i className="fas fa-info-circle me-2"></i>
           No hay productos en esta categoría
+        </div>
+      )}
+
+      {/* Toast de notificación */}
+      {showToast && (
+        <div 
+          className="position-fixed bottom-0 end-0 p-3" 
+          style={{ zIndex: 9999 }}
+        >
+          <div 
+            className="toast show bg-success text-white" 
+            role="alert"
+          >
+            <div className="d-flex align-items-center p-3">
+              <i className="fas fa-check-circle fa-2x me-3"></i>
+              <div className="flex-grow-1">
+                <strong className="d-block">¡Producto agregado!</strong>
+                <small>{lastAddedProduct}</small>
+              </div>
+              <button 
+                type="button" 
+                className="btn-close btn-close-white ms-2" 
+                onClick={() => setShowToast(false)}
+              ></button>
+            </div>
+          </div>
         </div>
       )}
     </div>
