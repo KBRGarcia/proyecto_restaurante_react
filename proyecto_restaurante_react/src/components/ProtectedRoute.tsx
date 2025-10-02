@@ -1,6 +1,7 @@
 import { Navigate } from 'react-router-dom'
-import { useAuth } from '../contexts/AuthContext'
-import LoadingSpinner from './LoadingSpinner'
+import { useAuth } from '../contexts/AuthContext.tsx'
+import LoadingSpinner from './LoadingSpinner.tsx'
+import type { ProtectedRouteProps } from '../types.ts'
 
 /**
  * Componente HOC para proteger rutas
@@ -13,7 +14,7 @@ import LoadingSpinner from './LoadingSpinner'
  *   </ProtectedRoute>
  * } />
  */
-function ProtectedRoute({ children, requiredRole = null }) {
+function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
   const { usuario, loading, estaAutenticado, tieneRol } = useAuth()
 
   // Mostrar loading mientras verifica la sesión
@@ -43,7 +44,7 @@ function ProtectedRoute({ children, requiredRole = null }) {
   }
 
   // Si todo está bien, mostrar el componente hijo
-  return children
+  return <>{children}</>
 }
 
 export default ProtectedRoute

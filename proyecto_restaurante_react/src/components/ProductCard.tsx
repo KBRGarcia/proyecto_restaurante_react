@@ -1,10 +1,11 @@
 import { useState } from 'react'
+import type { ProductCardProps } from '../types.ts'
 
 /**
  * Componente de Tarjeta de Producto
  * Siguiendo las mejores prácticas de React
  */
-function ProductCard({ producto, onAddToCart }) {
+function ProductCard({ producto, onAddToCart }: ProductCardProps) {
   const [isAdding, setIsAdding] = useState(false)
 
   const handleAddToCart = async () => {

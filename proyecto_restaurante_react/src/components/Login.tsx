@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useAuth } from '../contexts/AuthContext'
+import { useState, FormEvent } from 'react'
+import { useAuth } from '../contexts/AuthContext.tsx'
 import { useNavigate, Link } from 'react-router-dom'
 
 /**
@@ -10,12 +10,12 @@ function Login() {
   const [correo, setCorreo] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
+  const [error, setError] = useState<string | null>(null)
   
   const { login } = useAuth()
   const navigate = useNavigate()
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setError(null)
     setLoading(true)
@@ -30,7 +30,7 @@ function Login() {
     try {
       const resultado = await login(correo, password)
 
-      if (resultado.success) {
+      if (resultado.success && resultado.usuario) {
         // Redirigir según el rol del usuario
         if (resultado.usuario.rol === 'admin') {
           navigate('/dashboard')

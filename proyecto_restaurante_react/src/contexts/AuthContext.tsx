@@ -1,17 +1,24 @@
-import { createContext, useContext, useState, useEffect } from 'react'
-import { API_ENDPOINTS } from '../config'
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { API_ENDPOINTS } from '../config.ts'
+import type { 
+  Usuario, 
+  AuthContextType, 
+  AuthResponse, 
+  RegisterData,
+  RolUsuario 
+} from '../types.ts'
 
 /**
  * Context para gestión de autenticación
  * Fuente: https://react.dev/learn/passing-data-deeply-with-context
  */
-const AuthContext = createContext(null)
+const AuthContext = createContext<AuthContextType | null>(null)
 
 /**
  * Hook personalizado para usar el contexto de autenticación
  * Fuente: https://react.dev/reference/react/useContext
  */
-export const useAuth = () => {
+export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext)
   if (!context) {
     throw new Error('useAuth debe usarse dentro de AuthProvider')
@@ -19,14 +26,18 @@ export const useAuth = () => {
   return context
 }
 
+interface AuthProviderProps {
+  children: ReactNode
+}
+
 /**
  * Provider de autenticación
  * Gestiona el estado del usuario y provee funciones de auth
  */
-export function AuthProvider({ children }) {
-  const [usuario, setUsuario] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+export function AuthProvider({ children }: AuthProviderProps) {
+  const [usuario, setUsuario] = useState<Usuario | null>(null)
+  const [loading, setLoading] = useState<boolean>(true)
+  const [error, setError] = useState<string | null>(null)
 
   // Al cargar, verificar si hay sesión activa
   useEffect(() => {
@@ -36,7 +47,7 @@ export function AuthProvider({ children }) {
   /**
    * Verificar si hay una sesión activa
    */
-  const verificarSesion = async () => {
+  const verificarSesion = async (): Promise<void> => {
     try {
       const token = localStorage.getItem('token')
       
@@ -53,8 +64,8 @@ export function AuthProvider({ children }) {
       })
 
       if (response.ok) {
-        const data = await response.json()
-        if (data.success) {
+        const data: AuthResponse = await response.json()
+        if (data.success && data.usuario) {
           setUsuario(data.usuario)
         } else {
           localStorage.removeItem('token')
@@ -73,7 +84,7 @@ export function AuthProvider({ children }) {
   /**
    * Iniciar sesión
    */
-  const login = async (correo, password) => {
+  const login = async (correo: string, password: string): Promise<AuthResponse> => {
     try {
       setError(null)
       
@@ -85,9 +96,9 @@ export function AuthProvider({ children }) {
         body: JSON.stringify({ correo, password })
       })
 
-      const data = await response.json()
+      const data: AuthResponse = await response.json()
 
-      if (data.success) {
+      if (data.success && data.token && data.usuario) {
         // Guardar token en localStorage
         localStorage.setItem('token', data.token)
         
@@ -96,20 +107,22 @@ export function AuthProvider({ children }) {
         
         return { success: true, usuario: data.usuario }
       } else {
-        setError(data.message || 'Error al iniciar sesión')
-        return { success: false, message: data.message }
+        const errorMsg = data.message || 'Error al iniciar sesión'
+        setError(errorMsg)
+        return { success: false, message: errorMsg }
       }
     } catch (error) {
       console.error('Error en login:', error)
-      setError('Error de conexión')
-      return { success: false, message: 'Error de conexión' }
+      const errorMsg = 'Error de conexión'
+      setError(errorMsg)
+      return { success: false, message: errorMsg }
     }
   }
 
   /**
    * Registrar nuevo usuario
    */
-  const register = async (datos) => {
+  const register = async (datos: RegisterData): Promise<AuthResponse> => {
     try {
       setError(null)
       
@@ -121,26 +134,28 @@ export function AuthProvider({ children }) {
         body: JSON.stringify(datos)
       })
 
-      const data = await response.json()
+      const data: AuthResponse = await response.json()
 
       if (data.success) {
         // Auto-login después de registro exitoso
         return await login(datos.correo, datos.password)
       } else {
-        setError(data.message || 'Error al registrarse')
-        return { success: false, message: data.message }
+        const errorMsg = data.message || 'Error al registrarse'
+        setError(errorMsg)
+        return { success: false, message: errorMsg }
       }
     } catch (error) {
       console.error('Error en registro:', error)
-      setError('Error de conexión')
-      return { success: false, message: 'Error de conexión' }
+      const errorMsg = 'Error de conexión'
+      setError(errorMsg)
+      return { success: false, message: errorMsg }
     }
   }
 
   /**
    * Cerrar sesión
    */
-  const logout = async () => {
+  const logout = async (): Promise<void> => {
     try {
       const token = localStorage.getItem('token')
       
@@ -166,19 +181,19 @@ export function AuthProvider({ children }) {
   /**
    * Verificar si el usuario tiene un rol específico
    */
-  const tieneRol = (rol) => {
+  const tieneRol = (rol: RolUsuario): boolean => {
     return usuario?.rol === rol
   }
 
   /**
    * Verificar si el usuario está autenticado
    */
-  const estaAutenticado = () => {
+  const estaAutenticado = (): boolean => {
     return usuario !== null
   }
 
   // Valor del contexto
-  const value = {
+  const value: AuthContextType = {
     usuario,
     loading,
     error,

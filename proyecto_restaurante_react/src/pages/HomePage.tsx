@@ -142,7 +142,7 @@ function HomePage() {
       <footer className="bg-dark text-white py-4">
         <div className="container text-center">
           <p className="mb-0">
-            &copy; 2024 Sabor & Tradición. Todos los derechos reservados.
+            &copy; 2025 Sabor & Tradición. Todos los derechos reservados.
           </p>
         </div>
       </footer>

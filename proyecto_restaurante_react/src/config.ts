@@ -8,11 +8,11 @@ const isDevelopment = import.meta.env.DEV
 
 // URL base de tu proyecto en XAMPP
 // IMPORTANTE: Ajusta esto según la ruta de tu proyecto
-const XAMPP_PROJECT_PATH = '/codigos-ika%20XAMPP/proyecto_restaurante_react'
+const XAMPP_PROJECT_PATH = '/codigos-ika%20XAMPP/proyecto_restaurante_react/proyecto_restaurante_react'
 
 // Construir URL base de la API
-export const API_BASE_URL = isDevelopment
-  ? `http://localhost${XAMPP_PROJECT_PATH}/api`
+export const API_BASE_URL: string = isDevelopment
+  ? `http://localhost${XAMPP_PROJECT_PATH}/server/api`
   : '/api'
 
 // Endpoints específicos
@@ -32,15 +32,15 @@ export const API_ENDPOINTS = {
   
   // Órdenes
   ordenes: `${API_BASE_URL}/ordenes.php`,
-  ordenDetalle: (id) => `${API_BASE_URL}/ordenes.php?id=${id}`,
-}
+  ordenDetalle: (id: number) => `${API_BASE_URL}/ordenes.php?id=${id}`,
+} as const
 
 // Configuración general
 export const CONFIG = {
   appName: 'Sabor & Tradición',
-  version: '1.0.0',
+  version: '2.0.0',
   apiTimeout: 10000, // 10 segundos
-}
+} as const
 
 export default {
   API_BASE_URL,

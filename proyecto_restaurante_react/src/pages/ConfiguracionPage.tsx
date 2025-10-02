@@ -1,8 +1,9 @@
-import { useState } from 'react'
-import { useAuth } from '../contexts/AuthContext'
+import { useState, type ChangeEvent, type FormEvent } from 'react'
+import { useAuth } from '../contexts/AuthContext.tsx'
 import { API_ENDPOINTS } from '../config'
-import ErrorMessage from '../components/ErrorMessage'
+import ErrorMessage from '../components/ErrorMessage.tsx'
 import { Link } from 'react-router-dom'
+import type { PasswordData, PasswordStrength, ShowPasswordState } from '../types'
 
 /**
  * Página de Configuración del Usuario
@@ -10,30 +11,30 @@ import { Link } from 'react-router-dom'
  */
 function ConfiguracionPage() {
   const { usuario } = useAuth()
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
-  const [success, setSuccess] = useState(null)
+  const [loading, setLoading] = useState<boolean>(false)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
   
   // Estado para cambio de contraseña
-  const [passwordData, setPasswordData] = useState({
+  const [passwordData, setPasswordData] = useState<PasswordData>({
     passwordActual: '',
     passwordNueva: '',
     passwordConfirmacion: ''
   })
   
-  const [passwordStrength, setPasswordStrength] = useState({
+  const [passwordStrength, setPasswordStrength] = useState<PasswordStrength>({
     strength: 0,
     text: '',
     color: ''
   })
   
-  const [showPassword, setShowPassword] = useState({
+  const [showPassword, setShowPassword] = useState<ShowPasswordState>({
     actual: false,
     nueva: false,
     confirmacion: false
   })
 
-  const handlePasswordChange = (e) => {
+  const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setPasswordData(prev => ({
       ...prev,
@@ -46,7 +47,7 @@ function ConfiguracionPage() {
     }
   }
 
-  const calcularFortaleza = (password) => {
+  const calcularFortaleza = (password: string) => {
     let strength = 0
     
     if (password.length >= 6) strength++
@@ -72,14 +73,14 @@ function ConfiguracionPage() {
     setPasswordStrength({ strength, text, color })
   }
 
-  const togglePasswordVisibility = (field) => {
+  const togglePasswordVisibility = (field: keyof ShowPasswordState) => {
     setShowPassword(prev => ({
       ...prev,
       [field]: !prev[field]
     }))
   }
 
-  const handlePasswordSubmit = async (e) => {
+  const handlePasswordSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setError(null)
     setSuccess(null)
@@ -193,7 +194,7 @@ function ConfiguracionPage() {
             Configuración de la Cuenta
           </h2>
 
-          {error && <ErrorMessage message={error} />}
+          {error && <ErrorMessage mensaje={error} />}
           
           {success && (
             <div className="alert alert-success alert-dismissible fade show">

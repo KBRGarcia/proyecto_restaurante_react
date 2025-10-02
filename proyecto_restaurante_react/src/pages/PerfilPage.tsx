@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react'
-import { useAuth } from '../contexts/AuthContext'
+import { useState, useEffect, type ChangeEvent, type FormEvent } from 'react'
+import { useAuth } from '../contexts/AuthContext.tsx'
 import { API_ENDPOINTS } from '../config'
-import LoadingSpinner from '../components/LoadingSpinner'
-import ErrorMessage from '../components/ErrorMessage'
+import LoadingSpinner from '../components/LoadingSpinner.tsx'
+import ErrorMessage from '../components/ErrorMessage.tsx'
+import type { Usuario, PerfilFormData, Estadisticas } from '../types'
 
 /**
  * Página de Perfil del Usuario
@@ -10,14 +11,14 @@ import ErrorMessage from '../components/ErrorMessage'
  */
 function PerfilPage() {
   const { usuario, estaAutenticado } = useAuth()
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [success, setSuccess] = useState(null)
-  const [perfil, setPerfil] = useState(null)
-  const [estadisticas, setEstadisticas] = useState(null)
-  const [editando, setEditando] = useState(false)
+  const [loading, setLoading] = useState<boolean>(true)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
+  const [perfil, setPerfil] = useState<Usuario | null>(null)
+  const [estadisticas, setEstadisticas] = useState<Estadisticas | null>(null)
+  const [editando, setEditando] = useState<boolean>(false)
   
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<PerfilFormData>({
     nombre: '',
     apellido: '',
     telefono: '',
@@ -71,7 +72,7 @@ function PerfilPage() {
     }
   }
 
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setFormData(prev => ({
       ...prev,
@@ -79,7 +80,7 @@ function PerfilPage() {
     }))
   }
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setError(null)
     setSuccess(null)
@@ -107,7 +108,7 @@ function PerfilPage() {
 
       if (data.success) {
         setSuccess('Perfil actualizado exitosamente')
-        setPerfil(prev => ({ ...prev, ...formData }))
+        setPerfil(prev => prev ? { ...prev, ...formData } : null)
         setEditando(false)
         setTimeout(() => setSuccess(null), 5000)
       } else {
@@ -220,7 +221,7 @@ function PerfilPage() {
             Mi Perfil
           </h2>
 
-          {error && <ErrorMessage message={error} />}
+          {error && <ErrorMessage mensaje={error} />}
           
           {success && (
             <div className="alert alert-success alert-dismissible fade show">
@@ -343,7 +344,7 @@ function PerfilPage() {
                     value={formData.direccion}
                     onChange={handleChange}
                     disabled={!editando}
-                    rows="3"
+                    rows={3}
                     placeholder="Calle, número, colonia, ciudad..."
                   ></textarea>
                 </div>

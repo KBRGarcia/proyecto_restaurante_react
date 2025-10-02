@@ -1,13 +1,14 @@
-import { useState } from 'react'
-import { useAuth } from '../contexts/AuthContext'
+import { useState, FormEvent, ChangeEvent } from 'react'
+import { useAuth } from '../contexts/AuthContext.tsx'
 import { useNavigate, Link } from 'react-router-dom'
+import type { RegisterData } from '../types.ts'
 
 /**
  * Componente de Registro
  * Permite a nuevos usuarios crear una cuenta
  */
 function Register() {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<RegisterData & { confirmPassword: string }>({
     nombre: '',
     apellido: '',
     correo: '',
@@ -16,19 +17,19 @@ function Register() {
     confirmPassword: ''
   })
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
+  const [error, setError] = useState<string | null>(null)
   
   const { register } = useAuth()
   const navigate = useNavigate()
 
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     })
   }
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setError(null)
     setLoading(true)
@@ -53,7 +54,7 @@ function Register() {
     }
 
     try {
-      // Preparar datos para enviar
+      // Preparar datos para enviar (sin confirmPassword)
       const { confirmPassword, ...datosRegistro } = formData
       
       const resultado = await register(datosRegistro)
@@ -183,7 +184,7 @@ function Register() {
                       placeholder="••••••••"
                       required
                       disabled={loading}
-                      minLength="6"
+                      minLength={6}
                     />
                     <small className="text-muted">Mínimo 6 caracteres</small>
                   </div>

@@ -1,13 +1,13 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import { AuthProvider } from './contexts/AuthContext'
-import Navbar from './components/Navbar'
-import Login from './components/Login'
-import Register from './components/Register'
-import ProtectedRoute from './components/ProtectedRoute'
-import HomePage from './pages/HomePage'
-import MenuPage from './pages/MenuPage'
-import PerfilPage from './pages/PerfilPage'
-import ConfiguracionPage from './pages/ConfiguracionPage'
+import { AuthProvider } from './contexts/AuthContext.tsx'
+import Navbar from './components/Navbar.tsx'
+import Login from './components/Login.tsx'
+import Register from './components/Register.tsx'
+import ProtectedRoute from './components/ProtectedRoute.tsx'
+import MenuPage from './pages/MenuPage.tsx'
+import HomePage from './pages/HomePage.tsx'
+import PerfilPage from './pages/PerfilPage.tsx'
+import ConfiguracionPage from './pages/ConfiguracionPage.tsx'
 import './App.css'
 
 /**
@@ -32,6 +32,24 @@ function App() {
             
             {/* Rutas protegidas */}
             <Route 
+              path="/perfil" 
+              element={
+                <ProtectedRoute>
+                  <PerfilPage />
+                </ProtectedRoute>
+              } 
+            />
+            
+            <Route 
+              path="/configuracion" 
+              element={
+                <ProtectedRoute>
+                  <ConfiguracionPage />
+                </ProtectedRoute>
+              } 
+            />
+            
+            <Route 
               path="/carrito" 
               element={
                 <ProtectedRoute>
@@ -51,24 +69,6 @@ function App() {
                     <h1>Mis Órdenes</h1>
                     <p>Próximamente...</p>
                   </div>
-                </ProtectedRoute>
-              } 
-            />
-            
-            <Route 
-              path="/perfil" 
-              element={
-                <ProtectedRoute>
-                  <PerfilPage />
-                </ProtectedRoute>
-              } 
-            />
-            
-            <Route 
-              path="/configuracion" 
-              element={
-                <ProtectedRoute>
-                  <ConfiguracionPage />
                 </ProtectedRoute>
               } 
             />

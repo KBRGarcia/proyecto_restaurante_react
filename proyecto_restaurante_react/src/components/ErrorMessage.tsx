@@ -1,8 +1,10 @@
+import type { ErrorMessageProps } from '../types.ts'
+
 /**
  * Componente de Mensaje de Error
  * Para mostrar errores de forma consistente
  */
-function ErrorMessage({ mensaje, onRetry }) {
+function ErrorMessage({ mensaje, onRetry }: ErrorMessageProps) {
   return (
     <div className="alert alert-danger d-flex align-items-center" role="alert">
       <i className="fas fa-exclamation-triangle fa-2x me-3"></i>

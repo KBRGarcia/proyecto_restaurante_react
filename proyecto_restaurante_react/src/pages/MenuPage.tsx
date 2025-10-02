@@ -1,20 +1,21 @@
 import { useState, useEffect } from 'react'
-import ProductCard from '../components/ProductCard'
-import FilterBar from '../components/FilterBar'
-import LoadingSpinner from '../components/LoadingSpinner'
-import ErrorMessage from '../components/ErrorMessage'
-import { API_ENDPOINTS } from '../config'
+import ProductCard from '../components/ProductCard.tsx'
+import FilterBar from '../components/FilterBar.tsx'
+import LoadingSpinner from '../components/LoadingSpinner.tsx'
+import ErrorMessage from '../components/ErrorMessage.tsx'
+import { API_ENDPOINTS } from '../config.ts'
+import type { Producto, Categoria, ApiResponse } from '../types.ts'
 
 /**
  * Página de Menú
  * Muestra todos los productos del restaurante con filtros
  */
 function MenuPage() {
-  const [productos, setProductos] = useState([])
-  const [categorias, setCategorias] = useState([])
-  const [categoriaActiva, setCategoriaActiva] = useState(null)
+  const [productos, setProductos] = useState<Producto[]>([])
+  const [categorias, setCategorias] = useState<Categoria[]>([])
+  const [categoriaActiva, setCategoriaActiva] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     cargarDatos()
@@ -33,22 +34,20 @@ function MenuPage() {
         throw new Error(`HTTP error! status: ${resProductos.status}`)
       }
       
-      const dataProductos = await resProductos.json()
+      const dataProductos: ApiResponse<Producto[]> = await resProductos.json()
 
-      if (dataProductos.success) {
+      if (dataProductos.success && dataProductos.data) {
         setProductos(dataProductos.data)
         
         // Extraer categorías únicas
-        const categoriasUnicas = [...new Set(
-          dataProductos.data
-            .filter(p => p.categoria_nombre)
-            .map(p => ({ id: p.categoria_id, nombre: p.categoria_nombre }))
-        )]
+        const categoriasMap = new Map<number, Categoria>()
         
-        const categoriasMap = new Map()
-        categoriasUnicas.forEach(cat => {
-          if (!categoriasMap.has(cat.id)) {
-            categoriasMap.set(cat.id, cat)
+        dataProductos.data.forEach(p => {
+          if (p.categoria_id && p.categoria_nombre && !categoriasMap.has(p.categoria_id)) {
+            categoriasMap.set(p.categoria_id, {
+              id: p.categoria_id,
+              nombre: p.categoria_nombre
+            })
           }
         })
         
@@ -64,7 +63,7 @@ function MenuPage() {
     }
   }
 
-  const handleAddToCart = async (producto) => {
+  const handleAddToCart = async (producto: Producto) => {
     // TODO: Implementar lógica del carrito
     console.log('Producto agregado:', producto.nombre)
     alert(`${producto.nombre} agregado al carrito`)

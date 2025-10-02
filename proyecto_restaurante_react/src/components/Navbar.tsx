@@ -1,6 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { useEffect } from 'react'
-import { useAuth } from '../contexts/AuthContext'
+import { useAuth } from '../contexts/AuthContext.tsx'
 
 /**
  * Componente de Navbar
@@ -9,21 +8,6 @@ import { useAuth } from '../contexts/AuthContext'
 function Navbar() {
   const { usuario, logout, estaAutenticado } = useAuth()
   const navigate = useNavigate()
-
-  // Inicializar Bootstrap dropdowns cuando el componente se monta
-  useEffect(() => {
-    // Verificar que Bootstrap esté disponible
-    if (typeof window.bootstrap !== 'undefined') {
-      // Inicializar todos los dropdowns
-      const dropdownElementList = document.querySelectorAll('[data-bs-toggle="dropdown"]')
-      dropdownElementList.forEach(dropdownToggle => {
-        new window.bootstrap.Dropdown(dropdownToggle)
-      })
-      console.log('✅ Bootstrap dropdowns inicializados en Navbar')
-    } else {
-      console.warn('⚠️ Bootstrap no está disponible')
-    }
-  }, [])
 
   const handleLogout = async () => {
     await logout()
@@ -101,12 +85,11 @@ function Navbar() {
                   id="userDropdown"
                   role="button"
                   data-bs-toggle="dropdown"
-                  aria-expanded="false"
                 >
                   <i className="fas fa-user-circle me-1"></i>
                   {usuario?.nombre || 'Usuario'}
                 </a>
-                <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                <ul className="dropdown-menu dropdown-menu-end">
                   <li>
                     <Link className="dropdown-item" to="/perfil">
                       <i className="fas fa-user me-2"></i>
@@ -117,6 +100,12 @@ function Navbar() {
                     <Link className="dropdown-item" to="/configuracion">
                       <i className="fas fa-cog me-2"></i>
                       Configuración
+                    </Link>
+                  </li>
+                  <li>
+                    <Link className="dropdown-item" to="/mis-ordenes">
+                      <i className="fas fa-receipt me-2"></i>
+                      Mis Órdenes
                     </Link>
                   </li>
                   <li><hr className="dropdown-divider" /></li>

@@ -1,8 +1,10 @@
+import type { FilterBarProps } from '../types.ts'
+
 /**
  * Componente de Barra de Filtros
  * Para filtrar productos por categoría
  */
-function FilterBar({ categorias, categoriaActiva, onCategoriaChange }) {
+function FilterBar({ categorias, categoriaActiva, onCategoriaChange }: FilterBarProps) {
   return (
     <div className="card shadow-sm mb-4">
       <div className="card-body">
