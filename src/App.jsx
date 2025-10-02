@@ -4,8 +4,10 @@ import Navbar from './components/Navbar'
 import Login from './components/Login'
 import Register from './components/Register'
 import ProtectedRoute from './components/ProtectedRoute'
-import MenuPage from './pages/MenuPage'
 import HomePage from './pages/HomePage'
+import MenuPage from './pages/MenuPage'
+import PerfilPage from './pages/PerfilPage'
+import ConfiguracionPage from './pages/ConfiguracionPage'
 import './App.css'
 
 /**
@@ -57,10 +59,16 @@ function App() {
               path="/perfil" 
               element={
                 <ProtectedRoute>
-                  <div className="container mt-5">
-                    <h1>Mi Perfil</h1>
-                    <p>Próximamente...</p>
-                  </div>
+                  <PerfilPage />
+                </ProtectedRoute>
+              } 
+            />
+            
+            <Route 
+              path="/configuracion" 
+              element={
+                <ProtectedRoute>
+                  <ConfiguracionPage />
                 </ProtectedRoute>
               } 
             />

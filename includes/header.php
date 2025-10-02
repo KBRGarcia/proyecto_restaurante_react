@@ -77,7 +77,7 @@ $es_empleado = $usuario_logueado && $_SESSION['usuario']['rol'] == 'empleado';
       <ul class="navbar-nav">
         <?php if ($usuario_logueado): ?>
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" id="perfilDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <a class="nav-link dropdown-toggle" href="#" id="perfilDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="true">
             <i class="fas fa-user-circle me-1"></i><?php echo htmlspecialchars($_SESSION['usuario']['nombre']); ?>
           </a>
           <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="perfilDropdown">

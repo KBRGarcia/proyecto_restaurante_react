@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
     inicializarApp();
     actualizarContadorCarrito();
     configurarAnimaciones();
+    inicializarBootstrap();
 });
 
 // === INICIALIZACIÓN DE LA APLICACIÓN ===
@@ -306,6 +307,27 @@ function procederAlCheckout() {
     }
     
     window.location.href = 'checkout.php';
+}
+
+// === INICIALIZAR COMPONENTES DE BOOTSTRAP ===
+function inicializarBootstrap() {
+    // Verificar que Bootstrap esté cargado
+    if (typeof bootstrap === 'undefined') {
+        console.error('⚠️ Bootstrap no está cargado correctamente');
+        return;
+    }
+    
+    // Inicializar todos los dropdowns manualmente
+    const dropdowns = document.querySelectorAll('[data-bs-toggle="dropdown"]');
+    dropdowns.forEach(dropdown => {
+        try {
+            new bootstrap.Dropdown(dropdown);
+        } catch (error) {
+            console.error('Error al inicializar dropdown:', error);
+        }
+    });
+    
+    console.log('✅ Bootstrap inicializado correctamente - ' + dropdowns.length + ' dropdowns encontrados');
 }
 
 // === EXPORTAR FUNCIONES GLOBALES ===
