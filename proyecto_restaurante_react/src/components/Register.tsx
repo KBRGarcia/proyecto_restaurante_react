@@ -1,4 +1,4 @@
-import { useState, FormEvent, ChangeEvent } from 'react'
+import { useState, type FormEvent, type ChangeEvent } from 'react'
 import { useAuth } from '../contexts/AuthContext.tsx'
 import { useNavigate, Link } from 'react-router-dom'
 import type { RegisterData } from '../types.ts'

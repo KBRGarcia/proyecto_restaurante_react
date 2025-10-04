@@ -22,7 +22,7 @@ require_once '../../includes/db.php';
 // Función para verificar el token y obtener el usuario
 function verificarToken($conn, $token) {
     $stmt = $conn->prepare("
-        SELECT u.id, u.nombre, u.apellido, u.correo, u.rol, u.telefono, u.direccion, u.estado, u.fecha_registro, u.password
+        SELECT u.id, u.nombre, u.apellido, u.correo, u.rol, u.telefono, u.direccion, u.foto_perfil, u.estado, u.fecha_registro, u.password
         FROM sessions s
         JOIN usuarios u ON s.usuario_id = u.id
         WHERE s.token = ? AND s.expires_at > NOW()

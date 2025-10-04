@@ -14,6 +14,7 @@ export interface Usuario {
   rol: RolUsuario
   telefono?: string
   direccion?: string
+  foto_perfil?: string
   estado: EstadoUsuario
   fecha_registro?: string
 }
@@ -48,6 +49,7 @@ export interface AuthContextType {
   logout: () => Promise<void>
   tieneRol: (rol: RolUsuario) => boolean
   estaAutenticado: () => boolean
+  actualizarUsuario: () => Promise<void>
 }
 
 // === TIPOS DE PRODUCTOS ===

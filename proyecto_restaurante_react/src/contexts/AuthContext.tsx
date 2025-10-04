@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
 import { API_ENDPOINTS } from '../config.ts'
 import type { 
   Usuario, 
@@ -192,6 +192,34 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return usuario !== null
   }
 
+  /**
+   * Actualizar información del usuario actual
+   */
+  const actualizarUsuario = async (): Promise<void> => {
+    try {
+      const token = localStorage.getItem('token')
+      
+      if (!token) {
+        return
+      }
+
+      const response = await fetch(API_ENDPOINTS.me, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+
+      if (response.ok) {
+        const data: AuthResponse = await response.json()
+        if (data.success && data.usuario) {
+          setUsuario(data.usuario)
+        }
+      }
+    } catch (error) {
+      console.error('Error actualizando usuario:', error)
+    }
+  }
+
   // Valor del contexto
   const value: AuthContextType = {
     usuario,
@@ -202,6 +230,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     logout,
     tieneRol,
     estaAutenticado,
+    actualizarUsuario,
   }
 
   return (

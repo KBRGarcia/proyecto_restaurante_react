@@ -10,13 +10,14 @@ import type { Usuario, PerfilFormData, Estadisticas } from '../types'
  * Permite ver y editar información personal
  */
 function PerfilPage() {
-  const { usuario, estaAutenticado } = useAuth()
+  const { estaAutenticado, actualizarUsuario } = useAuth()
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [perfil, setPerfil] = useState<Usuario | null>(null)
   const [estadisticas, setEstadisticas] = useState<Estadisticas | null>(null)
   const [editando, setEditando] = useState<boolean>(false)
+  const [subiendoFoto, setSubiendoFoto] = useState<boolean>(false)
   
   const [formData, setFormData] = useState<PerfilFormData>({
     nombre: '',
@@ -133,6 +134,67 @@ function PerfilPage() {
     setError(null)
   }
 
+  const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Validar tipo de archivo
+    const tiposPermitidos = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
+    if (!tiposPermitidos.includes(file.type)) {
+      setError('Solo se permiten imágenes (JPEG, PNG, GIF, WEBP)')
+      return
+    }
+
+    // Validar tamaño (máximo 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setError('La imagen debe pesar menos de 5MB')
+      return
+    }
+
+    try {
+      setSubiendoFoto(true)
+      setError(null)
+      setSuccess(null)
+
+      // Convertir imagen a base64
+      const reader = new FileReader()
+      reader.onload = async () => {
+        const base64String = reader.result as string
+
+        // Enviar al servidor
+        const token = localStorage.getItem('token')
+        const response = await fetch(API_ENDPOINTS.uploadFoto, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ foto_perfil: base64String })
+        })
+
+        const data = await response.json()
+
+        if (data.success) {
+          setSuccess('Foto de perfil actualizada exitosamente')
+          setPerfil(prev => prev ? { ...prev, foto_perfil: data.foto_perfil } : null)
+          
+          // Actualizar usuario en el contexto
+          await actualizarUsuario()
+          
+          setTimeout(() => setSuccess(null), 5000)
+        } else {
+          setError(data.message || 'Error al actualizar la foto')
+        }
+      }
+      reader.readAsDataURL(file)
+    } catch (err) {
+      setError('Error al subir la foto de perfil')
+      console.error(err)
+    } finally {
+      setSubiendoFoto(false)
+    }
+  }
+
   if (loading && !perfil) {
     return <LoadingSpinner />
   }
@@ -144,8 +206,47 @@ function PerfilPage() {
         <div className="col-lg-3 mb-4">
           <div className="card shadow-sm">
             <div className="card-body text-center">
-              <div className="mb-3">
-                <i className="fas fa-user-circle fa-5x text-danger"></i>
+              <div className="mb-3 position-relative d-inline-block">
+                {perfil?.foto_perfil ? (
+                  <img 
+                    src={perfil.foto_perfil} 
+                    alt="Foto de perfil" 
+                    className="rounded-circle"
+                    style={{ 
+                      width: '120px', 
+                      height: '120px', 
+                      objectFit: 'cover',
+                      border: '3px solid #dc3545'
+                    }}
+                  />
+                ) : (
+                  <i className="fas fa-user-circle fa-5x text-danger"></i>
+                )}
+                <label 
+                  htmlFor="foto-perfil-input" 
+                  className="position-absolute bottom-0 end-0 btn btn-danger btn-sm rounded-circle"
+                  style={{ 
+                    width: '35px', 
+                    height: '35px', 
+                    padding: '0',
+                    cursor: subiendoFoto ? 'not-allowed' : 'pointer'
+                  }}
+                  title="Cambiar foto de perfil"
+                >
+                  {subiendoFoto ? (
+                    <span className="spinner-border spinner-border-sm"></span>
+                  ) : (
+                    <i className="fas fa-camera"></i>
+                  )}
+                </label>
+                <input
+                  id="foto-perfil-input"
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                  onChange={handleFileChange}
+                  style={{ display: 'none' }}
+                  disabled={subiendoFoto}
+                />
               </div>
               <h5 className="card-title">
                 {perfil?.nombre} {perfil?.apellido}
@@ -158,7 +259,7 @@ function PerfilPage() {
                 perfil?.rol === 'admin' ? 'danger' : 
                 perfil?.rol === 'empleado' ? 'warning' : 'primary'
               }`}>
-                {perfil?.rol?.charAt(0).toUpperCase() + perfil?.rol?.slice(1)}
+                {(perfil?.rol ?? '').charAt(0).toUpperCase() + (perfil?.rol ?? '').slice(1)}
               </span>
               <hr />
               <p className="text-muted small mb-1">
@@ -327,7 +428,7 @@ function PerfilPage() {
                     <input
                       type="text"
                       className="form-control"
-                      value={perfil?.rol?.charAt(0).toUpperCase() + perfil?.rol?.slice(1) || ''}
+                      value={(perfil?.rol ?? '').charAt(0).toUpperCase() + (perfil?.rol ?? '').slice(1)}
                       disabled
                     />
                   </div>
@@ -412,7 +513,7 @@ function PerfilPage() {
                   </p>
                   <small className="text-muted">
                     <span className={`badge bg-${perfil?.estado === 'activo' ? 'success' : 'danger'}`}>
-                      {perfil?.estado?.charAt(0).toUpperCase() + perfil?.estado?.slice(1)}
+                      {(perfil?.estado ?? '').charAt(0).toUpperCase() + (perfil?.estado ?? '').slice(1)}
                     </span>
                   </small>
                 </div>

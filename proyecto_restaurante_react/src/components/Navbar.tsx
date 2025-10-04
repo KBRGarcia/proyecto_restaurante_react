@@ -86,13 +86,27 @@ function Navbar() {
             {estaAutenticado() ? (
               <li className="nav-item dropdown">
                 <a
-                  className="nav-link dropdown-toggle"
+                  className="nav-link dropdown-toggle d-flex align-items-center"
                   href="#"
                   id="userDropdown"
                   role="button"
                   data-bs-toggle="dropdown"
                 >
-                  <i className="fas fa-user-circle me-1"></i>
+                  {usuario?.foto_perfil ? (
+                    <img 
+                      src={usuario.foto_perfil} 
+                      alt="Foto de perfil" 
+                      className="rounded-circle me-2"
+                      style={{ 
+                        width: '32px', 
+                        height: '32px', 
+                        objectFit: 'cover',
+                        border: '2px solid white'
+                      }}
+                    />
+                  ) : (
+                    <i className="fas fa-user-circle me-1"></i>
+                  )}
                   {usuario?.nombre || 'Usuario'}
                 </a>
                 <ul className="dropdown-menu dropdown-menu-end">

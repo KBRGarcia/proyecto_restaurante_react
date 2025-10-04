@@ -1,365 +1,315 @@
-# 🍽️ Sistema de Restaurante - Sabor & Tradición
+# 📚 Documentación del Proyecto - Sistema de Restaurante
 
-**Una aplicación web moderna para gestión de restaurantes, construida con React + Vite y API PHP.**
-
-[![React](https://img.shields.io/badge/React-19.0-blue?logo=react)](https://react.dev)
-[![Vite](https://img.shields.io/badge/Vite-6.0-purple?logo=vite)](https://vitejs.dev)
-[![PHP](https://img.shields.io/badge/PHP-8.x-777bb4?logo=php)](https://www.php.net)
-[![MySQL](https://img.shields.io/badge/MySQL-8.0-4479a1?logo=mysql)](https://www.mysql.com)
-[![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3-7952b3?logo=bootstrap)](https://getbootstrap.com)
+Bienvenido a la documentación completa del **Sistema de Gestión de Restaurante** construido con React + TypeScript + Vite y API PHP.
 
 ---
 
-## 🎯 Descripción
+## 📋 Índice de Documentación
 
-Sistema completo de gestión para restaurantes que permite:
-- 👤 **Autenticación de usuarios** (Clientes, Empleados, Administradores)
-- 🍕 **Visualización del menú** con productos y categorías
-- 🛒 **Carrito de compras** y sistema de órdenes
-- 📋 **Gestión administrativa** de productos, usuarios y pedidos
-- 📊 **Reportes y estadísticas** para el negocio
-- 📱 **Diseño responsive** para móviles y tablets
+### 🏠 Documentación Principal
+- **[README.md del Proyecto](../README.md)** - Descripción general, instalación y uso
 
----
+### 📖 Guías Técnicas
 
-## ✨ Características Principales
+| Documento | Descripción | Fecha |
+|-----------|-------------|-------|
+| [**04-10-2025-GUIA_TYPESCRIPT.md**](04-10-2025-GUIA_TYPESCRIPT.md) | Guía completa de uso de TypeScript en el proyecto | 04/10/2025 |
+| [**04-10-2025-ARQUITECTURA_RUTAS.md**](04-10-2025-ARQUITECTURA_RUTAS.md) | Arquitectura y manejo centralizado de rutas | 04/10/2025 |
 
-### ✅ Ya Implementado
+### 🎯 Funcionalidades Implementadas
 
-- ✅ **Sistema de autenticación completo**
-  - Login y registro de usuarios
-  - Sesiones con tokens seguros
-  - Gestión de perfiles
-  - Cambio de contraseña
+| Documento | Descripción | Fecha |
+|-----------|-------------|-------|
+| [**04-10-2025-FEATURE_ORDENES.md**](04-10-2025-FEATURE_ORDENES.md) | Sistema completo de órdenes e historial | 04/10/2025 |
+| [**04-10-2025-FEATURE_PAGOS.md**](04-10-2025-FEATURE_PAGOS.md) | Pasarela de pago con múltiples métodos | 04/10/2025 |
 
-- ✅ **Arquitectura Moderna**
-  - Single Page Application (SPA) con React
-  - API RESTful en PHP
-  - Context API para estado global
-  - React Router para navegación
+### 📜 Registro de Cambios
 
-- ✅ **Gestión de Usuarios**
-  - Página de perfil personalizable
-  - Configuración de cuenta
-  - Roles (Cliente, Empleado, Admin)
-
-- ✅ **Diseño y UX**
-  - Interfaz moderna con Bootstrap 5
-  - Responsive design
-  - Iconos con Font Awesome
-  - Dropdowns funcionales
-
-### 🔜 Por Implementar
-
-- 🔜 Carrito de compras completo
-- 🔜 Sistema de órdenes y tracking
-- 🔜 Panel administrativo
-- 🔜 Sistema de reservaciones
-- 🔜 Reportes y estadísticas
+| Documento | Descripción | Fecha |
+|-----------|-------------|-------|
+| [**04-10-2025-HISTORIAL_CAMBIOS.md**](04-10-2025-HISTORIAL_CAMBIOS.md) | Historial consolidado de todos los cambios del proyecto | 04/10/2025 |
 
 ---
 
-## 🏗️ Arquitectura
+## 🎯 Inicio Rápido
+
+Si es tu primera vez con este proyecto:
+
+1. **Lee primero**: [README.md del Proyecto](../README.md)
+2. **Instalación**: Sigue los pasos en el README principal
+3. **TypeScript**: Consulta [04-10-2025-GUIA_TYPESCRIPT.md](04-10-2025-GUIA_TYPESCRIPT.md)
+4. **Rutas**: Entiende la arquitectura en [04-10-2025-ARQUITECTURA_RUTAS.md](04-10-2025-ARQUITECTURA_RUTAS.md)
+
+---
+
+## 🏗️ Arquitectura del Proyecto
 
 ```
-┌─────────────────┐         ┌─────────────────┐
-│   React SPA     │ ←HTTP→  │   API PHP       │
-│  (Frontend)     │ JSON    │   (Backend)     │
-│  Port: 3000     │         │   XAMPP         │
-└─────────────────┘         └────────┬────────┘
-                                     │
-                            ┌────────▼────────┐
-                            │   MySQL DB      │
-                            │  (Base Datos)   │
-                            └─────────────────┘
+┌─────────────────────────────────────────────────┐
+│           FRONTEND (React + TypeScript)         │
+│                                                 │
+│  ┌─────────────┐  ┌─────────────┐             │
+│  │   Components │  │    Pages    │             │
+│  └─────────────┘  └─────────────┘             │
+│         │                │                      │
+│         └────────┬───────┘                      │
+│                  │                              │
+│         ┌────────▼────────┐                     │
+│         │   Contexts      │                     │
+│         │  (Auth, Cart)   │                     │
+│         └────────┬────────┘                     │
+│                  │                              │
+│         ┌────────▼────────┐                     │
+│         │  Router + Rutas │                     │
+│         └────────┬────────┘                     │
+└──────────────────┼──────────────────────────────┘
+                   │ HTTP/JSON
+         ┌─────────▼─────────┐
+         │   API PHP (REST)  │
+         │                   │
+         │  ┌─────────────┐  │
+         │  │  Endpoints  │  │
+         │  └─────────────┘  │
+         │         │          │
+         └─────────┼──────────┘
+                   │
+         ┌─────────▼─────────┐
+         │   MySQL Database  │
+         └───────────────────┘
 ```
 
 ---
 
-## 🛠️ Tecnologías
+## 🔧 Stack Tecnológico
 
 ### Frontend
-- **React 19** - Librería UI con Hooks
-- **Vite 6** - Build tool ultrarrápido
-- **React Router** - Enrutamiento SPA
-- **Bootstrap 5** - Framework CSS
-- **Font Awesome** - Iconos
+- **React 19** con Hooks
+- **TypeScript 5.8** para type safety
+- **Vite 7** como build tool
+- **React Router v7** para navegación
+- **Bootstrap 5** para estilos
+- **Font Awesome** para iconos
 
 ### Backend
-- **PHP 8.x** - Lenguaje backend
-- **MySQL 8.0** - Base de datos
-- **Apache** - Servidor web (XAMPP)
+- **PHP 8.x** para la API REST
+- **MySQL 8.0** como base de datos
+- **Apache** (XAMPP) como servidor web
 
-### Seguridad
-- Password hashing con `password_hash()`
-- Prepared Statements (SQL injection protection)
-- Tokens de autenticación
-- Validación en frontend y backend
-- CORS configurado
+### Herramientas
+- **ESLint 9** para linting
+- **Git** para control de versiones
 
 ---
 
-## 📦 Instalación
-
-### Requisitos Previos
-
-- [XAMPP](https://www.apachefriends.org/) (Apache + MySQL + PHP)
-- [Node.js](https://nodejs.org/) v18 o superior
-- [Git](https://git-scm.com/)
-
-### Paso 1: Clonar el Repositorio
-
-```bash
-git clone https://github.com/TU_USUARIO/proyecto-restaurante-react.git
-cd proyecto-restaurante-react
-```
-
-### Paso 2: Instalar Dependencias
-
-```bash
-npm install
-```
-
-### Paso 3: Configurar Base de Datos
-
-1. Inicia **XAMPP** y activa **Apache** y **MySQL**
-2. Abre **phpMyAdmin**: `http://localhost/phpmyadmin`
-3. Crea una base de datos: `proyecto_restaurante_react`
-4. Importa los archivos SQL en orden:
-   - `sql/database.sql` (estructura y datos)
-   - `sql/sessions_table.sql` (tabla de sesiones)
-
-### Paso 4: Verificar Configuración
-
-Verifica que puedas acceder a:
-- API Test: `http://localhost/codigos-ika XAMPP/proyecto_restaurante_react/api/test.php`
-
-Si ves un mensaje JSON, ¡la API está funcionando! ✅
-
-### Paso 5: Iniciar Desarrollo
-
-```bash
-npm run dev
-```
-
-La aplicación se abrirá automáticamente en: **http://localhost:3000** 🚀
-
----
-
-## 🚀 Uso
-
-### Iniciar Servidores
-
-1. **Inicia XAMPP**:
-   - Apache ✅
-   - MySQL ✅
-
-2. **Inicia React**:
-   ```bash
-   npm run dev
-   ```
-
-3. **Abre el navegador**: `http://localhost:3000`
-
-### Usuarios de Prueba
-
-Después de importar la base de datos, usa:
-
-**Administrador:**
-- Email: `admin@restaurante.com`
-- Password: `password`
-
----
-
-## 📁 Estructura del Proyecto
+## 📁 Estructura de Carpetas
 
 ```
 proyecto_restaurante_react/
+├── docs/                           # 📚 Esta carpeta
+│   ├── README.md                   # Índice de documentación
+│   ├── 04-10-2025-HISTORIAL_CAMBIOS.md
+│   ├── 04-10-2025-GUIA_TYPESCRIPT.md
+│   ├── 04-10-2025-ARQUITECTURA_RUTAS.md
+│   ├── 04-10-2025-FEATURE_ORDENES.md
+│   └── 04-10-2025-FEATURE_PAGOS.md
 │
-├── src/                          # 🎨 Aplicación React
-│   ├── components/               # Componentes reutilizables
-│   │   ├── Navbar.jsx           # ✅ Menú de navegación
-│   │   ├── Login.jsx            # ✅ Formulario de login
-│   │   ├── Register.jsx         # ✅ Formulario de registro
-│   │   └── ...
-│   │
-│   ├── pages/                    # Páginas principales
-│   │   ├── HomePage.jsx         # ✅ Página de inicio
-│   │   ├── MenuPage.jsx         # ✅ Menú del restaurante
-│   │   ├── PerfilPage.jsx       # ✅ Perfil del usuario
-│   │   └── ConfiguracionPage.jsx # ✅ Configuración
-│   │
-│   ├── contexts/                 # Contextos de React
-│   │   └── AuthContext.jsx      # ✅ Gestión de autenticación
-│   │
-│   ├── App.jsx                   # Componente principal
-│   ├── main.jsx                  # Punto de entrada
-│   └── config.js                 # Configuración de API
+├── src/                            # Código fuente React
+│   ├── components/                 # Componentes reutilizables
+│   ├── pages/                      # Páginas/Vistas
+│   ├── contexts/                   # Context API (Auth, Cart)
+│   ├── routes/                     # Configuración de rutas
+│   ├── types.ts                    # Tipos TypeScript
+│   ├── config.ts                   # Configuración
+│   ├── App.tsx                     # Componente raíz
+│   └── main.tsx                    # Punto de entrada
 │
-├── api/                          # 🔧 API Backend PHP
-│   ├── auth/                     # Endpoints de autenticación
-│   │   ├── login.php            # ✅ POST: Login
-│   │   ├── register.php         # ✅ POST: Registro
-│   │   ├── logout.php           # ✅ POST: Logout
-│   │   └── me.php               # ✅ GET/PUT/POST: Usuario actual
-│   │
-│   └── productos.php            # ✅ CRUD productos
+├── server/                         # Backend PHP (legacy)
+│   ├── api/                        # API REST endpoints
+│   ├── includes/                   # Utilidades PHP
+│   └── pages/                      # Páginas PHP legacy
 │
-├── includes/                     # Utilidades PHP
-│   ├── db.php                   # ✅ Conexión a DB
-│   └── auth.php                 # ✅ Funciones de auth
+├── database/                       # Scripts SQL
 │
-├── sql/                          # Scripts de base de datos
-│   ├── database.sql             # ✅ Estructura completa
-│   └── sessions_table.sql       # ✅ Tabla de sesiones
+├── public/                         # Archivos estáticos
 │
-├── index.html                    # Entrada de React
-├── package.json                  # Dependencias npm
-├── vite.config.js               # Configuración de Vite
-│
-├── README.md                    # 📖 Este archivo
-├── INSTRUCCIONES_REACT.md       # 📘 Guía detallada de uso
-└── ARCHIVOS_LEGACY.md           # 📦 Archivos obsoletos
+└── README.md                       # Documentación principal
 ```
 
-### ⚠️ Archivos Legacy (No Usar)
+---
 
-Los siguientes archivos PHP son **obsoletos** y están **reemplazados por React**:
+## 🎓 Convención de Nombres de Documentación
 
-- ❌ `index.php` → Use `HomePage.jsx`
-- ❌ `login.php` → Use `Login.jsx`
-- ❌ `registro.php` → Use `Register.jsx`
-- ❌ `perfil.php` → Use `PerfilPage.jsx`
-- ❌ `configuracion.php` → Use `ConfiguracionPage.jsx`
-- ❌ `includes/header.php` → Use `Navbar.jsx`
+A partir del **4 de octubre de 2025**, todos los archivos de documentación siguen esta convención:
 
-Ver `ARCHIVOS_LEGACY.md` para más detalles.
+```
+dd-mm-aaaa-NOMBRE_DESCRIPTIVO.md
+```
+
+**Ejemplos:**
+- `04-10-2025-GUIA_TYPESCRIPT.md`
+- `04-10-2025-FEATURE_ORDENES.md`
+- `04-10-2025-HISTORIAL_CAMBIOS.md`
+
+**Excepciones:**
+- `README.md` - Archivo índice (sin fecha)
+
+**Criterios para crear documentación:**
+- ✅ Solo para cambios **importantes** del proyecto
+- ✅ Funcionalidades nuevas completas
+- ✅ Migraciones o refactorizaciones mayores
+- ✅ Guías técnicas relevantes
+- ❌ No crear un .md para cada pequeño cambio
 
 ---
 
-## 🔐 Autenticación
+## 📖 Guía de Lectura por Perfil
 
-### Flujo de Autenticación
+### 👨‍💻 Para Desarrolladores Nuevos
 
-1. Usuario ingresa credenciales en `Login.jsx`
-2. React envía `POST` a `/api/auth/login.php`
-3. PHP valida y crea un token de sesión
-4. Token se guarda en `localStorage`
-5. Peticiones subsecuentes incluyen: `Authorization: Bearer {token}`
+1. **Instalación y Setup**
+   - [README.md del Proyecto](../README.md)
+   
+2. **Entender TypeScript**
+   - [04-10-2025-GUIA_TYPESCRIPT.md](04-10-2025-GUIA_TYPESCRIPT.md)
+   
+3. **Arquitectura de Rutas**
+   - [04-10-2025-ARQUITECTURA_RUTAS.md](04-10-2025-ARQUITECTURA_RUTAS.md)
 
-### Endpoints de API
+4. **Historial de Cambios**
+   - [04-10-2025-HISTORIAL_CAMBIOS.md](04-10-2025-HISTORIAL_CAMBIOS.md)
 
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| `POST` | `/api/auth/login.php` | Iniciar sesión |
-| `POST` | `/api/auth/register.php` | Registrar usuario |
-| `POST` | `/api/auth/logout.php` | Cerrar sesión |
-| `GET` | `/api/auth/me.php` | Obtener usuario actual |
-| `PUT` | `/api/auth/me.php` | Actualizar perfil |
-| `POST` | `/api/auth/me.php` | Cambiar contraseña |
+### 🎨 Para Diseñadores/Frontend
+
+1. **Componentes y Páginas**
+   - Ver: `src/components/` y `src/pages/`
+   
+2. **Sistema de Órdenes**
+   - [04-10-2025-FEATURE_ORDENES.md](04-10-2025-FEATURE_ORDENES.md)
+   
+3. **Pasarela de Pago**
+   - [04-10-2025-FEATURE_PAGOS.md](04-10-2025-FEATURE_PAGOS.md)
+
+### 🔧 Para DevOps/Backend
+
+1. **API REST**
+   - Ver: `server/api/README.md`
+   
+2. **Base de Datos**
+   - Ver: `database/database.sql`
+   
+3. **Configuración**
+   - Ver: `server/includes/db.php`
 
 ---
 
-## 🛣️ Rutas de la Aplicación
+## 🚀 Funcionalidades Principales
 
-| Ruta | Componente | Protegida | Descripción |
-|------|------------|-----------|-------------|
-| `/` | `HomePage` | No | Página principal |
-| `/menu` | `MenuPage` | No | Menú del restaurante |
-| `/login` | `Login` | No | Iniciar sesión |
-| `/register` | `Register` | No | Crear cuenta |
-| `/perfil` | `PerfilPage` | ✅ Sí | Perfil del usuario |
-| `/configuracion` | `ConfiguracionPage` | ✅ Sí | Configuración de cuenta |
-| `/carrito` | _Pendiente_ | ✅ Sí | Carrito de compras |
-| `/mis-ordenes` | _Pendiente_ | ✅ Sí | Historial de órdenes |
-| `/dashboard` | _Pendiente_ | ✅ Admin | Panel administrativo |
+### ✅ Implementadas
+
+- ✅ **Autenticación completa** (Login, registro, sesiones)
+- ✅ **Gestión de usuarios** (Perfil, configuración, foto de perfil)
+- ✅ **Menú de productos** (Visualización, filtros, búsqueda)
+- ✅ **Carrito de compras** (Agregar, modificar, eliminar)
+- ✅ **Sistema de pagos** (Tarjeta, PayPal, Zinli, Zelle)
+- ✅ **Historial de órdenes** (Ver, filtrar, detalles)
+- ✅ **Rutas protegidas** (Por autenticación y rol)
+- ✅ **Lazy loading** (Optimización de carga)
+- ✅ **Responsive design** (Mobile, tablet, desktop)
+
+### 🔜 Por Implementar
+
+- 🔜 **Dashboard administrativo**
+- 🔜 **Sistema de reservaciones**
+- 🔜 **Reportes y estadísticas**
+- 🔜 **Notificaciones en tiempo real**
+- 🔜 **Chat de soporte**
 
 ---
 
-## 🧪 Desarrollo
-
-### Comandos Disponibles
+## 🛠️ Comandos Útiles
 
 ```bash
-# Desarrollo con hot-reload
+# Desarrollo
 npm run dev
 
-# Compilar para producción
+# Build para producción
 npm run build
 
-# Vista previa del build
-npm run preview
-
-# Linter (ESLint)
+# Linting
 npm run lint
-```
 
-### Variables de Entorno
-
-Edita `src/config.js` para configurar la URL de tu API:
-
-```javascript
-const XAMPP_PROJECT_PATH = '/codigos-ika%20XAMPP/proyecto_restaurante_react'
+# Preview del build
+npm run preview
 ```
 
 ---
 
-## 📚 Documentación Adicional
+## 📞 Recursos Adicionales
 
-- 📘 [INSTRUCCIONES_REACT.md](INSTRUCCIONES_REACT.md) - Guía completa de uso
-- 📦 [ARCHIVOS_LEGACY.md](ARCHIVOS_LEGACY.md) - Archivos obsoletos
-- 🔧 [api/README.md](api/README.md) - Documentación de la API
+### Documentación Oficial
 
----
+- [React](https://react.dev/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Vite](https://vitejs.dev/)
+- [React Router](https://reactrouter.com/)
+- [Bootstrap](https://getbootstrap.com/)
 
-## 🐛 Solución de Problemas
+### Tutoriales Recomendados
 
-### El dropdown no funciona
-**Solución**: Verifica que Bootstrap JS esté cargado en `index.html`
-
-### Error de CORS
-**Solución**: Los headers CORS deben estar en cada archivo PHP de la API
-
-### Token inválido
-**Solución**: Limpia el localStorage y vuelve a iniciar sesión
-
-### Más soluciones: [INSTRUCCIONES_REACT.md](INSTRUCCIONES_REACT.md#solución-de-problemas)
+- [React + TypeScript](https://react.dev/learn/typescript)
+- [React Router Tutorial](https://reactrouter.com/en/main/start/tutorial)
+- [Vite Guide](https://vitejs.dev/guide/)
 
 ---
 
-## 🤝 Contribuir
+## 🤝 Contribuir a la Documentación
 
-1. Fork el proyecto
-2. Crea una rama: `git checkout -b feature/nueva-funcionalidad`
-3. Commit: `git commit -m 'Agregar nueva funcionalidad'`
-4. Push: `git push origin feature/nueva-funcionalidad`
-5. Abre un Pull Request
+Si agregas una funcionalidad importante o realizas un cambio significativo:
 
----
-
-## 📝 Licencia
-
-Este proyecto está bajo la Licencia MIT. Ver `LICENSE` para más detalles.
-
----
-
-## 👨‍💻 Autor
-
-**Tu Nombre**  
-[GitHub](https://github.com/TU_USUARIO) | [Email](mailto:tu@email.com)
+1. **Crea un nuevo archivo** siguiendo la convención: `dd-mm-aaaa-NOMBRE.md`
+2. **Documenta detalladamente**:
+   - ¿Qué se implementó?
+   - ¿Por qué se hizo así?
+   - ¿Cómo se usa?
+   - Ejemplos de código
+3. **Actualiza este README.md** agregando el link al nuevo documento
+4. **Actualiza el HISTORIAL_CAMBIOS.md** con un resumen
 
 ---
 
-## ⭐ Agradecimientos
+## 📝 Notas Importantes
 
-- [React](https://react.dev)
-- [Vite](https://vitejs.dev)
-- [Bootstrap](https://getbootstrap.com)
-- [Font Awesome](https://fontawesome.com)
+### Archivos Legacy
+
+El proyecto tiene archivos PHP legacy en `server/pages/` que **NO deben usarse**. Todo el frontend ahora es React. Ver [04-10-2025-HISTORIAL_CAMBIOS.md](04-10-2025-HISTORIAL_CAMBIOS.md) para detalles.
+
+### TypeScript Estricto
+
+El proyecto usa TypeScript en modo estricto. Todos los componentes y funciones deben estar correctamente tipados. Consultar [04-10-2025-GUIA_TYPESCRIPT.md](04-10-2025-GUIA_TYPESCRIPT.md).
+
+### Convención de Código
+
+- **Componentes**: PascalCase (e.g., `HomePage.tsx`)
+- **Archivos de utilidad**: camelCase (e.g., `config.ts`)
+- **Tipos**: PascalCase (e.g., `type Usuario`)
+- **Interfaces**: PascalCase con prefijo (e.g., `interface AuthContextType`)
+
+---
+
+## ✨ Estado del Proyecto
+
+**Versión:** 2.0.0  
+**Última actualización:** 04 de octubre de 2025  
+**Estado:** ✅ En desarrollo activo  
+**Migración a TypeScript:** ✅ Completada  
+**Lazy Loading:** ✅ Funcional  
+**Arquitectura de Rutas:** ✅ Centralizada
 
 ---
 
 <div align="center">
-  <p>Hecho con ❤️ y ☕</p>
-  <p>⭐ Si te gustó el proyecto, dale una estrella!</p>
+  <p><strong>¿Tienes dudas?</strong></p>
+  <p>Consulta la documentación específica o revisa el código fuente</p>
+  <br>
+  <p>Hecho con ❤️ y TypeScript</p>
 </div>

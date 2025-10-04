@@ -420,7 +420,7 @@ function ConfiguracionPage() {
                   <small className="text-muted">
                     Tu cuenta está{' '}
                     <span className={`badge bg-${usuario?.estado === 'activo' ? 'success' : 'danger'}`}>
-                      {usuario?.estado?.charAt(0).toUpperCase() + usuario?.estado?.slice(1)}
+                      {usuario?.estado ? usuario.estado.charAt(0).toUpperCase() + usuario.estado.slice(1) : 'N/A'}
                     </span>
                   </small>
                 </div>
@@ -487,7 +487,7 @@ function ConfiguracionPage() {
                       usuario?.rol === 'admin' ? 'danger' : 
                       usuario?.rol === 'empleado' ? 'warning' : 'primary'
                     }`}>
-                      {usuario?.rol?.charAt(0).toUpperCase() + usuario?.rol?.slice(1)}
+                      {usuario?.rol ? usuario.rol.charAt(0).toUpperCase() + usuario.rol.slice(1) : 'N/A'}
                     </span>
                   </p>
                 </div>

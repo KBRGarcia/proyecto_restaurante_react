@@ -15,7 +15,7 @@ import type { ProtectedRouteProps } from '../types.ts'
  * } />
  */
 function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
-  const { usuario, loading, estaAutenticado, tieneRol } = useAuth()
+  const { loading, estaAutenticado, tieneRol } = useAuth()
 
   // Mostrar loading mientras verifica la sesión
   if (loading) {

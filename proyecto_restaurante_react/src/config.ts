@@ -26,6 +26,7 @@ export const API_ENDPOINTS = {
   register: `${API_BASE_URL}/auth/register.php`,
   logout: `${API_BASE_URL}/auth/logout.php`,
   me: `${API_BASE_URL}/auth/me.php`,
+  uploadFoto: `${API_BASE_URL}/auth/upload-foto.php`,
   
   // Carrito
   carrito: `${API_BASE_URL}/carrito.php`,
