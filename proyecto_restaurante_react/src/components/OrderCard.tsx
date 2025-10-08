@@ -58,11 +58,6 @@ function OrderCard({ orden, onVerDetalles }: OrderCardProps) {
    */
   const getTipoServicioConfig = (tipo: TipoServicio) => {
     const configs = {
-      mesa: { 
-        icon: 'chair', 
-        texto: 'En Mesa',
-        color: 'secondary'
-      },
       domicilio: { 
         icon: 'motorcycle', 
         texto: 'A Domicilio',
@@ -70,7 +65,7 @@ function OrderCard({ orden, onVerDetalles }: OrderCardProps) {
       },
       recoger: { 
         icon: 'shopping-bag', 
-        texto: 'Para Recoger',
+        texto: 'Para Llevar',
         color: 'info'
       },
     }
@@ -146,12 +141,12 @@ function OrderCard({ orden, onVerDetalles }: OrderCardProps) {
               </div>
             )}
 
-            {/* Mesa */}
-            {orden.mesa_id && (
+            {/* Teléfono de contacto */}
+            {orden.telefono_contacto && (
               <div className="mb-2">
                 <small className="text-muted">
-                  <i className="fas fa-chair me-1"></i>
-                  <strong>Mesa:</strong> #{orden.mesa_id}
+                  <i className="fas fa-phone me-1"></i>
+                  <strong>Contacto:</strong> {orden.telefono_contacto}
                 </small>
               </div>
             )}

@@ -109,11 +109,9 @@ function OrderDetailsModal({ orden, onClose }: OrderDetailsModalProps) {
                     <h6 className="card-subtitle mb-2 text-muted">Tipo de Servicio</h6>
                     <h5 className="mb-0">
                       <i className={`fas fa-${
-                        orden.tipo_servicio === 'domicilio' ? 'motorcycle' :
-                        orden.tipo_servicio === 'mesa' ? 'chair' : 'shopping-bag'
+                        orden.tipo_servicio === 'domicilio' ? 'motorcycle' : 'shopping-bag'
                       } me-2`}></i>
-                      {orden.tipo_servicio === 'domicilio' ? 'A Domicilio' :
-                       orden.tipo_servicio === 'mesa' ? 'En Mesa' : 'Para Recoger'}
+                      {orden.tipo_servicio === 'domicilio' ? 'A Domicilio' : 'Para Llevar'}
                     </h5>
                   </div>
                 </div>
@@ -192,28 +190,28 @@ function OrderDetailsModal({ orden, onClose }: OrderDetailsModalProps) {
               </h6>
               <div className="card bg-light">
                 <div className="card-body">
-                  {orden.direccion_entrega && (
+                  {orden.tipo_servicio === 'domicilio' && orden.direccion_entrega && (
                     <p className="mb-2">
                       <i className="fas fa-map-marker-alt me-2 text-danger"></i>
-                      <strong>Dirección:</strong> {orden.direccion_entrega}
+                      <strong>Dirección de Entrega:</strong> {orden.direccion_entrega}
+                    </p>
+                  )}
+                  {orden.tipo_servicio === 'recoger' && (
+                    <p className="mb-2">
+                      <i className="fas fa-store me-2 text-info"></i>
+                      <strong>Recoger en:</strong> Calle Principal #123, Ciudad
                     </p>
                   )}
                   {orden.telefono_contacto && (
                     <p className="mb-2">
                       <i className="fas fa-phone me-2 text-success"></i>
-                      <strong>Teléfono:</strong> {orden.telefono_contacto}
-                    </p>
-                  )}
-                  {orden.mesa_id && (
-                    <p className="mb-2">
-                      <i className="fas fa-chair me-2 text-primary"></i>
-                      <strong>Mesa:</strong> #{orden.mesa_id}
+                      <strong>Teléfono de Contacto:</strong> {orden.telefono_contacto}
                     </p>
                   )}
                   {orden.notas_especiales && (
                     <p className="mb-0">
                       <i className="fas fa-sticky-note me-2 text-warning"></i>
-                      <strong>Notas:</strong> <em>{orden.notas_especiales}</em>
+                      <strong>Notas Especiales:</strong> <em>{orden.notas_especiales}</em>
                     </p>
                   )}
                 </div>

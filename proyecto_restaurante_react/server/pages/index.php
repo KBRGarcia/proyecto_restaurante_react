@@ -35,9 +35,6 @@ $categorias = $conn->query($sql_categorias);
         <a href="menu.php" class="btn btn-primary btn-lg me-3">
           <i class="fas fa-book-open me-2"></i>Ver Nuestro Menú
         </a>
-        <a href="reservaciones.php" class="btn btn-outline-primary btn-lg">
-          <i class="fas fa-calendar-alt me-2"></i>Reservar Mesa
-        </a>
       </div>
     </div>
   </section>
@@ -119,15 +116,15 @@ $categorias = $conn->query($sql_categorias);
       <p class="lead text-muted">Todo lo que necesitas para una experiencia perfecta</p>
     </div>
     
-    <div class="row">
+    <div class="row justify-content-center">
       <div class="col-lg-4 col-md-6 mb-4">
         <div class="card text-center h-100 shadow-custom">
           <div class="card-body">
             <div class="bg-gradient-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
-              <i class="fas fa-utensils fa-2x"></i>
+              <i class="fas fa-shopping-bag fa-2x"></i>
             </div>
-            <h5 class="card-title">Servicio en Mesa</h5>
-            <p class="card-text">Disfruta de nuestro ambiente acogedor con atención personalizada de nuestro equipo.</p>
+            <h5 class="card-title">Para Llevar</h5>
+            <p class="card-text">Disfruta de nuestra comida en la comodidad de tu hogar. Ordena y recoge en el local.</p>
           </div>
         </div>
       </div>
@@ -140,18 +137,6 @@ $categorias = $conn->query($sql_categorias);
             </div>
             <h5 class="card-title">Entrega a Domicilio</h5>
             <p class="card-text">Llevamos la mejor comida directamente a tu hogar. Rápido, caliente y delicioso.</p>
-          </div>
-        </div>
-      </div>
-      
-      <div class="col-lg-4 col-md-6 mb-4">
-        <div class="card text-center h-100 shadow-custom">
-          <div class="card-body">
-            <div class="bg-gradient-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
-              <i class="fas fa-calendar-check fa-2x"></i>
-            </div>
-            <h5 class="card-title">Reservaciones</h5>
-            <p class="card-text">Asegura tu mesa para ocasiones especiales. Sistema de reservas fácil y rápido.</p>
           </div>
         </div>
       </div>
@@ -199,7 +184,6 @@ $categorias = $conn->query($sql_categorias);
           <h5>Enlaces Rápidos</h5>
           <ul class="list-unstyled">
             <li><a href="menu.php">Menú</a></li>
-            <li><a href="reservaciones.php">Reservaciones</a></li>
             <li><a href="login.php">Iniciar Sesión</a></li>
             <li><a href="registro.php">Registrarse</a></li>
           </ul>

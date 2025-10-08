@@ -57,7 +57,7 @@ function HomePage() {
           </p>
         </div>
         
-        <div className="row">
+        <div className="row justify-content-center">
           <div className="col-lg-4 col-md-6 mb-4">
             <div className="card text-center h-100 shadow-sm">
               <div className="card-body">
@@ -65,9 +65,9 @@ function HomePage() {
                      style={{ width: '80px', height: '80px' }}>
                   <i className="fas fa-utensils fa-2x"></i>
                 </div>
-                <h5 className="card-title">Servicio en Mesa</h5>
+                <h5 className="card-title">Para Llevar</h5>
                 <p className="card-text">
-                  Disfruta de nuestro ambiente acogedor con atención personalizada.
+                  Disfruta de nuestra comida en la comodidad de tu hogar.
                 </p>
               </div>
             </div>
@@ -82,22 +82,7 @@ function HomePage() {
                 </div>
                 <h5 className="card-title">Entrega a Domicilio</h5>
                 <p className="card-text">
-                  Llevamos la mejor comida directamente a tu hogar.
-                </p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="col-lg-4 col-md-6 mb-4">
-            <div className="card text-center h-100 shadow-sm">
-              <div className="card-body">
-                <div className="bg-danger text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
-                     style={{ width: '80px', height: '80px' }}>
-                  <i className="fas fa-calendar-check fa-2x"></i>
-                </div>
-                <h5 className="card-title">Reservaciones</h5>
-                <p className="card-text">
-                  Asegura tu mesa para ocasiones especiales.
+                  Llevamos la mejor comida directamente a tu hogar o al lugar de tu preferencia.
                 </p>
               </div>
             </div>

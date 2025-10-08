@@ -3,16 +3,17 @@ import { useNavigate } from 'react-router-dom'
 import { useCart } from '../contexts/CartContext.tsx'
 import { useAuth } from '../contexts/AuthContext.tsx'
 import PaymentMethodSelector from '../components/PaymentMethodSelector.tsx'
-import type { MetodoPago, DatosTarjeta, DatosPayPal, DatosZinli, DatosZelle } from '../types.ts'
+import type { MetodoPago, DatosTarjeta, DatosPayPal, DatosZinli, DatosZelle, TipoServicio } from '../types.ts'
 
 /**
  * Página de Checkout y Procesamiento de Pago
  * 
- * Permite al usuario seleccionar método de pago y completar la transacción
+ * Permite al usuario seleccionar método de pago, tipo de servicio y completar la transacción
  * 
  * Fuentes oficiales:
  * - React Forms: https://react.dev/reference/react-dom/components/input
  * - React Router Navigation: https://reactrouter.com/en/main/hooks/use-navigate
+ * - React useState: https://react.dev/reference/react/useState
  */
 function CheckoutPage() {
   const navigate = useNavigate()
@@ -20,6 +21,10 @@ function CheckoutPage() {
   const { items, total, subtotal, impuestos, vaciarCarrito } = useCart()
 
   // Estados
+  const [tipoServicio, setTipoServicio] = useState<TipoServicio>('recoger')
+  const [direccionEntrega, setDireccionEntrega] = useState('')
+  const [telefonoContacto, setTelefonoContacto] = useState(usuario?.telefono || '')
+  const [notasEspeciales, setNotasEspeciales] = useState('')
   const [metodoPago, setMetodoPago] = useState<MetodoPago>('tarjeta')
   const [procesando, setProcesando] = useState(false)
   
@@ -101,10 +106,19 @@ function CheckoutPage() {
   }
 
   /**
-   * Validar formulario según método de pago
+   * Validar formulario según método de pago y tipo de servicio
    */
   const validarFormulario = (): boolean => {
     const nuevosErrores: Record<string, string> = {}
+
+    // Validar tipo de servicio
+    if (tipoServicio === 'domicilio' && !direccionEntrega.trim()) {
+      nuevosErrores.direccionEntrega = 'La dirección de entrega es requerida para servicio a domicilio'
+    }
+
+    if (!telefonoContacto.trim()) {
+      nuevosErrores.telefonoContacto = 'El teléfono de contacto es requerido'
+    }
 
     if (metodoPago === 'tarjeta') {
       if (!datosTarjeta.numeroTarjeta || datosTarjeta.numeroTarjeta.length !== 16) {
@@ -254,6 +268,136 @@ function CheckoutPage() {
               </div>
             </div>
           )}
+
+          {/* Tipo de Servicio */}
+          <div className="card shadow-sm mb-4">
+            <div className="card-header bg-warning text-dark">
+              <h5 className="mb-0">
+                <i className="fas fa-truck me-2"></i>
+                Tipo de Servicio
+              </h5>
+            </div>
+            <div className="card-body">
+              <div className="row g-3">
+                {/* Selector de tipo de servicio */}
+                <div className="col-12">
+                  <div className="btn-group w-100" role="group">
+                    <input
+                      type="radio"
+                      className="btn-check"
+                      name="tipoServicio"
+                      id="servicio-recoger"
+                      checked={tipoServicio === 'recoger'}
+                      onChange={() => setTipoServicio('recoger')}
+                    />
+                    <label className="btn btn-outline-info" htmlFor="servicio-recoger">
+                      <i className="fas fa-shopping-bag fa-2x d-block mb-2"></i>
+                      <strong>Para Llevar</strong>
+                      <br />
+                      <small>Recoger en el local</small>
+                    </label>
+
+                    <input
+                      type="radio"
+                      className="btn-check"
+                      name="tipoServicio"
+                      id="servicio-domicilio"
+                      checked={tipoServicio === 'domicilio'}
+                      onChange={() => setTipoServicio('domicilio')}
+                    />
+                    <label className="btn btn-outline-primary" htmlFor="servicio-domicilio">
+                      <i className="fas fa-motorcycle fa-2x d-block mb-2"></i>
+                      <strong>A Domicilio</strong>
+                      <br />
+                      <small>Entrega en tu dirección</small>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Dirección de entrega (solo si es domicilio) */}
+                {tipoServicio === 'domicilio' && (
+                  <div className="col-12">
+                    <label className="form-label">
+                      <i className="fas fa-map-marker-alt me-1"></i>
+                      Dirección de Entrega *
+                    </label>
+                    <textarea
+                      className={`form-control ${errores.direccionEntrega ? 'is-invalid' : ''}`}
+                      rows={2}
+                      placeholder="Calle, número, colonia, referencias..."
+                      value={direccionEntrega}
+                      onChange={(e) => {
+                        setDireccionEntrega(e.target.value)
+                        if (errores.direccionEntrega) setErrores({ ...errores, direccionEntrega: '' })
+                      }}
+                    />
+                    {errores.direccionEntrega && (
+                      <div className="invalid-feedback">{errores.direccionEntrega}</div>
+                    )}
+                  </div>
+                )}
+
+                {/* Teléfono de contacto */}
+                <div className="col-md-6">
+                  <label className="form-label">
+                    <i className="fas fa-phone me-1"></i>
+                    Teléfono de Contacto *
+                  </label>
+                  <input
+                    type="tel"
+                    className={`form-control ${errores.telefonoContacto ? 'is-invalid' : ''}`}
+                    placeholder="+1 (555) 123-4567"
+                    value={telefonoContacto}
+                    onChange={(e) => {
+                      setTelefonoContacto(e.target.value)
+                      if (errores.telefonoContacto) setErrores({ ...errores, telefonoContacto: '' })
+                    }}
+                  />
+                  {errores.telefonoContacto && (
+                    <div className="invalid-feedback">{errores.telefonoContacto}</div>
+                  )}
+                </div>
+
+                {/* Notas especiales */}
+                <div className="col-12">
+                  <label className="form-label">
+                    <i className="fas fa-sticky-note me-1"></i>
+                    Notas Especiales (opcional)
+                  </label>
+                  <textarea
+                    className="form-control"
+                    rows={2}
+                    placeholder="Instrucciones adicionales para tu pedido..."
+                    value={notasEspeciales}
+                    onChange={(e) => setNotasEspeciales(e.target.value)}
+                  />
+                </div>
+
+                {/* Información adicional según tipo de servicio */}
+                {tipoServicio === 'recoger' && (
+                  <div className="col-12">
+                    <div className="alert alert-info mb-0">
+                      <i className="fas fa-info-circle me-2"></i>
+                      <strong>Para Llevar:</strong> Tu pedido estará listo para recoger en aproximadamente 30-45 minutos.
+                      <br />
+                      <strong>Dirección del local:</strong> Calle Principal #123, Ciudad
+                    </div>
+                  </div>
+                )}
+
+                {tipoServicio === 'domicilio' && (
+                  <div className="col-12">
+                    <div className="alert alert-primary mb-0">
+                      <i className="fas fa-motorcycle me-2"></i>
+                      <strong>Entrega a Domicilio:</strong> Tiempo estimado de entrega: 45-60 minutos.
+                      <br />
+                      <small>El tiempo puede variar según la distancia y el tráfico.</small>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
 
           {/* Selector de método de pago */}
           <div className="card shadow-sm mb-4">

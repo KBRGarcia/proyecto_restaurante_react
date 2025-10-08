@@ -139,12 +139,11 @@ export interface CartContextType {
 
 // === TIPOS DE ÓRDENES ===
 export type EstadoOrden = 'pendiente' | 'preparando' | 'listo' | 'entregado' | 'cancelado'
-export type TipoServicio = 'mesa' | 'domicilio' | 'recoger'
+export type TipoServicio = 'domicilio' | 'recoger'
 
 export interface Orden {
   id: number
   usuario_id: number
-  mesa_id?: number
   estado: EstadoOrden
   tipo_servicio: TipoServicio
   subtotal: number
@@ -169,7 +168,6 @@ export interface PerfilFormData {
 export interface Estadisticas {
   totalOrdenes: number
   totalGastado: number
-  totalReservaciones: number
 }
 
 // === TIPOS DE CONFIGURACIÓN ===

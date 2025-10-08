@@ -61,8 +61,7 @@ function PerfilPage() {
       // Cargar estadísticas (simuladas por ahora)
       setEstadisticas({
         totalOrdenes: 0,
-        totalGastado: 0,
-        totalReservaciones: 0
+        totalGastado: 0
       })
 
     } catch (err) {
@@ -292,22 +291,13 @@ function PerfilPage() {
                     {estadisticas?.totalOrdenes || 0}
                   </span>
                 </div>
-                <div className="d-flex justify-content-between align-items-center mb-2">
+                <div className="d-flex justify-content-between align-items-center">
                   <span className="text-muted small">
                     <i className="fas fa-dollar-sign me-1"></i>
                     Total Gastado
                   </span>
                   <span className="badge bg-success">
                     ${estadisticas?.totalGastado?.toFixed(2) || '0.00'}
-                  </span>
-                </div>
-                <div className="d-flex justify-content-between align-items-center">
-                  <span className="text-muted small">
-                    <i className="fas fa-calendar-check me-1"></i>
-                    Reservaciones
-                  </span>
-                  <span className="badge bg-warning text-dark">
-                    {estadisticas?.totalReservaciones || 0}
                   </span>
                 </div>
               </div>

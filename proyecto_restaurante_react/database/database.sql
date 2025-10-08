@@ -42,22 +42,13 @@ CREATE TABLE productos (
   FOREIGN KEY (categoria_id) REFERENCES categorias(id) ON DELETE SET NULL
 );
 
--- Tabla de mesas del restaurante
-CREATE TABLE mesas (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  numero_mesa INT NOT NULL UNIQUE,
-  capacidad INT NOT NULL,
-  estado ENUM('libre','ocupada','reservada','mantenimiento') DEFAULT 'libre',
-  ubicacion VARCHAR(100)
-);
-
 -- Tabla de órdenes principales
+-- Solo soporta tipo_servicio: 'domicilio' y 'recoger' (take away)
 CREATE TABLE ordenes (
   id INT AUTO_INCREMENT PRIMARY KEY,
   usuario_id INT,
-  mesa_id INT NULL,
   estado ENUM('pendiente','preparando','listo','entregado','cancelado') DEFAULT 'pendiente',
-  tipo_servicio ENUM('mesa','domicilio','recoger') DEFAULT 'mesa',
+  tipo_servicio ENUM('domicilio','recoger') NOT NULL,
   subtotal DECIMAL(10,2) NOT NULL,
   impuestos DECIMAL(10,2) DEFAULT 0,
   total DECIMAL(10,2) NOT NULL,
@@ -68,7 +59,6 @@ CREATE TABLE ordenes (
   fecha_entrega_estimada TIMESTAMP NULL,
   empleado_asignado_id INT NULL,
   FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
-  FOREIGN KEY (mesa_id) REFERENCES mesas(id),
   FOREIGN KEY (empleado_asignado_id) REFERENCES usuarios(id)
 );
 
@@ -83,21 +73,6 @@ CREATE TABLE orden_detalles (
   notas_producto TEXT,
   FOREIGN KEY (orden_id) REFERENCES ordenes(id) ON DELETE CASCADE,
   FOREIGN KEY (producto_id) REFERENCES productos(id)
-);
-
--- Tabla de reservaciones
-CREATE TABLE reservaciones (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  usuario_id INT NOT NULL,
-  mesa_id INT,
-  fecha_reserva DATETIME NOT NULL,
-  numero_personas INT NOT NULL,
-  estado ENUM('pendiente','confirmada','cancelada','completada') DEFAULT 'pendiente',
-  notas TEXT,
-  telefono_contacto VARCHAR(20),
-  fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
-  FOREIGN KEY (mesa_id) REFERENCES mesas(id)
 );
 
 -- Tabla de evaluaciones y comentarios
@@ -155,14 +130,3 @@ INSERT INTO productos (nombre, descripcion, precio, categoria_id, tiempo_prepara
 -- Especialidades
 ('Paella Marinera', 'Arroz con mariscos frescos (para 2 personas)', 35.99, 5, 45, true),
 ('Ceviche Peruano', 'Pescado fresco marinado en limón', 19.99, 5, 15, true);
-
--- Mesas de ejemplo
-INSERT INTO mesas (numero_mesa, capacidad, ubicacion) VALUES 
-(1, 2, 'Terraza'),
-(2, 4, 'Salón Principal'),
-(3, 4, 'Salón Principal'),
-(4, 6, 'Salón Principal'),
-(5, 2, 'Terraza'),
-(6, 8, 'Salón VIP'),
-(7, 4, 'Terraza'),
-(8, 2, 'Salón Principal');

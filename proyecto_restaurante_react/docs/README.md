@@ -219,7 +219,6 @@ dd-mm-aaaa-NOMBRE_DESCRIPTIVO.md
 ### 🔜 Por Implementar
 
 - 🔜 **Dashboard administrativo**
-- 🔜 **Sistema de reservaciones**
 - 🔜 **Reportes y estadísticas**
 - 🔜 **Notificaciones en tiempo real**
 - 🔜 **Chat de soporte**

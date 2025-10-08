@@ -655,11 +655,6 @@ Usuario visita → http://localhost:3000
    - Gestión de usuarios
    - Reportes y estadísticas
 
-2. **Sistema de Reservaciones**
-   - Reservar mesas
-   - Gestión de reservaciones
-   - Calendario de disponibilidad
-
 ### Objetivos Alcanzados
 
 - ✅ **100% React** para el frontend
