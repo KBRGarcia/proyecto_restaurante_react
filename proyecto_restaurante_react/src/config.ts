@@ -8,7 +8,7 @@ const isDevelopment = import.meta.env.DEV
 
 // URL base de tu proyecto en XAMPP
 // IMPORTANTE: Ajusta esto según la ruta de tu proyecto
-const XAMPP_PROJECT_PATH = '/codigos-ika%20XAMPP/proyecto_restaurante_react/proyecto_restaurante_react'
+const XAMPP_PROJECT_PATH = '/codigos-ika-XAMPP/proyecto_restaurante_react/proyecto_restaurante_react'
 
 // Construir URL base de la API
 export const API_BASE_URL: string = isDevelopment
