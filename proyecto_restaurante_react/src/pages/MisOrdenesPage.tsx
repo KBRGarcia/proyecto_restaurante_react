@@ -95,17 +95,6 @@ function MisOrdenesPage() {
         {
           id: 1005,
           usuario_id: usuario?.id || 1,
-          mesa_id: 12,
-          estado: 'entregado',
-          tipo_servicio: 'mesa',
-          subtotal: 320.00,
-          impuestos: 51.20,
-          total: 371.20,
-          fecha_orden: '2025-09-28T19:00:00',
-        },
-        {
-          id: 1006,
-          usuario_id: usuario?.id || 1,
           estado: 'cancelado',
           tipo_servicio: 'domicilio',
           subtotal: 150.00,
@@ -290,7 +279,6 @@ function MisOrdenesPage() {
                 <option value="todos">Todos</option>
                 <option value="domicilio">A Domicilio</option>
                 <option value="recoger">Para Recoger</option>
-                <option value="mesa">En Mesa</option>
               </select>
             </div>
 
