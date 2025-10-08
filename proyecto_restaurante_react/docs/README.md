@@ -22,6 +22,7 @@ Bienvenido a la documentación completa del **Sistema de Gestión de Restaurante
 |-----------|-------------|-------|
 | [**04-10-2025-FEATURE_ORDENES.md**](04-10-2025-FEATURE_ORDENES.md) | Sistema completo de órdenes e historial | 04/10/2025 |
 | [**04-10-2025-FEATURE_PAGOS.md**](04-10-2025-FEATURE_PAGOS.md) | Pasarela de pago con múltiples métodos | 04/10/2025 |
+| [**08-10-2025-DASHBOARD_ADMIN.md**](08-10-2025-DASHBOARD_ADMIN.md) | Dashboard administrativo completo | 08/10/2025 |
 
 ### 📜 Registro de Cambios
 
@@ -212,16 +213,18 @@ dd-mm-aaaa-NOMBRE_DESCRIPTIVO.md
 - ✅ **Carrito de compras** (Agregar, modificar, eliminar)
 - ✅ **Sistema de pagos** (Tarjeta, PayPal, Zinli, Zelle)
 - ✅ **Historial de órdenes** (Ver, filtrar, detalles)
+- ✅ **Dashboard administrativo** (Estadísticas, gestión de usuarios, órdenes)
 - ✅ **Rutas protegidas** (Por autenticación y rol)
 - ✅ **Lazy loading** (Optimización de carga)
 - ✅ **Responsive design** (Mobile, tablet, desktop)
 
 ### 🔜 Por Implementar
 
-- 🔜 **Dashboard administrativo**
-- 🔜 **Reportes y estadísticas**
+- 🔜 **Integración del dashboard con backend**
+- 🔜 **Reportes avanzados y estadísticas**
 - 🔜 **Notificaciones en tiempo real**
 - 🔜 **Chat de soporte**
+- 🔜 **Gestión de productos y categorías desde el dashboard**
 
 ---
 

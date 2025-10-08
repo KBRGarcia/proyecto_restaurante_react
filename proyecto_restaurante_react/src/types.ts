@@ -231,3 +231,37 @@ export interface ResultadoPago {
   fecha?: string
 }
 
+// === TIPOS DE DASHBOARD ADMINISTRATIVO ===
+export interface EstadisticasDashboard {
+  totalUsuarios: number
+  totalOrdenes: number
+  totalIngresos: number
+  ordenesHoy: number
+  ingresosHoy: number
+  nuevosusuarios: number
+  promedioOrden: number
+}
+
+export interface UsuarioAdmin extends Usuario {
+  total_gastado?: number
+  total_ordenes?: number
+  ultima_orden?: string
+}
+
+export interface TopUsuario {
+  id: number
+  nombre: string
+  apellido: string
+  correo: string
+  total_gastado: number
+  total_ordenes: number
+}
+
+export interface ProductoPopular {
+  id: number
+  nombre: string
+  categoria: string
+  veces_pedido: number
+  ingresos_generados: number
+}
+

@@ -11,6 +11,8 @@ import ConfiguracionPage from '../pages/ConfiguracionPage.tsx'
 import CartPage from '../pages/CartPage.tsx'
 import CheckoutPage from '../pages/CheckoutPage.tsx'
 import MisOrdenesPage from '../pages/MisOrdenesPage.tsx'
+import DashboardPage from '../pages/DashboardPage.tsx'
+import NotFoundPage from '../pages/NotFoundPage.tsx'
 
 /**
  * Configuración Centralizada de Rutas
@@ -99,10 +101,7 @@ export const adminRoutes = (
       path="/dashboard" 
       element={
         <ProtectedRoute requiredRole="admin">
-          <div className="container mt-5">
-            <h1>Dashboard Administrativo</h1>
-            <p>Próximamente...</p>
-          </div>
+          <DashboardPage />
         </ProtectedRoute>
       } 
     />
@@ -116,12 +115,7 @@ export const adminRoutes = (
 export const notFoundRoute = (
   <Route 
     path="*" 
-    element={
-      <div className="container mt-5 text-center">
-        <h1>404</h1>
-        <p>Página no encontrada</p>
-      </div>
-    } 
+    element={<NotFoundPage />} 
   />
 )
 
