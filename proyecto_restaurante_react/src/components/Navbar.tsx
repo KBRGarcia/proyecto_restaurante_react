@@ -52,7 +52,8 @@ function Navbar() {
                 Menú
               </Link>
             </li>
-            {estaAutenticado() && (
+            {/* Solo mostrar "Mis Órdenes" para usuarios NO admin */}
+            {estaAutenticado() && usuario?.rol !== 'admin' && (
               <li className="nav-item">
                 <Link className="nav-link" to="/mis-ordenes">
                   <i className="fas fa-receipt me-1"></i>
@@ -72,16 +73,19 @@ function Navbar() {
 
           {/* Carrito y usuario */}
           <ul className="navbar-nav">
-            <li className="nav-item">
-              <Link className="nav-link position-relative" to="/carrito">
-                <i className="fas fa-shopping-cart fa-lg"></i>
-                {cantidadTotal > 0 && (
-                  <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary">
-                    {cantidadTotal > 99 ? '99+' : cantidadTotal}
-                  </span>
-                )}
-              </Link>
-            </li>
+            {/* Solo mostrar carrito si NO es admin */}
+            {usuario?.rol !== 'admin' && (
+              <li className="nav-item">
+                <Link className="nav-link position-relative" to="/carrito">
+                  <i className="fas fa-shopping-cart fa-lg"></i>
+                  {cantidadTotal > 0 && (
+                    <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary">
+                      {cantidadTotal > 99 ? '99+' : cantidadTotal}
+                    </span>
+                  )}
+                </Link>
+              </li>
+            )}
 
             {estaAutenticado() ? (
               <li className="nav-item dropdown">
@@ -122,12 +126,15 @@ function Navbar() {
                       Configuración
                     </Link>
                   </li>
-                  <li>
-                    <Link className="dropdown-item" to="/mis-ordenes">
-                      <i className="fas fa-receipt me-2"></i>
-                      Mis Órdenes
-                    </Link>
-                  </li>
+                  {/* Solo mostrar "Mis Órdenes" para usuarios NO admin */}
+                  {usuario?.rol !== 'admin' && (
+                    <li>
+                      <Link className="dropdown-item" to="/mis-ordenes">
+                        <i className="fas fa-receipt me-2"></i>
+                        Mis Órdenes
+                      </Link>
+                    </li>
+                  )}
                   <li><hr className="dropdown-divider" /></li>
                   <li>
                     <button

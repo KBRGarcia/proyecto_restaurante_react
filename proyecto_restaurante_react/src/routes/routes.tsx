@@ -43,6 +43,9 @@ export const publicRoutes = (
 /**
  * Rutas Protegidas
  * Requieren que el usuario esté autenticado
+ * 
+ * Algunas rutas excluyen a usuarios admin ya que son funcionalidades
+ * específicas para clientes (carrito, checkout, órdenes)
  */
 export const protectedRoutes = (
   <>
@@ -64,10 +67,11 @@ export const protectedRoutes = (
       } 
     />
     
+    {/* Rutas exclusivas para clientes (admin no puede acceder) */}
     <Route 
       path="/carrito" 
       element={
-        <ProtectedRoute>
+        <ProtectedRoute excludedRoles={['admin']}>
           <CartPage />
         </ProtectedRoute>
       } 
@@ -76,7 +80,7 @@ export const protectedRoutes = (
     <Route 
       path="/checkout" 
       element={
-        <ProtectedRoute>
+        <ProtectedRoute excludedRoles={['admin']}>
           <CheckoutPage />
         </ProtectedRoute>
       } 
@@ -85,7 +89,7 @@ export const protectedRoutes = (
     <Route 
       path="/mis-ordenes" 
       element={
-        <ProtectedRoute>
+        <ProtectedRoute excludedRoles={['admin']}>
           <MisOrdenesPage />
         </ProtectedRoute>
       } 

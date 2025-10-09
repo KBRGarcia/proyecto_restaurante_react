@@ -90,6 +90,10 @@ export interface ApiResponse<T = any> {
 export interface ProductCardProps {
   producto: Producto
   onAddToCart: (producto: Producto) => void | Promise<void>
+  mostrarBotonCompra?: boolean
+  onEdit?: (producto: Producto) => void
+  onDelete?: (productoId: number) => Promise<void>
+  modoAdmin?: boolean
 }
 
 export interface FilterBarProps {
@@ -110,6 +114,7 @@ export interface ErrorMessageProps {
 export interface ProtectedRouteProps {
   children: React.ReactNode
   requiredRole?: RolUsuario
+  excludedRoles?: RolUsuario[]
 }
 
 // === TIPOS DE CARRITO ===
