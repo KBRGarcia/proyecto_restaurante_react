@@ -111,15 +111,26 @@ Se incluye una sección informativa que indica:
 1. **`src/pages/DashboardPage.tsx`** (560 líneas)
    - Componente principal del dashboard
    - Gestión de estado con React Hooks
-   - Integración con contexto de autenticación
-   - Sistema de filtrado y búsqueda
+   - Integración con API real
+   - Sistema de filtrado y búsqueda en tiempo real
 
 2. **`src/pages/NotFoundPage.tsx`** (44 líneas)
    - Página 404 personalizada
    - Links de navegación útiles
    - Diseño centrado y responsive
 
-3. **`docs/08-10-2025-DASHBOARD_ADMIN.md`** (Este archivo)
+3. **`server/api/admin/dashboard.php`** (350+ líneas)
+   - API REST para todas las operaciones del dashboard
+   - 6 endpoints diferentes
+   - Validación de autenticación y roles
+   - Queries SQL optimizadas
+
+4. **`database/08-10-2025-datos-prueba-dashboard.sql`** (100+ líneas)
+   - Script con datos de prueba
+   - Usuarios, órdenes y detalles de ejemplo
+   - Datos distribuidos en el tiempo
+
+5. **`docs/08-10-2025-DASHBOARD_ADMIN.md`** (Este archivo)
    - Documentación completa del dashboard
    - Guía de uso y funcionalidades
 
@@ -137,6 +148,15 @@ Se incluye una sección informativa que indica:
    - Actualización de la ruta `/dashboard`
    - Importación de `NotFoundPage`
    - Actualización de la ruta 404
+
+3. **`src/config.ts`**
+   - Agregados 6 nuevos endpoints para el dashboard:
+     - `adminEstadisticas`
+     - `adminUsuarios`
+     - `adminTopUsuarios`
+     - `adminOrdenesRecientes`
+     - `adminBanearUsuario`
+     - `adminEliminarUsuario`
 
 ---
 
@@ -407,13 +427,30 @@ Mostrar mensaje de éxito
 
 ## 📝 Notas Finales
 
-### Datos de Prueba
+### Datos Reales de la Base de Datos
 
-El dashboard actualmente utiliza **datos simulados** para demostración. En producción:
-1. Todos los datos vendrán de la API
-2. Se implementará paginación para grandes volúmenes
-3. Cache para mejorar rendimiento
-4. WebSockets para actualizaciones en tiempo real (opcional)
+El dashboard utiliza **datos reales de la base de datos** a través de la API:
+
+✅ **Implementado:**
+1. Todos los datos provienen de la base de datos MySQL
+2. API REST en PHP con autenticación y verificación de roles
+3. Queries optimizadas con agregaciones y joins
+4. Validaciones de seguridad (solo admin puede acceder)
+
+🔜 **Futuras mejoras:**
+1. Paginación para grandes volúmenes de datos
+2. Cache para mejorar rendimiento
+3. WebSockets para actualizaciones en tiempo real (opcional)
+4. Búsqueda avanzada con filtros múltiples
+
+### Script de Datos de Prueba
+
+Se incluye el archivo `database/08-10-2025-datos-prueba-dashboard.sql` con:
+- 10 usuarios de prueba
+- 17 órdenes variadas en el tiempo
+- Órdenes de hoy, este mes y meses anteriores
+- Diferentes estados y tipos de servicio
+- Detalles de órdenes para realismo
 
 ### Accesibilidad
 

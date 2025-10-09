@@ -1,6 +1,88 @@
 <?php
 // Funciones de autenticación y autorización
 
+/**
+ * Verificar autenticación mediante token JWT (Bearer token)
+ * Para uso en APIs REST
+ */
+function verificarAuth() {
+    // Obtener el header de autorización
+    $headers = getallheaders();
+    $authHeader = $headers['Authorization'] ?? $headers['authorization'] ?? '';
+    
+    if (empty($authHeader)) {
+        return [
+            'success' => false,
+            'message' => 'No se proporcionó token de autenticación'
+        ];
+    }
+    
+    // Extraer el token (formato: "Bearer TOKEN")
+    $token = str_replace('Bearer ', '', $authHeader);
+    
+    if (empty($token)) {
+        return [
+            'success' => false,
+            'message' => 'Token inválido'
+        ];
+    }
+    
+    // Validar el token (simple validación por ahora)
+    // En producción, usar JWT real con firma y expiración
+    global $conn;
+    
+    // Buscar sesión activa con este token
+    $stmt = $conn->prepare("SELECT s.*, u.id, u.nombre, u.apellido, u.correo, u.rol, u.estado, u.telefono, u.direccion, u.foto_perfil, u.fecha_registro 
+                            FROM sessions s 
+                            JOIN usuarios u ON s.usuario_id = u.id 
+                            WHERE s.token = ? AND s.expires_at > NOW()");
+    
+    if (!$stmt) {
+        return [
+            'success' => false,
+            'message' => 'Error en la consulta: ' . $conn->error
+        ];
+    }
+    
+    $stmt->bind_param("s", $token);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($result->num_rows === 0) {
+        return [
+            'success' => false,
+            'message' => 'Token inválido o expirado'
+        ];
+    }
+    
+    $session = $result->fetch_assoc();
+    
+    // Verificar que el usuario esté activo
+    if ($session['estado'] !== 'activo') {
+        return [
+            'success' => false,
+            'message' => 'Usuario inactivo'
+        ];
+    }
+    
+    // Retornar datos del usuario
+    return [
+        'success' => true,
+        'usuario' => [
+            'id' => $session['id'],
+            'nombre' => $session['nombre'],
+            'apellido' => $session['apellido'],
+            'correo' => $session['correo'],
+            'rol' => $session['rol'],
+            'estado' => $session['estado'],
+            'telefono' => $session['telefono'],
+            'direccion' => $session['direccion'],
+            'foto_perfil' => $session['foto_perfil'],
+            'fecha_registro' => $session['fecha_registro']
+        ]
+    ];
+}
+
 function verificarLogin() {
     if (!isset($_SESSION['usuario'])) {
         header("Location: login.php");

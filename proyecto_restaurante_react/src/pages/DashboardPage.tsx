@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext.tsx'
+import { API_ENDPOINTS } from '../config'
 import LoadingSpinner from '../components/LoadingSpinner.tsx'
 import type { EstadisticasDashboard, UsuarioAdmin, TopUsuario, Orden } from '../types'
 
@@ -41,94 +42,82 @@ function DashboardPage() {
   const cargarDatos = async () => {
     setLoading(true)
     try {
-      // Simular llamada a API
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const token = localStorage.getItem('token')
+      
+      if (!token) {
+        console.error('No hay token de autenticación')
+        alert('Sesión no válida. Por favor inicia sesión nuevamente.')
+        setLoading(false)
+        return
+      }
 
-      // Datos simulados - En producción vendrían del backend
-      setEstadisticas({
-        totalUsuarios: 156,
-        totalOrdenes: 842,
-        totalIngresos: 45820.50,
-        ordenesHoy: 23,
-        ingresosHoy: 1250.75,
-        nuevosusuarios: 12,
-        promedioOrden: 54.40
-      })
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
 
-      // Usuarios simulados
-      setUsuarios([
-        {
-          id: 1,
-          nombre: 'Juan',
-          apellido: 'Pérez',
-          correo: 'juan@example.com',
-          rol: 'cliente',
-          estado: 'activo',
-          telefono: '+1 555-0101',
-          fecha_registro: '2024-01-15',
-          total_gastado: 1250.50,
-          total_ordenes: 15
-        },
-        {
-          id: 2,
-          nombre: 'María',
-          apellido: 'González',
-          correo: 'maria@example.com',
-          rol: 'cliente',
-          estado: 'activo',
-          telefono: '+1 555-0102',
-          fecha_registro: '2024-02-20',
-          total_gastado: 890.25,
-          total_ordenes: 12
-        },
-        {
-          id: 3,
-          nombre: 'Carlos',
-          apellido: 'Rodríguez',
-          correo: 'carlos@example.com',
-          rol: 'cliente',
-          estado: 'inactivo',
-          telefono: '+1 555-0103',
-          fecha_registro: '2024-03-10',
-          total_gastado: 450.00,
-          total_ordenes: 8
+      // Cargar estadísticas
+      console.log('Cargando estadísticas desde:', API_ENDPOINTS.adminEstadisticas)
+      const estadisticasRes = await fetch(API_ENDPOINTS.adminEstadisticas, { headers })
+      console.log('Status estadísticas:', estadisticasRes.status)
+      
+      if (!estadisticasRes.ok) {
+        const errorText = await estadisticasRes.text()
+        console.error('Error en estadísticas:', errorText)
+        throw new Error(`Error ${estadisticasRes.status}: ${errorText}`)
+      }
+
+      const estadisticasData = await estadisticasRes.json()
+      console.log('Datos de estadísticas:', estadisticasData)
+      
+      if (estadisticasData.success) {
+        setEstadisticas(estadisticasData.data)
+      } else {
+        console.error('Respuesta no exitosa:', estadisticasData)
+      }
+
+      // Cargar usuarios
+      console.log('Cargando usuarios desde:', API_ENDPOINTS.adminUsuarios)
+      const usuariosRes = await fetch(API_ENDPOINTS.adminUsuarios, { headers })
+      console.log('Status usuarios:', usuariosRes.status)
+      
+      if (usuariosRes.ok) {
+        const usuariosData = await usuariosRes.json()
+        console.log('Datos de usuarios:', usuariosData)
+        if (usuariosData.success) {
+          setUsuarios(usuariosData.data)
         }
-      ])
+      }
 
-      // Top usuarios por gasto
-      setTopUsuarios([
-        { id: 1, nombre: 'Juan', apellido: 'Pérez', correo: 'juan@example.com', total_gastado: 1250.50, total_ordenes: 15 },
-        { id: 4, nombre: 'Ana', apellido: 'Martínez', correo: 'ana@example.com', total_gastado: 980.75, total_ordenes: 18 },
-        { id: 2, nombre: 'María', apellido: 'González', correo: 'maria@example.com', total_gastado: 890.25, total_ordenes: 12 }
-      ])
-
-      // Órdenes recientes simuladas
-      setOrdenesRecientes([
-        {
-          id: 1001,
-          usuario_id: 1,
-          estado: 'pendiente',
-          tipo_servicio: 'domicilio',
-          subtotal: 45.00,
-          impuestos: 7.20,
-          total: 52.20,
-          fecha_orden: new Date().toISOString(),
-          direccion_entrega: 'Calle Principal #123'
-        },
-        {
-          id: 1002,
-          usuario_id: 2,
-          estado: 'preparando',
-          tipo_servicio: 'recoger',
-          subtotal: 32.50,
-          impuestos: 5.20,
-          total: 37.70,
-          fecha_orden: new Date(Date.now() - 3600000).toISOString()
+      // Cargar top usuarios
+      console.log('Cargando top usuarios desde:', API_ENDPOINTS.adminTopUsuarios)
+      const topUsuariosRes = await fetch(API_ENDPOINTS.adminTopUsuarios, { headers })
+      console.log('Status top usuarios:', topUsuariosRes.status)
+      
+      if (topUsuariosRes.ok) {
+        const topUsuariosData = await topUsuariosRes.json()
+        console.log('Datos de top usuarios:', topUsuariosData)
+        if (topUsuariosData.success) {
+          setTopUsuarios(topUsuariosData.data)
         }
-      ])
+      }
+
+      // Cargar órdenes recientes
+      console.log('Cargando órdenes desde:', API_ENDPOINTS.adminOrdenesRecientes)
+      const ordenesRes = await fetch(API_ENDPOINTS.adminOrdenesRecientes, { headers })
+      console.log('Status órdenes:', ordenesRes.status)
+      
+      if (ordenesRes.ok) {
+        const ordenesData = await ordenesRes.json()
+        console.log('Datos de órdenes:', ordenesData)
+        if (ordenesData.success) {
+          setOrdenesRecientes(ordenesData.data)
+        }
+      }
 
     } catch (error) {
-      console.error('Error al cargar datos del dashboard:', error)
+      console.error('Error detallado al cargar datos del dashboard:', error)
+      alert(`Error al cargar los datos del dashboard.\n\nDetalles: ${error instanceof Error ? error.message : 'Error desconocido'}\n\nAbre la consola (F12) para más información.`)
     } finally {
       setLoading(false)
     }
@@ -139,7 +128,7 @@ function DashboardPage() {
    */
   const usuariosFiltrados = usuarios.filter(u =>
     u.nombre.toLowerCase().includes(filtroUsuarios.toLowerCase()) ||
-    u.apellido.toLowerCase().includes(filtroUsuarios.toLowerCase()) ||
+    (u.apellido && u.apellido.toLowerCase().includes(filtroUsuarios.toLowerCase())) ||
     u.correo.toLowerCase().includes(filtroUsuarios.toLowerCase())
   )
 
@@ -159,27 +148,56 @@ function DashboardPage() {
     if (!usuarioSeleccionado || !accionModal) return
 
     try {
-      // En producción, aquí iría la llamada a la API
-      // await fetch(`/api/usuarios/${usuarioSeleccionado.id}/${accionModal}`, { method: 'POST' })
+      const token = localStorage.getItem('token')
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
 
       if (accionModal === 'banear') {
-        // Cambiar estado del usuario
-        setUsuarios(prev => prev.map(u =>
-          u.id === usuarioSeleccionado.id
-            ? { ...u, estado: u.estado === 'activo' ? 'inactivo' : 'activo' }
-            : u
-        ))
-        alert(`Usuario ${usuarioSeleccionado.estado === 'activo' ? 'baneado' : 'desbaneado'} exitosamente`)
+        // Llamada a la API para banear/desbanear
+        const response = await fetch(API_ENDPOINTS.adminBanearUsuario, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ usuario_id: usuarioSeleccionado.id })
+        })
+
+        const data = await response.json()
+
+        if (data.success) {
+          // Actualizar estado local
+          setUsuarios(prev => prev.map(u =>
+            u.id === usuarioSeleccionado.id
+              ? { ...u, estado: data.nuevo_estado }
+              : u
+          ))
+          alert(`Usuario ${data.nuevo_estado === 'inactivo' ? 'baneado' : 'desbaneado'} exitosamente`)
+        } else {
+          alert(data.message || 'Error al cambiar el estado del usuario')
+        }
       } else if (accionModal === 'eliminar') {
-        // Eliminar usuario
-        setUsuarios(prev => prev.filter(u => u.id !== usuarioSeleccionado.id))
-        alert('Usuario eliminado exitosamente')
+        // Llamada a la API para eliminar
+        const response = await fetch(API_ENDPOINTS.adminEliminarUsuario, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ usuario_id: usuarioSeleccionado.id })
+        })
+
+        const data = await response.json()
+
+        if (data.success) {
+          // Eliminar del estado local
+          setUsuarios(prev => prev.filter(u => u.id !== usuarioSeleccionado.id))
+          alert('Usuario eliminado exitosamente')
+        } else {
+          alert(data.message || 'Error al eliminar el usuario')
+        }
       }
 
       cerrarModal()
     } catch (error) {
       console.error('Error al ejecutar acción:', error)
-      alert('Error al ejecutar la acción')
+      alert('Error de conexión al ejecutar la acción')
     }
   }
 

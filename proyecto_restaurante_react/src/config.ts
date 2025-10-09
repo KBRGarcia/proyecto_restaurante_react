@@ -34,6 +34,14 @@ export const API_ENDPOINTS = {
   // Órdenes
   ordenes: `${API_BASE_URL}/ordenes.php`,
   ordenDetalle: (id: number) => `${API_BASE_URL}/ordenes.php?id=${id}`,
+  
+  // Admin Dashboard
+  adminEstadisticas: `${API_BASE_URL}/admin/dashboard.php?action=estadisticas`,
+  adminUsuarios: `${API_BASE_URL}/admin/dashboard.php?action=usuarios`,
+  adminTopUsuarios: `${API_BASE_URL}/admin/dashboard.php?action=top-usuarios`,
+  adminOrdenesRecientes: `${API_BASE_URL}/admin/dashboard.php?action=ordenes-recientes`,
+  adminBanearUsuario: `${API_BASE_URL}/admin/dashboard.php?action=banear-usuario`,
+  adminEliminarUsuario: `${API_BASE_URL}/admin/dashboard.php?action=eliminar-usuario`,
 } as const
 
 // Configuración general
