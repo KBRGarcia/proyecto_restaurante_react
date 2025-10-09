@@ -34,6 +34,8 @@ export const API_ENDPOINTS = {
   // Órdenes
   ordenes: `${API_BASE_URL}/ordenes.php`,
   ordenDetalle: (id: number) => `${API_BASE_URL}/ordenes.php?id=${id}`,
+  crearOrden: `${API_BASE_URL}/ordenes.php`,
+  cancelarOrden: (id: number) => `${API_BASE_URL}/ordenes.php?id=${id}`,
   
   // Admin Dashboard
   adminEstadisticas: `${API_BASE_URL}/admin/dashboard.php?action=estadisticas`,

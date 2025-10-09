@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useAuth } from '../contexts/AuthContext.tsx'
+import { API_ENDPOINTS } from '../config'
 import OrderCard from '../components/OrderCard.tsx'
 import OrderDetailsModal from '../components/OrderDetailsModal.tsx'
 import LoadingSpinner from '../components/LoadingSpinner.tsx'
@@ -14,7 +14,6 @@ import type { Orden, EstadoOrden, TipoServicio } from '../types.ts'
  * - Estado y Efectos: https://react.dev/learn/state-a-components-memory
  */
 function MisOrdenesPage() {
-  const { usuario } = useAuth()
   const [ordenes, setOrdenes] = useState<Orden[]>([])
   const [loading, setLoading] = useState(true)
   const [filtroEstado, setFiltroEstado] = useState<EstadoOrden | 'todas'>('todas')
@@ -23,8 +22,8 @@ function MisOrdenesPage() {
   const [ordenamiento, setOrdenamiento] = useState<'reciente' | 'antiguo' | 'mayor' | 'menor'>('reciente')
 
   /**
-   * Cargar órdenes del usuario
-   * En producción, esto haría una llamada al backend
+   * Cargar órdenes del usuario desde la base de datos
+   * Fuente: https://react.dev/reference/react/useEffect
    */
   useEffect(() => {
     cargarOrdenes()
@@ -34,82 +33,47 @@ function MisOrdenesPage() {
     setLoading(true)
     
     try {
-      // Simular llamada API
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const token = localStorage.getItem('token')
       
-      // Datos mock de ejemplo
-      // TODO: Reemplazar con llamada real al backend
-      const ordenesMock: Orden[] = [
-        {
-          id: 1001,
-          usuario_id: usuario?.id || 1,
-          estado: 'entregado',
-          tipo_servicio: 'domicilio',
-          subtotal: 450.00,
-          impuestos: 72.00,
-          total: 522.00,
-          direccion_entrega: 'Av. Reforma 123, Col. Centro',
-          telefono_contacto: '555-1234-5678',
-          notas_especiales: 'Sin cebolla, por favor',
-          fecha_orden: '2025-10-01T14:30:00',
-          fecha_entrega_estimada: '2025-10-01T15:15:00',
-        },
-        {
-          id: 1002,
-          usuario_id: usuario?.id || 1,
-          estado: 'preparando',
-          tipo_servicio: 'recoger',
-          subtotal: 280.00,
-          impuestos: 44.80,
-          total: 324.80,
-          telefono_contacto: '555-1234-5678',
-          notas_especiales: 'Para llevar',
-          fecha_orden: '2025-10-02T12:00:00',
-          fecha_entrega_estimada: '2025-10-02T12:45:00',
-        },
-        {
-          id: 1003,
-          usuario_id: usuario?.id || 1,
-          estado: 'listo',
-          tipo_servicio: 'recoger',
-          subtotal: 195.00,
-          impuestos: 31.20,
-          total: 226.20,
-          telefono_contacto: '555-1234-5678',
-          fecha_orden: '2025-10-02T13:30:00',
-        },
-        {
-          id: 1004,
-          usuario_id: usuario?.id || 1,
-          estado: 'pendiente',
-          tipo_servicio: 'domicilio',
-          subtotal: 680.00,
-          impuestos: 108.80,
-          total: 788.80,
-          direccion_entrega: 'Calle 5 de Mayo 456, Col. Juárez',
-          telefono_contacto: '555-8765-4321',
-          notas_especiales: 'Timbre roto, llamar al teléfono',
-          fecha_orden: '2025-10-02T14:00:00',
-          fecha_entrega_estimada: '2025-10-02T15:30:00',
-        },
-        {
-          id: 1005,
-          usuario_id: usuario?.id || 1,
-          estado: 'cancelado',
-          tipo_servicio: 'domicilio',
-          subtotal: 150.00,
-          impuestos: 24.00,
-          total: 174.00,
-          direccion_entrega: 'Av. Universidad 789',
-          telefono_contacto: '555-1111-2222',
-          notas_especiales: 'Cancelada por el cliente',
-          fecha_orden: '2025-09-25T11:00:00',
-        },
-      ]
+      if (!token) {
+        console.error('No hay token de autenticación')
+        setOrdenes([])
+        setLoading(false)
+        return
+      }
 
-      setOrdenes(ordenesMock)
+      console.log('Cargando órdenes desde:', API_ENDPOINTS.ordenes)
+      
+      const response = await fetch(API_ENDPOINTS.ordenes, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      console.log('Status de órdenes:', response.status)
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('Error al cargar órdenes:', errorText)
+        throw new Error(`Error ${response.status}: ${errorText}`)
+      }
+
+      const data = await response.json()
+      console.log('Datos de órdenes recibidos:', data)
+
+      if (data.success) {
+        setOrdenes(data.data || [])
+      } else {
+        console.error('Respuesta no exitosa:', data)
+        setOrdenes([])
+      }
     } catch (error) {
-      console.error('Error cargando órdenes:', error)
+      console.error('Error detallado al cargar órdenes:', error)
+      setOrdenes([])
+      // No mostramos alert para no interrumpir la experiencia del usuario
+      // Si no hay órdenes, simplemente mostrará el mensaje de "No hay órdenes"
     } finally {
       setLoading(false)
     }
