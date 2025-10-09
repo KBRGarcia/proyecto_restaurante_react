@@ -12,6 +12,7 @@ import CartPage from '../pages/CartPage.tsx'
 import CheckoutPage from '../pages/CheckoutPage.tsx'
 import MisOrdenesPage from '../pages/MisOrdenesPage.tsx'
 import DashboardPage from '../pages/DashboardPage.tsx'
+import TerminosPage from '../pages/TerminosPage.tsx'
 import NotFoundPage from '../pages/NotFoundPage.tsx'
 
 /**
@@ -35,6 +36,7 @@ export const publicRoutes = (
     <Route path="/menu" element={<MenuPage />} />
     <Route path="/login" element={<Login />} />
     <Route path="/register" element={<Register />} />
+    <Route path="/terminos" element={<TerminosPage />} />
   </>
 )
 
