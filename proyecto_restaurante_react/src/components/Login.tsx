@@ -11,6 +11,7 @@ function Login() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showPassword, setShowPassword] = useState(false)
   
   const { login } = useAuth()
   const navigate = useNavigate()
@@ -94,16 +95,27 @@ function Login() {
                     <i className="fas fa-lock me-2"></i>
                     Contraseña
                   </label>
-                  <input
-                    type="password"
-                    className="form-control"
-                    id="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    required
-                    disabled={loading}
-                  />
+                  <div className="input-group">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      className="form-control"
+                      id="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      required
+                      disabled={loading}
+                    />
+                    <button
+                      type="button"
+                      className="btn btn-outline-secondary"
+                      onClick={() => setShowPassword(!showPassword)}
+                      disabled={loading}
+                      title={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                    >
+                      <i className={`fas fa-${showPassword ? 'eye-slash' : 'eye'}`}></i>
+                    </button>
+                  </div>
                 </div>
 
                 {/* Recordarme */}

@@ -596,7 +596,7 @@ function DashboardPage() {
                             </div>
                           </td>
                           <td><small>{usuario.correo}</small></td>
-                          <td><small>{usuario.telefono || 'N/A'}</small></td>
+                          <td><small>{usuario.codigo_area && usuario.numero_telefono ? `${usuario.codigo_area}-${usuario.numero_telefono}` : 'N/A'}</small></td>
                           <td>
                             <span className={`badge bg-${usuario.estado === 'activo' ? 'success' : 'danger'}`}>
                               {usuario.estado === 'activo' ? 'Activo' : 'Baneado'}

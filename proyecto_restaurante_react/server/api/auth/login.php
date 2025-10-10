@@ -38,7 +38,7 @@ try {
     
     // Buscar usuario en la base de datos
     $stmt = $conn->prepare("
-        SELECT id, nombre, apellido, correo, password, rol, telefono, estado 
+        SELECT id, nombre, apellido, correo, password, rol, codigo_area, numero_telefono, estado 
         FROM usuarios 
         WHERE correo = ? 
         LIMIT 1

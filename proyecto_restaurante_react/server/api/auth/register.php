@@ -31,20 +31,44 @@ try {
     $nombre = trim($input['nombre'] ?? '');
     $apellido = trim($input['apellido'] ?? '');
     $correo = trim($input['correo'] ?? '');
-    $telefono = trim($input['telefono'] ?? '');
+    $codigo_area = trim($input['codigo_area'] ?? '');
+    $numero_telefono = trim($input['numero_telefono'] ?? '');
     $password = $input['password'] ?? '';
     
-    // Validaciones
-    if (empty($nombre) || empty($correo) || empty($password)) {
-        throw new Exception('Nombre, correo y contraseña son requeridos');
+    // Validaciones de campos obligatorios
+    if (empty($nombre) || empty($apellido) || empty($correo) || empty($password)) {
+        throw new Exception('Nombre, apellido, correo y contraseña son requeridos');
     }
     
+    // Validación de nombre (solo letras, acentos y ñ, 2-16 caracteres)
+    if (!preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]{2,16}$/', $nombre)) {
+        throw new Exception('El nombre solo puede contener letras, acentos y ñ (2-16 caracteres)');
+    }
+    
+    // Validación de apellido (solo letras, acentos y ñ, 2-16 caracteres)
+    if (!preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]{2,16}$/', $apellido)) {
+        throw new Exception('El apellido solo puede contener letras, acentos y ñ (2-16 caracteres)');
+    }
+    
+    // Validación de correo electrónico
     if (!filter_var($correo, FILTER_VALIDATE_EMAIL)) {
         throw new Exception('Correo electrónico inválido');
     }
     
-    if (strlen($password) < 6) {
-        throw new Exception('La contraseña debe tener al menos 6 caracteres');
+    // Validación de código de área
+    $codigos_validos = ['0414', '0424', '0412', '0416', '0426'];
+    if (!empty($codigo_area) && !in_array($codigo_area, $codigos_validos)) {
+        throw new Exception('Código de área inválido');
+    }
+    
+    // Validación de número telefónico (7 dígitos exactos)
+    if (!empty($numero_telefono) && !preg_match('/^[0-9]{7}$/', $numero_telefono)) {
+        throw new Exception('El número telefónico debe tener exactamente 7 dígitos');
+    }
+    
+    // Validación de contraseña (4-10 caracteres)
+    if (strlen($password) < 4 || strlen($password) > 10) {
+        throw new Exception('La contraseña debe tener entre 4 y 10 caracteres');
     }
     
     // Verificar si el correo ya existe
@@ -65,10 +89,10 @@ try {
     $estado = 'activo';
     
     $stmt = $conn->prepare("
-        INSERT INTO usuarios (nombre, apellido, correo, telefono, password, rol, estado, fecha_registro) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
+        INSERT INTO usuarios (nombre, apellido, correo, codigo_area, numero_telefono, password, rol, estado, fecha_registro) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
     ");
-    $stmt->bind_param("sssssss", $nombre, $apellido, $correo, $telefono, $passwordHash, $rol, $estado);
+    $stmt->bind_param("ssssssss", $nombre, $apellido, $correo, $codigo_area, $numero_telefono, $passwordHash, $rol, $estado);
     
     if (!$stmt->execute()) {
         throw new Exception('Error al crear la cuenta');

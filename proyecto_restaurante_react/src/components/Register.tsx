@@ -1,7 +1,7 @@
 import { useState, type FormEvent, type ChangeEvent } from 'react'
 import { useAuth } from '../contexts/AuthContext.tsx'
 import { useNavigate, Link } from 'react-router-dom'
-import type { RegisterData } from '../types.ts'
+import type { RegisterData, CodigoArea } from '../types.ts'
 
 /**
  * Componente de Registro
@@ -12,21 +12,73 @@ function Register() {
     nombre: '',
     apellido: '',
     correo: '',
-    telefono: '',
+    codigo_area: '0414',
+    numero_telefono: '',
     password: '',
     confirmPassword: ''
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  
+  // Códigos de área disponibles
+  const codigosArea: CodigoArea[] = ['0414', '0424', '0412', '0416', '0426']
   
   const { register } = useAuth()
   const navigate = useNavigate()
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    })
+  // Funciones de validación
+  const validarNombre = (nombre: string): boolean => {
+    const regex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]{2,16}$/
+    return regex.test(nombre.trim())
+  }
+
+  const validarApellido = (apellido: string): boolean => {
+    const regex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]{2,16}$/
+    return regex.test(apellido.trim())
+  }
+
+  const validarNumeroTelefono = (numero: string): boolean => {
+    const regex = /^[0-9]{7}$/
+    return regex.test(numero)
+  }
+
+  const validarPassword = (password: string): boolean => {
+    return password.length >= 4 && password.length <= 10
+  }
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target
+    
+    // Validaciones en tiempo real para campos específicos
+    if (name === 'numero_telefono') {
+      // Solo permitir números y máximo 7 caracteres
+      const soloNumeros = value.replace(/[^0-9]/g, '').slice(0, 7)
+      setFormData({
+        ...formData,
+        [name]: soloNumeros
+      })
+    } else if (name === 'nombre' || name === 'apellido') {
+      // Solo permitir letras, acentos, ñ y espacios, máximo 16 caracteres
+      const soloTexto = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]/g, '').slice(0, 16)
+      setFormData({
+        ...formData,
+        [name]: soloTexto
+      })
+    } else if (name === 'password' || name === 'confirmPassword') {
+      // Máximo 10 caracteres para contraseñas
+      const passwordLimitada = value.slice(0, 10)
+      setFormData({
+        ...formData,
+        [name]: passwordLimitada
+      })
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value
+      })
+    }
   }
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -34,21 +86,43 @@ function Register() {
     setError(null)
     setLoading(true)
 
-    // Validaciones
-    if (!formData.nombre || !formData.correo || !formData.password) {
+    // Validaciones de campos obligatorios
+    if (!formData.nombre || !formData.apellido || !formData.correo || !formData.password) {
       setError('Por favor completa todos los campos obligatorios')
+      setLoading(false)
+      return
+    }
+
+    // Validación de nombre
+    if (!validarNombre(formData.nombre)) {
+      setError('El nombre solo puede contener letras, acentos y ñ (2-16 caracteres)')
+      setLoading(false)
+      return
+    }
+
+    // Validación de apellido
+    if (!validarApellido(formData.apellido)) {
+      setError('El apellido solo puede contener letras, acentos y ñ (2-16 caracteres)')
+      setLoading(false)
+      return
+    }
+
+    // Validación de número telefónico
+    if (formData.numero_telefono && !validarNumeroTelefono(formData.numero_telefono)) {
+      setError('El número telefónico debe tener exactamente 7 dígitos')
+      setLoading(false)
+      return
+    }
+
+    // Validación de contraseña
+    if (!validarPassword(formData.password)) {
+      setError('La contraseña debe tener entre 4 y 10 caracteres')
       setLoading(false)
       return
     }
 
     if (formData.password !== formData.confirmPassword) {
       setError('Las contraseñas no coinciden')
-      setLoading(false)
-      return
-    }
-
-    if (formData.password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres')
       setLoading(false)
       return
     }
@@ -110,13 +184,17 @@ function Register() {
                       onChange={handleChange}
                       required
                       disabled={loading}
+                      minLength={2}
+                      maxLength={16}
+                      placeholder="Solo letras, acentos y ñ"
                     />
+                    <small className="text-muted">2-16 caracteres, solo letras</small>
                   </div>
 
                   {/* Apellido */}
                   <div className="col-md-6 mb-3">
                     <label htmlFor="apellido" className="form-label">
-                      Apellido
+                      Apellido <span className="text-danger">*</span>
                     </label>
                     <input
                       type="text"
@@ -125,8 +203,13 @@ function Register() {
                       name="apellido"
                       value={formData.apellido}
                       onChange={handleChange}
+                      required
                       disabled={loading}
+                      minLength={2}
+                      maxLength={16}
+                      placeholder="Solo letras, acentos y ñ"
                     />
+                    <small className="text-muted">2-16 caracteres, solo letras</small>
                   </div>
                 </div>
 
@@ -151,20 +234,42 @@ function Register() {
 
                 {/* Teléfono */}
                 <div className="mb-3">
-                  <label htmlFor="telefono" className="form-label">
+                  <label className="form-label">
                     <i className="fas fa-phone me-2"></i>
                     Teléfono
                   </label>
-                  <input
-                    type="tel"
-                    className="form-control"
-                    id="telefono"
-                    name="telefono"
-                    value={formData.telefono}
-                    onChange={handleChange}
-                    placeholder="+1 234 567 8900"
-                    disabled={loading}
-                  />
+                  <div className="row">
+                    <div className="col-md-4">
+                      <select
+                        className="form-select"
+                        name="codigo_area"
+                        value={formData.codigo_area}
+                        onChange={handleChange}
+                        disabled={loading}
+                      >
+                        {codigosArea.map((codigo) => (
+                          <option key={codigo} value={codigo}>
+                            {codigo}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="col-md-8">
+                      <input
+                        type="tel"
+                        className="form-control"
+                        id="numero_telefono"
+                        name="numero_telefono"
+                        value={formData.numero_telefono}
+                        onChange={handleChange}
+                        placeholder="1234567"
+                        disabled={loading}
+                        maxLength={7}
+                        pattern="[0-9]{7}"
+                      />
+                    </div>
+                  </div>
+                  <small className="text-muted">7 dígitos exactos</small>
                 </div>
 
                 <div className="row">
@@ -174,19 +279,31 @@ function Register() {
                       <i className="fas fa-lock me-2"></i>
                       Contraseña <span className="text-danger">*</span>
                     </label>
-                    <input
-                      type="password"
-                      className="form-control"
-                      id="password"
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      placeholder="••••••••"
-                      required
-                      disabled={loading}
-                      minLength={6}
-                    />
-                    <small className="text-muted">Mínimo 6 caracteres</small>
+                    <div className="input-group">
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        className="form-control"
+                        id="password"
+                        name="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        placeholder="••••••••"
+                        required
+                        disabled={loading}
+                        minLength={4}
+                        maxLength={10}
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary"
+                        onClick={() => setShowPassword(!showPassword)}
+                        disabled={loading}
+                        title={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                      >
+                        <i className={`fas fa-${showPassword ? 'eye-slash' : 'eye'}`}></i>
+                      </button>
+                    </div>
+                    <small className="text-muted">4-10 caracteres</small>
                   </div>
 
                   {/* Confirmar Password */}
@@ -195,17 +312,30 @@ function Register() {
                       <i className="fas fa-lock me-2"></i>
                       Confirmar Contraseña <span className="text-danger">*</span>
                     </label>
-                    <input
-                      type="password"
-                      className="form-control"
-                      id="confirmPassword"
-                      name="confirmPassword"
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                      placeholder="••••••••"
-                      required
-                      disabled={loading}
-                    />
+                    <div className="input-group">
+                      <input
+                        type={showConfirmPassword ? "text" : "password"}
+                        className="form-control"
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        value={formData.confirmPassword}
+                        onChange={handleChange}
+                        placeholder="••••••••"
+                        required
+                        disabled={loading}
+                        minLength={4}
+                        maxLength={10}
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        disabled={loading}
+                        title={showConfirmPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                      >
+                        <i className={`fas fa-${showConfirmPassword ? 'eye-slash' : 'eye'}`}></i>
+                      </button>
+                    </div>
                   </div>
                 </div>
 

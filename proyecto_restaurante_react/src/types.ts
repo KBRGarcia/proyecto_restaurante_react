@@ -9,10 +9,11 @@ export type EstadoUsuario = 'activo' | 'inactivo'
 export interface Usuario {
   id: number
   nombre: string
-  apellido?: string
+  apellido: string
   correo: string
   rol: RolUsuario
-  telefono?: string
+  codigo_area?: string
+  numero_telefono?: string
   direccion?: string
   foto_perfil?: string
   estado: EstadoUsuario
@@ -25,11 +26,36 @@ export interface LoginCredentials {
   password: string
 }
 
+// === TIPOS DE VALIDACIÓN ===
+export type CodigoArea = '0414' | '0424' | '0412' | '0416' | '0426'
+
+export interface ValidationRules {
+  nombre: {
+    minLength: number
+    maxLength: number
+    pattern: RegExp
+  }
+  apellido: {
+    minLength: number
+    maxLength: number
+    pattern: RegExp
+  }
+  password: {
+    minLength: number
+    maxLength: number
+  }
+  numero_telefono: {
+    length: number
+    pattern: RegExp
+  }
+}
+
 export interface RegisterData {
   nombre: string
-  apellido?: string
+  apellido: string
   correo: string
-  telefono?: string
+  codigo_area: string
+  numero_telefono: string
   password: string
 }
 

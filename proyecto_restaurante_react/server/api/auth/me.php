@@ -22,7 +22,7 @@ require_once '../../includes/db.php';
 // Función para verificar el token y obtener el usuario
 function verificarToken($conn, $token) {
     $stmt = $conn->prepare("
-        SELECT u.id, u.nombre, u.apellido, u.correo, u.rol, u.telefono, u.direccion, u.foto_perfil, u.estado, u.fecha_registro, u.password
+        SELECT u.id, u.nombre, u.apellido, u.correo, u.rol, u.codigo_area, u.numero_telefono, u.direccion, u.foto_perfil, u.estado, u.fecha_registro, u.password
         FROM sessions s
         JOIN usuarios u ON s.usuario_id = u.id
         WHERE s.token = ? AND s.expires_at > NOW()
@@ -96,16 +96,17 @@ try {
             // Sanitizar datos
             $nombre = trim($input['nombre']);
             $apellido = trim($input['apellido']);
-            $telefono = isset($input['telefono']) ? trim($input['telefono']) : null;
+            $codigo_area = isset($input['codigo_area']) ? trim($input['codigo_area']) : null;
+            $numero_telefono = isset($input['numero_telefono']) ? trim($input['numero_telefono']) : null;
             $direccion = isset($input['direccion']) ? trim($input['direccion']) : null;
             
             // Actualizar en base de datos
             $stmt = $conn->prepare("
                 UPDATE usuarios 
-                SET nombre = ?, apellido = ?, telefono = ?, direccion = ?
+                SET nombre = ?, apellido = ?, codigo_area = ?, numero_telefono = ?, direccion = ?
                 WHERE id = ?
             ");
-            $stmt->bind_param("ssssi", $nombre, $apellido, $telefono, $direccion, $usuario['id']);
+            $stmt->bind_param("sssssi", $nombre, $apellido, $codigo_area, $numero_telefono, $direccion, $usuario['id']);
             
             if (!$stmt->execute()) {
                 throw new Exception('Error al actualizar el perfil');
@@ -119,7 +120,8 @@ try {
                 'usuario' => [
                     'nombre' => $nombre,
                     'apellido' => $apellido,
-                    'telefono' => $telefono,
+                    'codigo_area' => $codigo_area,
+                    'numero_telefono' => $numero_telefono,
                     'direccion' => $direccion
                 ]
             ]);

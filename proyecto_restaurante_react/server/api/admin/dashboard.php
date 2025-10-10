@@ -177,7 +177,8 @@ function obtenerUsuarios($conn) {
                     u.nombre,
                     u.apellido,
                     u.correo,
-                    u.telefono,
+                    u.codigo_area,
+                    u.numero_telefono,
                     u.rol,
                     u.estado,
                     u.fecha_registro,
@@ -186,7 +187,7 @@ function obtenerUsuarios($conn) {
                 FROM usuarios u
                 LEFT JOIN ordenes o ON u.id = o.usuario_id AND o.estado = 'entregado'
                 WHERE u.rol = 'cliente'
-                GROUP BY u.id, u.nombre, u.apellido, u.correo, u.telefono, u.rol, u.estado, u.fecha_registro
+                GROUP BY u.id, u.nombre, u.apellido, u.correo, u.codigo_area, u.numero_telefono, u.rol, u.estado, u.fecha_registro
                 ORDER BY total_gastado DESC";
         
         $result = $conn->query($sql);
