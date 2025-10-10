@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCart } from '../contexts/CartContext.tsx'
 import { useAuth } from '../contexts/AuthContext.tsx'
+import { API_ENDPOINTS } from '../config'
 import PaymentMethodSelector from '../components/PaymentMethodSelector.tsx'
 import type { MetodoPago, DatosTarjeta, DatosPayPal, DatosZinli, DatosZelle, TipoServicio } from '../types.ts'
 
@@ -167,7 +168,7 @@ function CheckoutPage() {
   }
 
   /**
-   * Procesar pago (simulado)
+   * Procesar pago y crear orden
    */
   const procesarPago = async () => {
     if (!validarFormulario()) {
@@ -177,24 +178,74 @@ function CheckoutPage() {
     setProcesando(true)
 
     try {
-      // Simular procesamiento de pago
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      const token = localStorage.getItem('token')
+      
+      if (!token) {
+        alert('Sesión no válida. Por favor inicia sesión nuevamente.')
+        navigate('/login')
+        return
+      }
 
-      // TODO: Aquí iría la llamada real a la API de pago
-      // const response = await fetch('/api/pagos/procesar', { ... })
+      // Preparar datos de la orden
+      const ordenData = {
+        tipo_servicio: tipoServicio,
+        direccion_entrega: tipoServicio === 'domicilio' ? direccionEntrega : null,
+        telefono_contacto: telefonoContacto,
+        notas_especiales: notasEspeciales,
+        productos: items.map(item => ({
+          id: item.id,
+          cantidad: item.cantidad,
+          precio: item.precio,
+          notas: item.notas || null
+        }))
+      }
+
+      console.log('Creando orden con datos:', ordenData)
+
+      // Crear la orden en la base de datos
+      const response = await fetch(API_ENDPOINTS.crearOrden, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(ordenData)
+      })
+
+      console.log('Respuesta de la API:', response.status)
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('Error al crear orden:', errorText)
+        throw new Error(`Error ${response.status}: ${errorText}`)
+      }
+
+      const result = await response.json()
+      console.log('Resultado de crear orden:', result)
+
+      if (!result.success) {
+        throw new Error(result.message || 'Error al crear la orden')
+      }
+
+      // Simular procesamiento de pago (2 segundos)
+      await new Promise(resolve => setTimeout(resolve, 2000))
 
       // Limpiar carrito
       vaciarCarrito()
 
       // Mostrar notificación de éxito y redirigir
-      // Usamos localStorage para pasar el mensaje
       localStorage.setItem('paymentSuccess', 'true')
+      localStorage.setItem('ordenCreada', JSON.stringify({
+        ordenId: result.orden_id,
+        total: total,
+        fecha: new Date().toISOString()
+      }))
       
       // Redirigir a home
       navigate('/')
     } catch (error) {
       console.error('Error procesando pago:', error)
-      alert('Error al procesar el pago. Por favor intenta nuevamente.')
+      alert(`Error al procesar el pago: ${error instanceof Error ? error.message : 'Error desconocido'}\n\nPor favor intenta nuevamente.`)
     } finally {
       setProcesando(false)
     }

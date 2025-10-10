@@ -9,20 +9,34 @@ import { Link } from 'react-router-dom'
  */
 function HomePage() {
   const [mostrarNotificacion, setMostrarNotificacion] = useState(false)
+  const [ordenCreada, setOrdenCreada] = useState<any>(null)
 
   /**
    * Verificar si hay notificación de pago exitoso
    */
   useEffect(() => {
     const paymentSuccess = localStorage.getItem('paymentSuccess')
+    const ordenData = localStorage.getItem('ordenCreada')
+    
     if (paymentSuccess === 'true') {
       setMostrarNotificacion(true)
       localStorage.removeItem('paymentSuccess')
       
-      // Ocultar notificación después de 5 segundos
+      if (ordenData) {
+        try {
+          const orden = JSON.parse(ordenData)
+          setOrdenCreada(orden)
+          localStorage.removeItem('ordenCreada')
+        } catch (error) {
+          console.error('Error parsing orden data:', error)
+        }
+      }
+      
+      // Ocultar notificación después de 8 segundos
       setTimeout(() => {
         setMostrarNotificacion(false)
-      }, 5000)
+        setOrdenCreada(null)
+      }, 8000)
     }
   }, [])
 
@@ -168,9 +182,17 @@ function HomePage() {
                 <p className="mb-1">
                   <strong>El pago se procesó con éxito</strong>
                 </p>
+                {ordenCreada && (
+                  <div className="mb-2">
+                    <small className="text-dark">
+                      <i className="fas fa-receipt me-1"></i>
+                      <strong>Orden #{ordenCreada.ordenId}</strong> - ${ordenCreada.total.toFixed(2)}
+                    </small>
+                  </div>
+                )}
                 <small className="text-muted">
                   <i className="fas fa-info-circle me-1"></i>
-                  Tu pedido está siendo preparado. Recibirás una confirmación por correo.
+                  Tu pedido está siendo preparado. Puedes ver el estado en "Mis Órdenes".
                 </small>
               </div>
               <button 

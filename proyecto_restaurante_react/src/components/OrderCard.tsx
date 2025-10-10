@@ -37,6 +37,12 @@ function OrderCard({ orden, onVerDetalles }: OrderCardProps) {
         texto: 'Listo',
         descripcion: 'Tu pedido está listo'
       },
+      en_camino: { 
+        color: 'secondary', 
+        icon: 'motorcycle', 
+        texto: 'En Camino',
+        descripcion: 'Tu pedido está en camino'
+      },
       entregado: { 
         color: 'success', 
         icon: 'check-double', 

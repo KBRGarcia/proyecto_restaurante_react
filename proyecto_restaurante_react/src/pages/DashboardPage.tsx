@@ -30,6 +30,12 @@ function DashboardPage() {
   const [usuarioSeleccionado, setUsuarioSeleccionado] = useState<UsuarioAdmin | null>(null)
   const [mostrarModal, setMostrarModal] = useState(false)
   const [accionModal, setAccionModal] = useState<'banear' | 'eliminar' | null>(null)
+  
+  // Estados para gestión de órdenes
+  const [ordenSeleccionada, setOrdenSeleccionada] = useState<Orden | null>(null)
+  const [mostrarModalOrden, setMostrarModalOrden] = useState(false)
+  const [nuevoEstado, setNuevoEstado] = useState<string>('')
+  const [actualizandoOrden, setActualizandoOrden] = useState(false)
 
   /**
    * Cargar datos del dashboard
@@ -208,6 +214,100 @@ function DashboardPage() {
     setMostrarModal(false)
     setUsuarioSeleccionado(null)
     setAccionModal(null)
+  }
+
+  /**
+   * Abrir modal para cambiar estado de orden
+   */
+  const abrirModalOrden = (orden: Orden) => {
+    setOrdenSeleccionada(orden)
+    setNuevoEstado(orden.estado)
+    setMostrarModalOrden(true)
+  }
+
+  /**
+   * Cerrar modal de orden
+   */
+  const cerrarModalOrden = () => {
+    setMostrarModalOrden(false)
+    setOrdenSeleccionada(null)
+    setNuevoEstado('')
+  }
+
+  /**
+   * Actualizar estado de orden
+   */
+  const actualizarEstadoOrden = async () => {
+    if (!ordenSeleccionada || !nuevoEstado) return
+
+    setActualizandoOrden(true)
+
+    try {
+      const token = localStorage.getItem('token')
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+
+      const response = await fetch(`${API_ENDPOINTS.ordenes}?id=${ordenSeleccionada.id}`, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify({ estado: nuevoEstado })
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        // Actualizar la orden en el estado local
+        setOrdenesRecientes(prev => prev.map(orden =>
+          orden.id === ordenSeleccionada.id
+            ? { ...orden, estado: nuevoEstado as any }
+            : orden
+        ))
+        
+        alert(`Estado de la orden #${ordenSeleccionada.id} actualizado a "${nuevoEstado}"`)
+        cerrarModalOrden()
+      } else {
+        alert(data.message || 'Error al actualizar el estado de la orden')
+      }
+    } catch (error) {
+      console.error('Error al actualizar orden:', error)
+      alert('Error de conexión al actualizar la orden')
+    } finally {
+      setActualizandoOrden(false)
+    }
+  }
+
+  /**
+   * Obtener opciones de estado disponibles según el estado actual y tipo de servicio
+   */
+  const obtenerEstadosDisponibles = (estadoActual: string, tipoServicio: string) => {
+    // Flujo para PARA LLEVAR (recoger)
+    if (tipoServicio === 'recoger') {
+      const estados = {
+        'pendiente': ['preparando', 'cancelado'],
+        'preparando': ['listo', 'cancelado'],
+        'listo': ['entregado'],
+        'entregado': [], // No se puede cambiar
+        'cancelado': [] // No se puede cambiar
+      }
+      return estados[estadoActual as keyof typeof estados] || []
+    }
+    
+    // Flujo para A DOMICILIO (domicilio)
+    if (tipoServicio === 'domicilio') {
+      const estados = {
+        'pendiente': ['preparando', 'cancelado'],
+        'preparando': ['listo', 'cancelado'],
+        'listo': ['en_camino'],
+        'en_camino': ['entregado'],
+        'entregado': [], // No se puede cambiar
+        'cancelado': [] // No se puede cambiar
+      }
+      return estados[estadoActual as keyof typeof estados] || []
+    }
+    
+    return []
   }
 
   /**
@@ -408,16 +508,22 @@ function DashboardPage() {
                             orden.estado === 'pendiente' ? 'warning' :
                             orden.estado === 'preparando' ? 'info' :
                             orden.estado === 'listo' ? 'primary' :
+                            orden.estado === 'en_camino' ? 'secondary' :
                             orden.estado === 'entregado' ? 'success' : 'danger'
                           }`}>
-                            {orden.estado.charAt(0).toUpperCase() + orden.estado.slice(1)}
+                            {orden.estado === 'en_camino' ? 'En Camino' : 
+                             orden.estado.charAt(0).toUpperCase() + orden.estado.slice(1)}
                           </span>
                         </td>
                         <td><strong>${orden.total.toFixed(2)}</strong></td>
                         <td><small>{formatearFecha(orden.fecha_orden)}</small></td>
                         <td>
-                          <button className="btn btn-sm btn-outline-primary">
-                            <i className="fas fa-eye"></i>
+                          <button 
+                            className="btn btn-sm btn-outline-primary"
+                            onClick={() => abrirModalOrden(orden)}
+                            title="Cambiar estado de la orden"
+                          >
+                            <i className="fas fa-edit"></i>
                           </button>
                         </td>
                       </tr>
@@ -606,6 +712,141 @@ function DashboardPage() {
                   {accionModal === 'banear' 
                     ? (usuarioSeleccionado.estado === 'activo' ? 'Banear' : 'Desbanear')
                     : 'Eliminar'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal para cambiar estado de orden */}
+      {mostrarModalOrden && ordenSeleccionada && (
+        <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">
+                  <i className="fas fa-edit me-2 text-primary"></i>
+                  Cambiar Estado de Orden
+                </h5>
+                <button type="button" className="btn-close" onClick={cerrarModalOrden}></button>
+              </div>
+              <div className="modal-body">
+                <div className="mb-3">
+                  <h6>Información de la Orden</h6>
+                  <div className="card bg-light">
+                    <div className="card-body">
+                      <p className="mb-1"><strong>Orden #:</strong> {ordenSeleccionada.id}</p>
+                      <p className="mb-1"><strong>Cliente:</strong> {ordenSeleccionada.usuario_nombre} {ordenSeleccionada.usuario_apellido}</p>
+                      <p className="mb-1"><strong>Tipo:</strong> {ordenSeleccionada.tipo_servicio === 'domicilio' ? 'A Domicilio' : 'Para Llevar'}</p>
+                      <p className="mb-1"><strong>Total:</strong> ${ordenSeleccionada.total.toFixed(2)}</p>
+                      <p className="mb-0"><strong>Estado Actual:</strong> 
+                        <span className={`badge bg-${
+                          ordenSeleccionada.estado === 'pendiente' ? 'warning' :
+                          ordenSeleccionada.estado === 'preparando' ? 'info' :
+                          ordenSeleccionada.estado === 'listo' ? 'primary' :
+                          ordenSeleccionada.estado === 'en_camino' ? 'secondary' :
+                          ordenSeleccionada.estado === 'entregado' ? 'success' : 'danger'
+                        } ms-2`}>
+                          {ordenSeleccionada.estado === 'en_camino' ? 'En Camino' : 
+                           ordenSeleccionada.estado.charAt(0).toUpperCase() + ordenSeleccionada.estado.slice(1)}
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mb-3">
+                  <label className="form-label">
+                    <i className="fas fa-arrow-right me-1"></i>
+                    Nuevo Estado
+                  </label>
+                  <select
+                    className="form-select"
+                    value={nuevoEstado}
+                    onChange={(e) => setNuevoEstado(e.target.value)}
+                  >
+                    <option value={ordenSeleccionada.estado}>
+                      Mantener: {ordenSeleccionada.estado === 'en_camino' ? 'En Camino' : 
+                                ordenSeleccionada.estado.charAt(0).toUpperCase() + ordenSeleccionada.estado.slice(1)}
+                    </option>
+                    {obtenerEstadosDisponibles(ordenSeleccionada.estado, ordenSeleccionada.tipo_servicio).map(estado => (
+                      <option key={estado} value={estado}>
+                        {estado === 'en_camino' ? 'En Camino' : 
+                         estado.charAt(0).toUpperCase() + estado.slice(1)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {obtenerEstadosDisponibles(ordenSeleccionada.estado, ordenSeleccionada.tipo_servicio).length === 0 && (
+                  <div className="alert alert-info">
+                    <i className="fas fa-info-circle me-2"></i>
+                    Esta orden no puede cambiar de estado. Las órdenes entregadas o canceladas son finales.
+                  </div>
+                )}
+
+                {nuevoEstado !== ordenSeleccionada.estado && (
+                  <div className="alert alert-warning">
+                    <i className="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Confirmar cambio:</strong> La orden pasará de "{ordenSeleccionada.estado === 'en_camino' ? 'En Camino' : ordenSeleccionada.estado}" a "{nuevoEstado === 'en_camino' ? 'En Camino' : nuevoEstado}".
+                  </div>
+                )}
+
+                {/* Mostrar flujo de estados según el tipo de servicio */}
+                <div className="alert alert-light">
+                  <h6 className="mb-2">
+                    <i className="fas fa-route me-2"></i>
+                    Flujo de Estados - {ordenSeleccionada.tipo_servicio === 'domicilio' ? 'A Domicilio' : 'Para Llevar'}
+                  </h6>
+                  <div className="d-flex align-items-center">
+                    {ordenSeleccionada.tipo_servicio === 'domicilio' ? (
+                      <>
+                        <span className="badge bg-warning me-1">Pendiente</span>
+                        <i className="fas fa-arrow-right mx-2 text-muted"></i>
+                        <span className="badge bg-info me-1">Preparando</span>
+                        <i className="fas fa-arrow-right mx-2 text-muted"></i>
+                        <span className="badge bg-primary me-1">Listo</span>
+                        <i className="fas fa-arrow-right mx-2 text-muted"></i>
+                        <span className="badge bg-secondary me-1">En Camino</span>
+                        <i className="fas fa-arrow-right mx-2 text-muted"></i>
+                        <span className="badge bg-success">Entregado</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="badge bg-warning me-1">Pendiente</span>
+                        <i className="fas fa-arrow-right mx-2 text-muted"></i>
+                        <span className="badge bg-info me-1">Preparando</span>
+                        <i className="fas fa-arrow-right mx-2 text-muted"></i>
+                        <span className="badge bg-primary me-1">Listo</span>
+                        <i className="fas fa-arrow-right mx-2 text-muted"></i>
+                        <span className="badge bg-success">Entregado</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={cerrarModalOrden}>
+                  Cancelar
+                </button>
+                <button 
+                  type="button" 
+                  className="btn btn-primary"
+                  onClick={actualizarEstadoOrden}
+                  disabled={actualizandoOrden || nuevoEstado === ordenSeleccionada.estado || obtenerEstadosDisponibles(ordenSeleccionada.estado, ordenSeleccionada.tipo_servicio).length === 0}
+                >
+                  {actualizandoOrden ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm me-2"></span>
+                      Actualizando...
+                    </>
+                  ) : (
+                    <>
+                      <i className="fas fa-save me-2"></i>
+                      Actualizar Estado
+                    </>
+                  )}
                 </button>
               </div>
             </div>

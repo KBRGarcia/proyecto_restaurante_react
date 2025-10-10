@@ -113,7 +113,13 @@ function obtenerOrdenesUsuario($conn, $usuario) {
                     notas_especiales,
                     fecha_orden,
                     fecha_entrega_estimada,
-                    empleado_asignado_id
+                    empleado_asignado_id,
+                    fecha_pendiente,
+                    fecha_preparando,
+                    fecha_listo,
+                    fecha_en_camino,
+                    fecha_entregado,
+                    fecha_cancelado
                 FROM ordenes
                 WHERE usuario_id = ?
                 ORDER BY fecha_orden DESC";
@@ -185,7 +191,13 @@ function obtenerOrdenDetalle($conn, $usuario, $orden_id) {
                     o.notas_especiales,
                     o.fecha_orden,
                     o.fecha_entrega_estimada,
-                    o.empleado_asignado_id
+                    o.empleado_asignado_id,
+                    o.fecha_pendiente,
+                    o.fecha_preparando,
+                    o.fecha_listo,
+                    o.fecha_en_camino,
+                    o.fecha_entregado,
+                    o.fecha_cancelado
                 FROM ordenes o
                 WHERE o.id = ? AND o.usuario_id = ?";
         
@@ -410,9 +422,38 @@ function actualizarOrden($conn, $usuario, $orden_id) {
             throw new Exception('Estado requerido');
         }
         
-        $sql = "UPDATE ordenes SET estado = ? WHERE id = ?";
+        // Actualizar estado y timestamp correspondiente
+        $campo_timestamp = '';
+        switch ($nuevo_estado) {
+            case 'preparando':
+                $campo_timestamp = 'fecha_preparando';
+                break;
+            case 'listo':
+                $campo_timestamp = 'fecha_listo';
+                break;
+            case 'en_camino':
+                $campo_timestamp = 'fecha_en_camino';
+                break;
+            case 'entregado':
+                $campo_timestamp = 'fecha_entregado';
+                break;
+            case 'cancelado':
+                $campo_timestamp = 'fecha_cancelado';
+                break;
+        }
+        
+        if ($campo_timestamp) {
+            $sql = "UPDATE ordenes SET estado = ?, $campo_timestamp = NOW() WHERE id = ?";
+        } else {
+            $sql = "UPDATE ordenes SET estado = ? WHERE id = ?";
+        }
+        
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("si", $nuevo_estado, $orden_id);
+        if ($campo_timestamp) {
+            $stmt->bind_param("si", $nuevo_estado, $orden_id);
+        } else {
+            $stmt->bind_param("si", $nuevo_estado, $orden_id);
+        }
         
         if ($stmt->execute()) {
             ob_clean();

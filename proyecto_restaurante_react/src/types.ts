@@ -143,7 +143,7 @@ export interface CartContextType {
 }
 
 // === TIPOS DE ÓRDENES ===
-export type EstadoOrden = 'pendiente' | 'preparando' | 'listo' | 'entregado' | 'cancelado'
+export type EstadoOrden = 'pendiente' | 'preparando' | 'listo' | 'en_camino' | 'entregado' | 'cancelado'
 export type TipoServicio = 'domicilio' | 'recoger'
 
 export interface Orden {
@@ -160,6 +160,16 @@ export interface Orden {
   fecha_orden: string
   fecha_entrega_estimada?: string
   empleado_asignado_id?: number
+  // Campos de timestamps para seguimiento
+  fecha_pendiente?: string
+  fecha_preparando?: string
+  fecha_listo?: string
+  fecha_en_camino?: string
+  fecha_entregado?: string
+  fecha_cancelado?: string
+  // Campos adicionales para el dashboard
+  usuario_nombre?: string
+  usuario_apellido?: string
 }
 
 // === TIPOS DE PERFIL ===

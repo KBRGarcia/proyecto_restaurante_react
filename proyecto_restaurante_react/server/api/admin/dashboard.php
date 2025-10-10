@@ -285,6 +285,12 @@ function obtenerOrdenesRecientes($conn) {
                     o.notas_especiales,
                     o.fecha_orden,
                     o.fecha_entrega_estimada,
+                    o.fecha_pendiente,
+                    o.fecha_preparando,
+                    o.fecha_listo,
+                    o.fecha_en_camino,
+                    o.fecha_entregado,
+                    o.fecha_cancelado,
                     u.nombre as usuario_nombre,
                     u.apellido as usuario_apellido
                 FROM ordenes o

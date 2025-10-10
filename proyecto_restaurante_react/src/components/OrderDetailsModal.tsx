@@ -48,10 +48,26 @@ function OrderDetailsModal({ orden, onClose }: OrderDetailsModalProps) {
       pendiente: 'warning',
       preparando: 'info',
       listo: 'primary',
+      en_camino: 'secondary',
       entregado: 'success',
       cancelado: 'danger',
     }
     return colores[estado] || 'secondary'
+  }
+
+  /**
+   * Obtener texto del estado
+   */
+  const getEstadoTexto = (estado: string): string => {
+    const textos: Record<string, string> = {
+      pendiente: 'Pendiente',
+      preparando: 'Preparando',
+      listo: 'Listo',
+      en_camino: 'En Camino',
+      entregado: 'Entregado',
+      cancelado: 'Cancelado'
+    }
+    return textos[estado] || estado
   }
 
   // Mock de productos (en producción vendría del backend)
@@ -97,7 +113,7 @@ function OrderDetailsModal({ orden, onClose }: OrderDetailsModalProps) {
                     <h6 className="card-subtitle mb-2 text-muted">Estado Actual</h6>
                     <h4 className="mb-0">
                       <span className={`badge bg-${getEstadoColor(orden.estado)} fs-6`}>
-                        {orden.estado.toUpperCase()}
+                        {getEstadoTexto(orden.estado)}
                       </span>
                     </h4>
                   </div>
@@ -136,22 +152,40 @@ function OrderDetailsModal({ orden, onClose }: OrderDetailsModalProps) {
                 
                 {orden.estado !== 'cancelado' && orden.estado !== 'pendiente' && (
                   <div className="timeline-item">
-                    <i className={`fas fa-utensils ${orden.estado === 'preparando' || orden.estado === 'listo' || orden.estado === 'entregado' ? 'text-info' : 'text-muted'}`}></i>
+                    <i className={`fas fa-utensils ${['preparando', 'listo', 'en_camino', 'entregado'].includes(orden.estado) ? 'text-info' : 'text-muted'}`}></i>
                     <div className="timeline-content">
                       <strong>En Preparación</strong>
                       <br />
-                      <small className="text-muted">Cocinando tus platillos</small>
+                      <small className="text-muted">
+                        {orden.fecha_preparando ? formatearFecha(orden.fecha_preparando) : 'Cocinando tus platillos'}
+                      </small>
                     </div>
                   </div>
                 )}
 
-                {(orden.estado === 'listo' || orden.estado === 'entregado') && (
+                {(orden.estado === 'listo' || orden.estado === 'en_camino' || orden.estado === 'entregado') && (
                   <div className="timeline-item">
                     <i className="fas fa-check text-primary"></i>
                     <div className="timeline-content">
                       <strong>Pedido Listo</strong>
                       <br />
-                      <small className="text-muted">Tu orden está lista</small>
+                      <small className="text-muted">
+                        {orden.fecha_listo ? formatearFecha(orden.fecha_listo) : 'Tu orden está lista'}
+                      </small>
+                    </div>
+                  </div>
+                )}
+
+                {/* En Camino - Solo para domicilio */}
+                {orden.tipo_servicio === 'domicilio' && (orden.estado === 'en_camino' || orden.estado === 'entregado') && (
+                  <div className="timeline-item">
+                    <i className="fas fa-motorcycle text-secondary"></i>
+                    <div className="timeline-content">
+                      <strong>En Camino</strong>
+                      <br />
+                      <small className="text-muted">
+                        {orden.fecha_en_camino ? formatearFecha(orden.fecha_en_camino) : 'Tu pedido está en camino'}
+                      </small>
                     </div>
                   </div>
                 )}
@@ -163,7 +197,7 @@ function OrderDetailsModal({ orden, onClose }: OrderDetailsModalProps) {
                       <strong>Entregado</strong>
                       <br />
                       <small className="text-muted">
-                        {orden.fecha_entrega_estimada && formatearFecha(orden.fecha_entrega_estimada)}
+                        {orden.fecha_entregado ? formatearFecha(orden.fecha_entregado) : '¡Disfruta tu comida!'}
                       </small>
                     </div>
                   </div>
@@ -175,7 +209,9 @@ function OrderDetailsModal({ orden, onClose }: OrderDetailsModalProps) {
                     <div className="timeline-content">
                       <strong>Orden Cancelada</strong>
                       <br />
-                      <small className="text-muted">Este pedido fue cancelado</small>
+                      <small className="text-muted">
+                        {orden.fecha_cancelado ? formatearFecha(orden.fecha_cancelado) : 'Este pedido fue cancelado'}
+                      </small>
                     </div>
                   </div>
                 )}
