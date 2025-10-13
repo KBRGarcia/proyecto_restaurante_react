@@ -153,6 +153,7 @@ function Login() {
               {/* Enlaces adicionales */}
               <div className="text-center">
                 <Link to="/recuperar-password" className="text-decoration-none small">
+                  <i className="fas fa-question-circle me-1"></i>
                   ¿Olvidaste tu contraseña?
                 </Link>
               </div>

@@ -6,6 +6,7 @@ import HomePage from '../pages/HomePage.tsx'
 import MenuPage from '../pages/MenuPage.tsx'
 import Login from '../components/Login.tsx'
 import Register from '../components/Register.tsx'
+import RecuperarPasswordPage from '../pages/RecuperarPasswordPage.tsx'
 import PerfilPage from '../pages/PerfilPage.tsx'
 import ConfiguracionPage from '../pages/ConfiguracionPage.tsx'
 import CartPage from '../pages/CartPage.tsx'
@@ -36,6 +37,7 @@ export const publicRoutes = (
     <Route path="/menu" element={<MenuPage />} />
     <Route path="/login" element={<Login />} />
     <Route path="/register" element={<Register />} />
+    <Route path="/recuperar-password" element={<RecuperarPasswordPage />} />
     <Route path="/terminos" element={<TerminosPage />} />
   </>
 )
