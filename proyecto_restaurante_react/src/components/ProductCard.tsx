@@ -78,7 +78,7 @@ function ProductCard({
                 title="Editar producto"
                 disabled={isDeleting}
               >
-                <i className="fas fa-edit text-primary"></i>
+                <i className="fas fa-edit" style={{ color: 'var(--theme-accent-color)' }}></i>
               </button>
               <button
                 className="btn btn-sm btn-light"
@@ -87,9 +87,9 @@ function ProductCard({
                 disabled={isDeleting}
               >
                 {isDeleting ? (
-                  <span className="spinner-border spinner-border-sm text-danger"></span>
+                  <span className="spinner-border spinner-border-sm" style={{ color: 'var(--theme-accent-color)' }}></span>
                 ) : (
-                  <i className="fas fa-trash text-danger"></i>
+                  <i className="fas fa-trash" style={{ color: 'var(--theme-accent-color)' }}></i>
                 )}
               </button>
             </div>

@@ -50,8 +50,8 @@ function NationalPaymentDataModal({
   const [datosPagoFisico] = useState<DatosPagoFisico>(
     datosExistentes as DatosPagoFisico || {
       metodo: 'efectivo',
-      horarioAtencion: 'Lunes a Domingo: 7:00 AM - 10:00 PM',
-      direccionRestaurante: 'Av. Principal #123, Centro, Caracas',
+      horarioAtencion: 'Lunes a Viernes: 11:00 AM - 10:00 PM\nSábado y Domingo: 10:00 AM - 11:00 PM',
+      direccionRestaurante: 'Calle Principal #123, Ciudad',
       limiteTiempo: 3
     }
   )
@@ -482,8 +482,8 @@ function NationalPaymentDataModal({
                 {/* Información para Pago Físico */}
                 {metodoPago === 'fisico' && (
                   <div className="text-center">
-                    <div className="alert alert-warning mb-4">
-                      <h5><i className="fas fa-exclamation-triangle me-2"></i>Pago Físico en el Local</h5>
+                    <div className="alert alert-info mb-4">
+                      <h5><i className="fas fa-money-bill-wave me-2"></i>Pago Físico en el Local</h5>
                       <p className="mb-0">Debes dirigirte al restaurante para realizar el pago en efectivo o con tarjeta.</p>
                     </div>
 
@@ -493,7 +493,7 @@ function NationalPaymentDataModal({
                           <div className="card-body text-center">
                             <i className="fas fa-clock fa-3x text-primary mb-3"></i>
                             <h6>Horario de Atención</h6>
-                            <p className="text-muted">{datosPagoFisico.horarioAtencion}</p>
+                            <p className="text-muted" style={{ whiteSpace: 'pre-line' }}>{datosPagoFisico.horarioAtencion}</p>
                           </div>
                         </div>
                       </div>
@@ -508,11 +508,10 @@ function NationalPaymentDataModal({
                       </div>
                     </div>
 
-                    <div className="alert alert-danger mt-4">
-                      <h6><i className="fas fa-hourglass-half me-2"></i>Límite de Tiempo</h6>
+                    <div className="alert alert-info mt-4">
+                      <h6><i className="fas fa-clock me-2"></i>Tiempo de la Orden</h6>
                       <p className="mb-0">
-                        <strong>Tienes {datosPagoFisico.limiteTiempo} horas</strong> para dirigirte al local y pagar. 
-                        Si transcurre este tiempo sin confirmar el pago, la orden se cancelará automáticamente.
+                        Su orden estará lista para ser recogida en un plazo menor a {datosPagoFisico.limiteTiempo} horas
                       </p>
                     </div>
                   </div>
