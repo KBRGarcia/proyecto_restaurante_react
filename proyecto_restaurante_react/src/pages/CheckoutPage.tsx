@@ -3,10 +3,26 @@ import { useNavigate } from 'react-router-dom'
 import { useCart } from '../contexts/CartContext.tsx'
 import { useAuth } from '../contexts/AuthContext.tsx'
 import { API_ENDPOINTS } from '../config'
+import CurrencySelector from '../components/CurrencySelector.tsx'
 import PaymentMethodSelector from '../components/PaymentMethodSelector.tsx'
+import NationalPaymentSelector from '../components/NationalPaymentSelector.tsx'
 import PaymentDataModal from '../components/PaymentDataModal.tsx'
+import NationalPaymentDataModal from '../components/NationalPaymentDataModal.tsx'
 import '../components/PaymentComponents.css'
-import type { MetodoPago, DatosTarjeta, DatosPayPal, DatosZinli, DatosZelle, TipoServicio } from '../types.ts'
+import type { 
+  TipoMoneda, 
+  MetodoPagoInternacional, 
+  MetodoPagoNacional, 
+  MetodoPago,
+  DatosTarjeta, 
+  DatosPayPal, 
+  DatosZinli, 
+  DatosZelle,
+  DatosPagoMovil,
+  DatosTransferencia,
+  DatosPagoFisico,
+  TipoServicio 
+} from '../types.ts'
 
 /**
  * Página de Checkout y Procesamiento de Pago
@@ -28,11 +44,16 @@ function CheckoutPage() {
   const [direccionEntrega, setDireccionEntrega] = useState('')
   const [telefonoContacto, setTelefonoContacto] = useState(usuario?.telefono || '')
   const [notasEspeciales, setNotasEspeciales] = useState('')
-  const [metodoPago, setMetodoPago] = useState<MetodoPago>('tarjeta')
   const [procesando, setProcesando] = useState(false)
   
-  // Estados para el modal de datos de pago
-  const [mostrarModalPago, setMostrarModalPago] = useState(false)
+  // Estados para selección de moneda y métodos de pago
+  const [tipoMoneda, setTipoMoneda] = useState<TipoMoneda>('internacional')
+  const [metodoPagoInternacional, setMetodoPagoInternacional] = useState<MetodoPagoInternacional>('tarjeta')
+  const [metodoPagoNacional, setMetodoPagoNacional] = useState<MetodoPagoNacional>('pago_movil')
+  
+  // Estados para los modales de datos de pago
+  const [mostrarModalPagoInternacional, setMostrarModalPagoInternacional] = useState(false)
+  const [mostrarModalPagoNacional, setMostrarModalPagoNacional] = useState(false)
   const [datosPagoCompletos, setDatosPagoCompletos] = useState(false)
   
   // Datos de tarjeta
@@ -61,22 +82,54 @@ function CheckoutPage() {
     nombreCompleto: ''
   })
 
+  // Datos para métodos de pago nacionales
+  const [datosPagoMovil, setDatosPagoMovil] = useState<DatosPagoMovil>({
+    cedula: '',
+    telefono: '',
+    banco: 'provincial',
+    numeroReferencia: '',
+    fechaPago: ''
+  })
+
+  const [datosTransferencia, setDatosTransferencia] = useState<DatosTransferencia>({
+    cedula: '',
+    telefono: '',
+    banco: 'provincial',
+    numeroReferencia: '',
+    fechaPago: ''
+  })
+
+  const [datosPagoFisico, setDatosPagoFisico] = useState<DatosPagoFisico>({
+    horarioAtencion: 'Lunes a Domingo: 7:00 AM - 10:00 PM',
+    direccionRestaurante: 'Av. Principal #123, Centro, Caracas',
+    limiteTiempo: 3
+  })
+
   // Validaciones
   const [errores, setErrores] = useState<Record<string, string>>({})
 
-  // Funciones para manejar el modal de datos de pago
-  const abrirModalPago = (metodo: MetodoPago) => {
-    setMetodoPago(metodo)
-    setMostrarModalPago(true)
+  // Funciones para manejar los modales de datos de pago
+  const abrirModalPagoInternacional = (metodo: MetodoPagoInternacional) => {
+    setMetodoPagoInternacional(metodo)
+    setMostrarModalPagoInternacional(true)
   }
 
-  const cerrarModalPago = () => {
-    setMostrarModalPago(false)
+  const cerrarModalPagoInternacional = () => {
+    setMostrarModalPagoInternacional(false)
   }
 
-  const guardarDatosPago = (datos: DatosTarjeta | DatosPayPal | DatosZinli | DatosZelle) => {
-    // Guardar los datos según el método de pago
-    switch (metodoPago) {
+  const abrirModalPagoNacional = (metodo: MetodoPagoNacional) => {
+    setMetodoPagoNacional(metodo)
+    setMostrarModalPagoNacional(true)
+  }
+
+  const cerrarModalPagoNacional = () => {
+    setMostrarModalPagoNacional(false)
+  }
+
+  const guardarDatosPagoInternacional = (datos: DatosTarjeta | DatosPayPal | DatosZinli | DatosZelle) => {
+    // Guardar los datos según el método de pago internacional
+    switch (metodoPagoInternacional) {
       case 'tarjeta':
         setDatosTarjeta(datos as DatosTarjeta)
         break
@@ -88,6 +141,22 @@ function CheckoutPage() {
         break
       case 'zelle':
         setDatosZelle(datos as DatosZelle)
+        break
+    }
+    setDatosPagoCompletos(true)
+  }
+
+  const guardarDatosPagoNacional = (datos: DatosPagoMovil | DatosTransferencia | DatosPagoFisico) => {
+    // Guardar los datos según el método de pago nacional
+    switch (metodoPagoNacional) {
+      case 'pago_movil':
+        setDatosPagoMovil(datos as DatosPagoMovil)
+        break
+      case 'transferencia':
+        setDatosTransferencia(datos as DatosTransferencia)
+        break
+      case 'fisico':
+        setDatosPagoFisico(datos as DatosPagoFisico)
         break
     }
     setDatosPagoCompletos(true)
@@ -159,10 +228,18 @@ function CheckoutPage() {
       console.log('❌ Error: Teléfono de contacto requerido')
     }
 
-    // Validar que los datos de pago estén completos
+    // Validar que los datos de pago estén completos según el tipo de moneda
     if (!datosPagoCompletos) {
       nuevosErrores.datosPago = 'Debes completar los datos de pago antes de proceder'
       console.log('❌ Error: Datos de pago incompletos')
+    }
+
+    // Validaciones específicas para métodos nacionales
+    if (tipoMoneda === 'nacional') {
+      if (metodoPagoNacional === 'fisico' && tipoServicio !== 'recoger') {
+        nuevosErrores.pagoFisico = 'El pago físico solo está disponible para servicio "Para Llevar"'
+        console.log('❌ Error: Pago físico no disponible para domicilio')
+      }
     }
 
 
@@ -183,11 +260,16 @@ function CheckoutPage() {
       direccionEntrega,
       telefonoContacto,
       notasEspeciales,
-      metodoPago,
+      tipoMoneda,
+      metodoPagoInternacional,
+      metodoPagoNacional,
       datosTarjeta,
       datosPayPal,
       datosZinli,
-      datosZelle
+      datosZelle,
+      datosPagoMovil,
+      datosTransferencia,
+      datosPagoFisico
     })
     
     console.log('Items en el carrito:', items)
@@ -487,7 +569,23 @@ function CheckoutPage() {
             </div>
           </div>
 
-          {/* Selector de método de pago */}
+          {/* Selector de Moneda */}
+          <div className="card shadow-sm mb-4">
+            <div className="card-header bg-primary text-white">
+              <h5 className="mb-0">
+                <i className="fas fa-coins me-2"></i>
+                Tipo de Moneda
+              </h5>
+            </div>
+            <div className="card-body">
+              <CurrencySelector
+                tipoMonedaSeleccionado={tipoMoneda}
+                onSeleccionar={setTipoMoneda}
+              />
+            </div>
+          </div>
+
+          {/* Métodos de Pago */}
           <div className="card shadow-sm mb-4">
             <div className="card-header bg-success text-white">
               <h5 className="mb-0">
@@ -496,11 +594,20 @@ function CheckoutPage() {
               </h5>
             </div>
             <div className="card-body">
+              {tipoMoneda === 'internacional' ? (
               <PaymentMethodSelector
-                metodoSeleccionado={metodoPago}
-                onSeleccionar={setMetodoPago}
-                onAbrirModal={abrirModalPago}
-              />
+                  metodoSeleccionado={metodoPagoInternacional}
+                  onSeleccionar={setMetodoPagoInternacional}
+                  onAbrirModal={abrirModalPagoInternacional}
+                />
+              ) : (
+                <NationalPaymentSelector
+                  metodoSeleccionado={metodoPagoNacional}
+                  onSeleccionar={setMetodoPagoNacional}
+                  onAbrirModal={abrirModalPagoNacional}
+                  tipoServicio={tipoServicio}
+                />
+              )}
             </div>
           </div>
 
@@ -518,18 +625,25 @@ function CheckoutPage() {
                   <i className="fas fa-check-circle me-2"></i>
                   <strong>Datos de pago completados</strong>
                   <p className="mb-0 mt-2">
-                    Los datos para {metodoPago === 'tarjeta' ? 'tarjeta de crédito/débito' : 
-                                   metodoPago === 'paypal' ? 'PayPal' :
-                                   metodoPago === 'zinli' ? 'Zinli' : 'Zelle'} han sido guardados correctamente.
+                    Los datos para {tipoMoneda === 'internacional' ? 
+                      (metodoPagoInternacional === 'tarjeta' ? 'tarjeta de crédito/débito' : 
+                       metodoPagoInternacional === 'paypal' ? 'PayPal' :
+                       metodoPagoInternacional === 'zinli' ? 'Zinli' : 'Zelle') :
+                      (metodoPagoNacional === 'pago_movil' ? 'Pago Móvil' :
+                       metodoPagoNacional === 'transferencia' ? 'Transferencia Bancaria' : 'Pago Físico')
+                    } han sido guardados correctamente.
                   </p>
                   <button 
                     className="btn btn-outline-primary btn-sm mt-2"
-                    onClick={() => abrirModalPago(metodoPago)}
+                    onClick={() => tipoMoneda === 'internacional' ? 
+                      abrirModalPagoInternacional(metodoPagoInternacional) : 
+                      abrirModalPagoNacional(metodoPagoNacional)
+                    }
                   >
                     <i className="fas fa-edit me-1"></i>
                     Modificar datos
                   </button>
-                </div>
+                    </div>
               ) : (
                 <div className="alert alert-warning">
                   <i className="fas fa-exclamation-triangle me-2"></i>
@@ -541,8 +655,8 @@ function CheckoutPage() {
                     <div className="text-danger mt-2">
                       <i className="fas fa-times-circle me-1"></i>
                       {errores.datosPago}
-                    </div>
-                  )}
+                </div>
+              )}
                 </div>
               )}
             </div>
@@ -637,17 +751,29 @@ function CheckoutPage() {
         </div>
       </div>
 
-      {/* Modal de datos de pago */}
+      {/* Modales de datos de pago */}
       <PaymentDataModal
-        show={mostrarModalPago}
-        onClose={cerrarModalPago}
-        metodoPago={metodoPago}
-        onSave={guardarDatosPago}
+        show={mostrarModalPagoInternacional}
+        onClose={cerrarModalPagoInternacional}
+        metodoPago={metodoPagoInternacional}
+        onSave={guardarDatosPagoInternacional}
         datosExistentes={
-          metodoPago === 'tarjeta' ? datosTarjeta :
-          metodoPago === 'paypal' ? datosPayPal :
-          metodoPago === 'zinli' ? datosZinli :
+          metodoPagoInternacional === 'tarjeta' ? datosTarjeta :
+          metodoPagoInternacional === 'paypal' ? datosPayPal :
+          metodoPagoInternacional === 'zinli' ? datosZinli :
           datosZelle
+        }
+      />
+
+      <NationalPaymentDataModal
+        show={mostrarModalPagoNacional}
+        onClose={cerrarModalPagoNacional}
+        metodoPago={metodoPagoNacional}
+        onSave={guardarDatosPagoNacional}
+        datosExistentes={
+          metodoPagoNacional === 'pago_movil' ? datosPagoMovil :
+          metodoPagoNacional === 'transferencia' ? datosTransferencia :
+          datosPagoFisico
         }
       />
     </div>

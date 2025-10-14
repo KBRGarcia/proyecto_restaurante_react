@@ -231,8 +231,12 @@ export interface ShowPasswordState {
 }
 
 // === TIPOS DE PAGO ===
-export type MetodoPago = 'tarjeta' | 'paypal' | 'zinli' | 'zelle'
+export type TipoMoneda = 'nacional' | 'internacional'
+export type MetodoPagoInternacional = 'tarjeta' | 'paypal' | 'zinli' | 'zelle'
+export type MetodoPagoNacional = 'pago_movil' | 'transferencia' | 'fisico'
+export type MetodoPago = MetodoPagoInternacional | MetodoPagoNacional
 export type TipoTarjeta = 'visa' | 'mastercard'
+export type BancoVenezuela = 'provincial' | 'mercantil' | 'banesco' | 'bnc' | 'bdv' | 'venezolano'
 
 export interface DatosTarjeta {
   numeroTarjeta: string
@@ -257,12 +261,40 @@ export interface DatosZelle {
   nombreCompleto: string
 }
 
+// Datos para métodos de pago nacionales
+export interface DatosPagoMovil {
+  cedula: string
+  telefono: string
+  banco: BancoVenezuela
+  numeroReferencia: string
+  fechaPago: string
+}
+
+export interface DatosTransferencia {
+  cedula: string
+  telefono: string
+  banco: BancoVenezuela
+  numeroReferencia: string
+  fechaPago: string
+}
+
+export interface DatosPagoFisico {
+  // No requiere datos adicionales, solo información del restaurante
+  horarioAtencion: string
+  direccionRestaurante: string
+  limiteTiempo: number // en horas
+}
+
 export interface DatosPago {
   metodoPago: MetodoPago
+  tipoMoneda?: TipoMoneda
   tarjeta?: DatosTarjeta
   paypal?: DatosPayPal
   zinli?: DatosZinli
   zelle?: DatosZelle
+  pagoMovil?: DatosPagoMovil
+  transferencia?: DatosTransferencia
+  pagoFisico?: DatosPagoFisico
 }
 
 export interface ResultadoPago {

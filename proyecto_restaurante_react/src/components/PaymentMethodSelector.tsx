@@ -1,20 +1,20 @@
-import type { MetodoPago } from '../types.ts'
+import type { MetodoPagoInternacional } from '../types.ts'
 
 /**
- * Selector de Método de Pago
- * Permite al usuario elegir entre diferentes métodos de pago
+ * Selector de Métodos de Pago Internacionales
+ * Permite al usuario elegir entre diferentes métodos de pago internacionales
  * 
  * Fuente: https://react.dev/learn/conditional-rendering
  */
 
 interface PaymentMethodSelectorProps {
-  metodoSeleccionado: MetodoPago
-  onSeleccionar: (metodo: MetodoPago) => void
-  onAbrirModal: (metodo: MetodoPago) => void
+  metodoSeleccionado: MetodoPagoInternacional
+  onSeleccionar: (metodo: MetodoPagoInternacional) => void
+  onAbrirModal: (metodo: MetodoPagoInternacional) => void
 }
 
 interface MetodoPagoOption {
-  id: MetodoPago
+  id: MetodoPagoInternacional
   nombre: string
   icono: string
   descripcion: string
