@@ -96,7 +96,7 @@ function ProductCard({
           )}
           
           {/* Badge de estado si no está activo */}
-          {producto.estado !== 'activo' && (
+          {producto.estado && producto.estado !== 'activo' && (
             <div className="position-absolute top-0 start-0 p-2">
               <span className={`badge bg-${producto.estado === 'agotado' ? 'warning' : 'secondary'}`}>
                 {producto.estado.charAt(0).toUpperCase() + producto.estado.slice(1)}

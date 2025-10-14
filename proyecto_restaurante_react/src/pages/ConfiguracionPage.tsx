@@ -1,7 +1,9 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react'
 import { useAuth } from '../contexts/AuthContext.tsx'
+import { useTheme } from '../contexts/ThemeContext.tsx'
 import { API_ENDPOINTS } from '../config'
 import ErrorMessage from '../components/ErrorMessage.tsx'
+import ThemeSelector from '../components/ThemeSelector.tsx'
 import { Link } from 'react-router-dom'
 import type { PasswordData, PasswordStrength, ShowPasswordState } from '../types'
 
@@ -11,6 +13,7 @@ import type { PasswordData, PasswordStrength, ShowPasswordState } from '../types
  */
 function ConfiguracionPage() {
   const { usuario } = useAuth()
+  const { theme } = useTheme()
   const [loading, setLoading] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
@@ -161,6 +164,10 @@ function ConfiguracionPage() {
               <a href="#cambiar-password" className="list-group-item list-group-item-action">
                 <i className="fas fa-key me-2 text-danger"></i>
                 Seguridad
+              </a>
+              <a href="#apariencia" className="list-group-item list-group-item-action">
+                <i className="fas fa-palette me-2 text-primary"></i>
+                Apariencia
               </a>
               <a href="#notificaciones" className="list-group-item list-group-item-action">
                 <i className="fas fa-bell me-2 text-warning"></i>
@@ -342,6 +349,62 @@ function ConfiguracionPage() {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+
+          {/* Sección: Apariencia */}
+          <div className="card shadow-sm mb-4" id="apariencia">
+            <div className="card-header bg-primary text-white">
+              <h5 className="mb-0">
+                <i className="fas fa-palette me-2"></i>
+                Apariencia y Temas
+              </h5>
+            </div>
+            <div className="card-body">
+              <p className="text-muted">
+                <i className="fas fa-info-circle me-1"></i>
+                Personaliza la apariencia de la aplicación según tus preferencias.
+              </p>
+
+              <div className="row">
+                <div className="col-md-6">
+                  <h6 className="mb-3">Configuración Actual</h6>
+                  <div className="p-3 bg-light rounded mb-3">
+                    <div className="d-flex justify-content-between align-items-center mb-2">
+                      <span><i className="fas fa-sun me-2"></i>Modo:</span>
+                      <span className={`badge bg-${theme.mode === 'light' ? 'warning' : 'dark'}`}>
+                        {theme.mode === 'light' ? 'Claro' : 'Oscuro'}
+                      </span>
+                    </div>
+                    <div className="d-flex justify-content-between align-items-center">
+                      <span><i className="fas fa-palette me-2"></i>Paleta:</span>
+                      <span className="badge bg-primary">
+                        {theme.palette === 'default' ? 'Por Defecto' :
+                         theme.palette === 'gray' ? 'Gris' :
+                         theme.palette === 'black' ? 'Negro' :
+                         theme.palette === 'pink' ? 'Rosa' :
+                         theme.palette === 'blue' ? 'Azul' :
+                         theme.palette === 'green' ? 'Verde' : 'N/A'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="col-md-6">
+                  <h6 className="mb-3">Cambiar Configuración</h6>
+                  <div className="p-3 border rounded">
+                    <ThemeSelector />
+                  </div>
+                </div>
+              </div>
+
+              <div className="alert alert-info mt-3">
+                <i className="fas fa-lightbulb me-2"></i>
+                <small>
+                  Los cambios de apariencia se aplican inmediatamente y se guardan automáticamente 
+                  para tu próxima visita.
+                </small>
+              </div>
             </div>
           </div>
 

@@ -1,6 +1,8 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext.tsx'
 import { useCart } from '../contexts/CartContext.tsx'
+import { useTheme } from '../contexts/ThemeContext.tsx'
+import type { ColorPalette } from '../types'
 
 /**
  * Componente de Navbar
@@ -11,11 +13,37 @@ import { useCart } from '../contexts/CartContext.tsx'
 function Navbar() {
   const { usuario, logout, estaAutenticado } = useAuth()
   const { cantidadTotal } = useCart()
+  const { theme, toggleThemeMode, setColorPalette } = useTheme()
   const navigate = useNavigate()
 
   const handleLogout = async () => {
     await logout()
     navigate('/login')
+  }
+
+  // Funciones auxiliares para paletas
+  const getPaletteColor = (palette: string) => {
+    const colors = {
+      default: '#dc3545',
+      gray: '#6c757d',
+      black: '#000000',
+      pink: '#e91e63',
+      blue: '#2196f3',
+      green: '#4caf50'
+    }
+    return colors[palette as keyof typeof colors] || '#dc3545'
+  }
+
+  const getPaletteName = (palette: string) => {
+    const names = {
+      default: 'Por Defecto',
+      gray: 'Gris',
+      black: 'Negro',
+      pink: 'Rosa',
+      blue: 'Azul',
+      green: 'Verde'
+    }
+    return names[palette as keyof typeof names] || 'Por Defecto'
   }
 
   return (
@@ -136,6 +164,48 @@ function Navbar() {
                     </li>
                   )}
                   <li><hr className="dropdown-divider" /></li>
+                  {/* Selector de Temas integrado como opciones del menú */}
+                  <li>
+                    <button
+                      className="dropdown-item d-flex align-items-center justify-content-between"
+                      onClick={toggleThemeMode}
+                    >
+                      <span>
+                        <i className={`fas fa-${theme.mode === 'light' ? 'moon' : 'sun'} me-2`}></i>
+                        {theme.mode === 'light' ? 'Modo Oscuro' : 'Modo Claro'}
+                      </span>
+                    </button>
+                  </li>
+                  <li>
+                    <div className="dropdown-item">
+                      <div className="d-flex align-items-center justify-content-between">
+                        <span>
+                          <i className="fas fa-palette me-2"></i>
+                          Paleta: {theme.palette === 'default' ? 'Por Defecto' :
+                                   theme.palette === 'gray' ? 'Gris' :
+                                   theme.palette === 'black' ? 'Negro' :
+                                   theme.palette === 'pink' ? 'Rosa' :
+                                   theme.palette === 'blue' ? 'Azul' :
+                                   theme.palette === 'green' ? 'Verde' : 'N/A'}
+                        </span>
+                        <div 
+                          className="palette-preview-small" 
+                          style={{ backgroundColor: getPaletteColor(theme.palette) }}
+                        ></div>
+                      </div>
+                      <div className="palette-options-inline mt-2">
+                        {['default', 'gray', 'black', 'pink', 'blue', 'green'].map(palette => (
+                          <button
+                            key={palette}
+                            className={`palette-option-small ${theme.palette === palette ? 'active' : ''}`}
+                            onClick={() => setColorPalette(palette as ColorPalette)}
+                            style={{ backgroundColor: getPaletteColor(palette) }}
+                            title={getPaletteName(palette)}
+                          ></button>
+                        ))}
+                      </div>
+                    </div>
+                  </li>
                   <li>
                     <button
                       className="dropdown-item text-danger"
@@ -148,19 +218,70 @@ function Navbar() {
                 </ul>
               </li>
             ) : (
-              <>
-                <li className="nav-item">
-                  <Link className="nav-link" to="/login">
-                    <i className="fas fa-sign-in-alt me-1"></i>
-                    Iniciar Sesión
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link className="btn btn-outline-light btn-sm ms-2" to="/register">
-                    Registrarse
-                  </Link>
-                </li>
-              </>
+              <li className="nav-item dropdown">
+                <a
+                  className="nav-link dropdown-toggle d-flex align-items-center"
+                  href="#"
+                  id="guestDropdown"
+                  role="button"
+                  data-bs-toggle="dropdown"
+                >
+                  <i className="fas fa-user me-1"></i>
+                  Usuario
+                </a>
+                <ul className="dropdown-menu dropdown-menu-end">
+                  <li>
+                    <Link className="dropdown-item" to="/login">
+                      <i className="fas fa-sign-in-alt me-2"></i>
+                      Iniciar Sesión
+                    </Link>
+                  </li>
+                  <li>
+                    <Link className="dropdown-item" to="/register">
+                      <i className="fas fa-user-plus me-2"></i>
+                      Registrarse
+                    </Link>
+                  </li>
+                  <li><hr className="dropdown-divider" /></li>
+                  {/* Selector de Temas integrado como opciones del menú */}
+                  <li>
+                    <button
+                      className="dropdown-item d-flex align-items-center justify-content-between"
+                      onClick={toggleThemeMode}
+                    >
+                      <span>
+                        <i className={`fas fa-${theme.mode === 'light' ? 'moon' : 'sun'} me-2`}></i>
+                        {theme.mode === 'light' ? 'Modo Oscuro' : 'Modo Claro'}
+                      </span>
+                    </button>
+                  </li>
+                  <li>
+                    <div className="dropdown-item">
+                      <div className="d-flex align-items-center justify-content-between">
+                        <span>
+                          <i className="fas fa-palette me-2"></i>
+                          Paleta: {getPaletteName(theme.palette)}
+                        </span>
+                        <div 
+                          className="palette-preview-small" 
+                          style={{ backgroundColor: getPaletteColor(theme.palette) }}
+                        ></div>
+                      </div>
+                      <div className="palette-options-inline mt-2">
+                        {['default', 'gray', 'black', 'pink', 'blue', 'green'].map(palette => (
+                          <button
+                            key={palette}
+                            className={`palette-option-small ${theme.palette === palette ? 'active' : ''}`}
+                            onClick={() => setColorPalette(palette as ColorPalette)}
+                            style={{ backgroundColor: getPaletteColor(palette) }}
+                            title={getPaletteName(palette)}
+                          ></button>
+                        ))}
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+              </li>
             )}
           </ul>
         </div>

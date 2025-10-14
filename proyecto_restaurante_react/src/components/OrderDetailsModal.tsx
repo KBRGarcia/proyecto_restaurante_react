@@ -302,11 +302,11 @@ function OrderDetailsModal({ orden, onClose }: OrderDetailsModalProps) {
               <div className="card-body">
                 <div className="d-flex justify-content-between mb-2">
                   <span>Subtotal:</span>
-                  <strong>${orden.subtotal.toFixed(2)}</strong>
+                  <strong>${orden.subtotal?.toFixed(2) || '0.00'}</strong>
                 </div>
                 <div className="d-flex justify-content-between mb-2">
                   <span>Impuestos (IVA 16%):</span>
-                  <strong>${orden.impuestos.toFixed(2)}</strong>
+                  <strong>${orden.impuestos?.toFixed(2) || '0.00'}</strong>
                 </div>
                 <hr />
                 <div className="d-flex justify-content-between">

@@ -12,8 +12,7 @@ import '../components/PaymentComponents.css'
 import type { 
   TipoMoneda, 
   MetodoPagoInternacional, 
-  MetodoPagoNacional, 
-  MetodoPago,
+  MetodoPagoNacional,
   DatosTarjeta, 
   DatosPayPal, 
   DatosZinli, 
@@ -59,8 +58,11 @@ function CheckoutPage() {
   // Datos de tarjeta
   const [datosTarjeta, setDatosTarjeta] = useState<DatosTarjeta>({
     numeroTarjeta: '',
-    nombreTitular: '',
+    nombre: '',
+    fecha_expiracion: '',
     fechaExpiracion: '',
+    nombreTitular: '',
+    tipoTarjeta: '',
     cvv: ''
   })
 
@@ -92,14 +94,17 @@ function CheckoutPage() {
   })
 
   const [datosTransferencia, setDatosTransferencia] = useState<DatosTransferencia>({
-    cedula: '',
-    telefono: '',
     banco: 'provincial',
+    numero_cuenta: '',
+    cedula: '',
+    nombre_titular: '',
+    telefono: '',
     numeroReferencia: '',
     fechaPago: ''
   })
 
   const [datosPagoFisico, setDatosPagoFisico] = useState<DatosPagoFisico>({
+    metodo: 'efectivo',
     horarioAtencion: 'Lunes a Domingo: 7:00 AM - 10:00 PM',
     direccionRestaurante: 'Av. Principal #123, Centro, Caracas',
     limiteTiempo: 3
@@ -163,52 +168,52 @@ function CheckoutPage() {
   }
 
   /**
-   * Detectar tipo de tarjeta según el número
+   * Detectar tipo de tarjeta según el número (no utilizado actualmente)
    */
-  const detectarTipoTarjeta = (numero: string) => {
-    const primerDigito = numero.charAt(0)
-    if (primerDigito === '4') return 'visa'
-    if (primerDigito === '5') return 'mastercard'
-    return undefined
-  }
+  // const detectarTipoTarjeta = (numero: string) => {
+  //   const primerDigito = numero.charAt(0)
+  //   if (primerDigito === '4') return 'visa'
+  //   if (primerDigito === '5') return 'mastercard'
+  //   return undefined
+  // }
 
   /**
-   * Formatear número de tarjeta
+   * Formatear número de tarjeta (no utilizado actualmente)
    */
-  const formatearNumeroTarjeta = (valor: string) => {
-    const numero = valor.replace(/\s/g, '')
-    const grupos = numero.match(/.{1,4}/g)
-    return grupos ? grupos.join(' ') : numero
-  }
+  // const formatearNumeroTarjeta = (valor: string) => {
+  //   const numero = valor.replace(/\s/g, '')
+  //   const grupos = numero.match(/.{1,4}/g)
+  //   return grupos ? grupos.join(' ') : numero
+  // }
 
   /**
-   * Formatear fecha de expiración
+   * Formatear fecha de expiración (no utilizado actualmente)
    */
-  const formatearFechaExpiracion = (valor: string) => {
-    const numeros = valor.replace(/\D/g, '')
-    if (numeros.length >= 2) {
-      return numeros.slice(0, 2) + '/' + numeros.slice(2, 4)
-    }
-    return numeros
-  }
+  // const formatearFechaExpiracion = (valor: string) => {
+  //   const numeros = valor.replace(/\D/g, '')
+  //   if (numeros.length >= 2) {
+  //     return numeros.slice(0, 2) + '/' + numeros.slice(2, 4)
+  //   }
+  //   return numeros
+  // }
 
   /**
-   * Manejar cambio en número de tarjeta
+   * Manejar cambio en número de tarjeta (no utilizado actualmente)
    */
-  const handleNumeroTarjetaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const valor = e.target.value.replace(/\s/g, '')
-    if (valor.length <= 16 && /^\d*$/.test(valor)) {
-      const tipo = detectarTipoTarjeta(valor)
-      setDatosTarjeta({
-        ...datosTarjeta,
-        numeroTarjeta: valor,
-        tipoTarjeta: tipo
-      })
-      if (errores.numeroTarjeta) {
-        setErrores({ ...errores, numeroTarjeta: '' })
-      }
-    }
-  }
+  // const handleNumeroTarjetaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const valor = e.target.value.replace(/\s/g, '')
+  //   if (valor.length <= 16 && /^\d*$/.test(valor)) {
+  //     const tipo = detectarTipoTarjeta(valor)
+  //     setDatosTarjeta({
+  //       ...datosTarjeta,
+  //       numeroTarjeta: valor,
+  //       tipoTarjeta: tipo
+  //     })
+  //     if (errores.numeroTarjeta) {
+  //       setErrores({ ...errores, numeroTarjeta: '' })
+  //     }
+  //   }
+  // }
 
   /**
    * Validar formulario según método de pago y tipo de servicio

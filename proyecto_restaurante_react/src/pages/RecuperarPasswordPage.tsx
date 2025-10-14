@@ -41,7 +41,7 @@ function RecuperarPasswordPage() {
   const [token, setToken] = useState<string | null>(null)
   
   const navigate = useNavigate()
-  const timerRef = useRef<NodeJS.Timeout | null>(null)
+  const timerRef = useRef<number | null>(null)
 
   // Efecto para el temporizador
   useEffect(() => {
@@ -234,7 +234,7 @@ function RecuperarPasswordPage() {
               {/* Indicador de progreso */}
               <div className="mb-4">
                 <div className="d-flex justify-content-between">
-                  <div className={`step-indicator ${step === 'email' ? 'active' : step !== 'email' ? 'completed' : ''}`}>
+                  <div className={`step-indicator ${step === 'email' ? 'active' : 'completed'}`}>
                     <i className="fas fa-envelope"></i>
                     <small>Correo</small>
                   </div>
@@ -477,7 +477,7 @@ function RecuperarPasswordPage() {
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .step-indicator {
           display: flex;
           flex-direction: column;

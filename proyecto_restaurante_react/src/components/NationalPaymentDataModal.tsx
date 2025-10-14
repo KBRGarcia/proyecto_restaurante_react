@@ -47,8 +47,9 @@ function NationalPaymentDataModal({
   )
 
   // Estados para Pago Físico
-  const [datosPagoFisico, setDatosPagoFisico] = useState<DatosPagoFisico>(
+  const [datosPagoFisico] = useState<DatosPagoFisico>(
     datosExistentes as DatosPagoFisico || {
+      metodo: 'efectivo',
       horarioAtencion: 'Lunes a Domingo: 7:00 AM - 10:00 PM',
       direccionRestaurante: 'Av. Principal #123, Centro, Caracas',
       limiteTiempo: 3
@@ -82,7 +83,7 @@ function NationalPaymentDataModal({
         nuevosErrores.telefono = 'Formato de teléfono inválido (04142583614)'
       }
       
-      if (!datosPagoMovil.numeroReferencia.trim()) {
+      if (!datosPagoMovil.numeroReferencia?.trim()) {
         nuevosErrores.numeroReferencia = 'El número de referencia es requerido'
       }
       
@@ -98,13 +99,13 @@ function NationalPaymentDataModal({
         nuevosErrores.cedula = 'Formato de cédula inválido (V-12345678)'
       }
       
-      if (!datosTransferencia.telefono.trim()) {
+      if (!datosTransferencia.telefono?.trim()) {
         nuevosErrores.telefono = 'El teléfono es requerido'
       } else if (!/^0\d{10}$/.test(datosTransferencia.telefono)) {
         nuevosErrores.telefono = 'Formato de teléfono inválido (04142583614)'
       }
       
-      if (!datosTransferencia.numeroReferencia.trim()) {
+      if (!datosTransferencia.numeroReferencia?.trim()) {
         nuevosErrores.numeroReferencia = 'El número de referencia es requerido'
       }
       

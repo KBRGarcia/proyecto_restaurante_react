@@ -60,6 +60,10 @@ function PerfilPage() {
 
       // Cargar estadísticas (simuladas por ahora)
       setEstadisticas({
+        total_ordenes: 0,
+        total_gastado: 0,
+        ultima_orden: '',
+        ordenes_mes_actual: 0,
         totalOrdenes: 0,
         totalGastado: 0
       })
@@ -178,7 +182,9 @@ function PerfilPage() {
           setPerfil(prev => prev ? { ...prev, foto_perfil: data.foto_perfil } : null)
           
           // Actualizar usuario en el contexto
-          await actualizarUsuario()
+          if (perfil) {
+            actualizarUsuario({ ...perfil, foto_perfil: data.foto_perfil })
+          }
           
           setTimeout(() => setSuccess(null), 5000)
         } else {
