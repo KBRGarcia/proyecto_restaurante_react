@@ -198,7 +198,7 @@ function Login() {
               <small className="text-muted">
                 <strong>Cuenta demo:</strong><br />
                 Email: admin@restaurante.com<br />
-                Password: password
+                Password: 987654321
               </small>
             </div>
           </div>

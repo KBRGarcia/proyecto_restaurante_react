@@ -9,10 +9,6 @@ import type { ItemCarrito } from '../types.ts'
  * 
  * Permite al usuario visualizar, modificar y gestionar los productos
  * que desea ordenar antes de proceder al pago.
- * 
- * Fuentes oficiales:
- * - React Router: https://reactrouter.com/en/main/hooks/use-navigate
- * - React Hooks: https://react.dev/reference/react
  */
 function CartPage() {
   const navigate = useNavigate()

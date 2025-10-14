@@ -1,6 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext.tsx'
-import { useCart } from '../contexts/CartContext.tsx'
 import { useTheme } from '../contexts/ThemeContext.tsx'
 import type { ColorPalette } from '../types'
 
@@ -12,7 +11,6 @@ import type { ColorPalette } from '../types'
  */
 function Navbar() {
   const { usuario, logout, estaAutenticado } = useAuth()
-  const { cantidadTotal } = useCart()
   const { theme, toggleThemeMode, setColorPalette } = useTheme()
   const navigate = useNavigate()
 
@@ -50,10 +48,10 @@ function Navbar() {
     <nav className="navbar navbar-expand-lg navbar-dark bg-danger">
       <div className="container">
         {/* Logo */}
-        <Link className="navbar-brand" to="/">
+        <span className="navbar-brand">
           <i className="fas fa-utensils me-2"></i>
           Sabor & Tradición
-        </Link>
+        </span>
 
         {/* Toggle para mobile */}
         <button
@@ -99,21 +97,8 @@ function Navbar() {
             )}
           </ul>
 
-          {/* Carrito y usuario */}
+          {/* Usuario */}
           <ul className="navbar-nav">
-            {/* Solo mostrar carrito si NO es admin */}
-            {usuario?.rol !== 'admin' && (
-              <li className="nav-item">
-                <Link className="nav-link position-relative" to="/carrito">
-                  <i className="fas fa-shopping-cart fa-lg"></i>
-                  {cantidadTotal > 0 && (
-                    <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary">
-                      {cantidadTotal > 99 ? '99+' : cantidadTotal}
-                    </span>
-                  )}
-                </Link>
-              </li>
-            )}
 
             {estaAutenticado() ? (
               <li className="nav-item dropdown">
