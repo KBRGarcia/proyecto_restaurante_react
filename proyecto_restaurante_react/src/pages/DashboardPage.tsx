@@ -358,19 +358,19 @@ function DashboardPage() {
       {/* Tarjetas de Estadísticas Principales */}
       <div className="row g-4 mb-4">
         <div className="col-xl-3 col-md-6">
-          <div className="card border-0 shadow-sm h-100">
+          <div className="card border-0 shadow-sm h-100" style={{ backgroundColor: 'var(--theme-card-bg)' }}>
             <div className="card-body">
               <div className="d-flex justify-content-between align-items-center">
                 <div>
                   <p className="text-muted mb-1 small">Total Usuarios</p>
-                  <h3 className="mb-0">{estadisticas?.totalUsuarios}</h3>
+                  <h3 className="mb-0" style={{ color: 'var(--theme-text)' }}>{estadisticas?.totalUsuarios}</h3>
                   <small className="text-success">
                     <i className="fas fa-arrow-up me-1"></i>
                     +{estadisticas?.nuevosusuarios} este mes
                   </small>
                 </div>
-                <div className="bg-primary bg-opacity-10 rounded-3 p-3">
-                  <i className="fas fa-users fa-2x text-primary"></i>
+                <div className="rounded-3 p-3" style={{ backgroundColor: 'var(--theme-highlight-bg)' }}>
+                  <i className="fas fa-users fa-2x" style={{ color: 'var(--theme-accent-color)' }}></i>
                 </div>
               </div>
             </div>
@@ -378,19 +378,19 @@ function DashboardPage() {
         </div>
 
         <div className="col-xl-3 col-md-6">
-          <div className="card border-0 shadow-sm h-100">
+          <div className="card border-0 shadow-sm h-100" style={{ backgroundColor: 'var(--theme-card-bg)' }}>
             <div className="card-body">
               <div className="d-flex justify-content-between align-items-center">
                 <div>
                   <p className="text-muted mb-1 small">Total Órdenes</p>
-                  <h3 className="mb-0">{estadisticas?.totalOrdenes}</h3>
+                  <h3 className="mb-0" style={{ color: 'var(--theme-text)' }}>{estadisticas?.totalOrdenes}</h3>
                   <small className="text-info">
                     <i className="fas fa-shopping-bag me-1"></i>
                     {estadisticas?.ordenesHoy} hoy
                   </small>
                 </div>
-                <div className="bg-success bg-opacity-10 rounded-3 p-3">
-                  <i className="fas fa-receipt fa-2x text-success"></i>
+                <div className="rounded-3 p-3" style={{ backgroundColor: 'var(--theme-highlight-bg)' }}>
+                  <i className="fas fa-receipt fa-2x" style={{ color: 'var(--theme-accent-color)' }}></i>
                 </div>
               </div>
             </div>
@@ -398,19 +398,19 @@ function DashboardPage() {
         </div>
 
         <div className="col-xl-3 col-md-6">
-          <div className="card border-0 shadow-sm h-100">
+          <div className="card border-0 shadow-sm h-100" style={{ backgroundColor: 'var(--theme-card-bg)' }}>
             <div className="card-body">
               <div className="d-flex justify-content-between align-items-center">
                 <div>
                   <p className="text-muted mb-1 small">Ingresos Totales</p>
-                  <h3 className="mb-0">${estadisticas?.totalIngresos.toFixed(2)}</h3>
+                  <h3 className="mb-0" style={{ color: 'var(--theme-text)' }}>${estadisticas?.totalIngresos.toFixed(2)}</h3>
                   <small className="text-success">
                     <i className="fas fa-dollar-sign me-1"></i>
                     ${estadisticas?.ingresosHoy.toFixed(2)} hoy
                   </small>
                 </div>
-                <div className="bg-warning bg-opacity-10 rounded-3 p-3">
-                  <i className="fas fa-chart-line fa-2x text-warning"></i>
+                <div className="rounded-3 p-3" style={{ backgroundColor: 'var(--theme-highlight-bg)' }}>
+                  <i className="fas fa-chart-line fa-2x" style={{ color: 'var(--theme-accent-color)' }}></i>
                 </div>
               </div>
             </div>
@@ -418,19 +418,19 @@ function DashboardPage() {
         </div>
 
         <div className="col-xl-3 col-md-6">
-          <div className="card border-0 shadow-sm h-100">
+          <div className="card border-0 shadow-sm h-100" style={{ backgroundColor: 'var(--theme-card-bg)' }}>
             <div className="card-body">
               <div className="d-flex justify-content-between align-items-center">
                 <div>
                   <p className="text-muted mb-1 small">Promedio por Orden</p>
-                  <h3 className="mb-0">${estadisticas?.promedioOrden.toFixed(2)}</h3>
+                  <h3 className="mb-0" style={{ color: 'var(--theme-text)' }}>${estadisticas?.promedioOrden.toFixed(2)}</h3>
                   <small className="text-muted">
                     <i className="fas fa-calculator me-1"></i>
                     Calculado
                   </small>
                 </div>
-                <div className="bg-danger bg-opacity-10 rounded-3 p-3">
-                  <i className="fas fa-money-bill-wave fa-2x text-danger"></i>
+                <div className="rounded-3 p-3" style={{ backgroundColor: 'var(--theme-highlight-bg)' }}>
+                  <i className="fas fa-money-bill-wave fa-2x" style={{ color: 'var(--theme-accent-color)' }}></i>
                 </div>
               </div>
             </div>
@@ -443,7 +443,7 @@ function DashboardPage() {
         <div className="col-lg-4">
           <div className="card border-0 shadow-sm h-100">
             <div className="card-header bg-transparent border-0 pt-4">
-              <h5 className="mb-0">
+              <h5 className="mb-0 text-white">
                 <i className="fas fa-trophy me-2 text-warning"></i>
                 Top Usuarios por Gasto
               </h5>
@@ -475,7 +475,7 @@ function DashboardPage() {
         <div className="col-lg-8">
           <div className="card border-0 shadow-sm h-100">
             <div className="card-header bg-transparent border-0 pt-4">
-              <h5 className="mb-0">
+              <h5 className="mb-0 text-white">
                 <i className="fas fa-clock me-2 text-primary"></i>
                 Órdenes Recientes
               </h5>
@@ -543,7 +543,7 @@ function DashboardPage() {
             <div className="card-header bg-transparent border-0 pt-4">
               <div className="row align-items-center">
                 <div className="col">
-                  <h5 className="mb-0">
+                  <h5 className="mb-0 text-white">
                     <i className="fas fa-users-cog me-2 text-danger"></i>
                     Gestión de Usuarios
                   </h5>

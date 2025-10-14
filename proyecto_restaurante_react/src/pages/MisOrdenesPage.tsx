@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react'
 import { API_ENDPOINTS } from '../config'
 import OrderCard from '../components/OrderCard.tsx'
@@ -149,56 +150,64 @@ function MisOrdenesPage() {
       {/* Tarjetas de estadísticas */}
       <div className="row g-3 mb-4">
         <div className="col-md-3 col-sm-6">
-          <div className="card bg-primary text-white shadow-sm">
+          <div className="card border-0 shadow-sm" style={{ backgroundColor: 'var(--theme-card-bg)' }}>
             <div className="card-body">
               <div className="d-flex justify-content-between align-items-center">
                 <div>
-                  <h6 className="card-subtitle mb-1 text-white-50">Total Órdenes</h6>
-                  <h3 className="mb-0">{estadisticas.total}</h3>
+                  <h6 className="card-subtitle mb-1 text-muted">Total Órdenes</h6>
+                  <h3 className="mb-0" style={{ color: 'var(--theme-text)' }}>{estadisticas.total}</h3>
                 </div>
-                <i className="fas fa-shopping-bag fa-2x opacity-50"></i>
+                <div className="rounded-3 p-3" style={{ backgroundColor: 'var(--theme-highlight-bg)' }}>
+                  <i className="fas fa-shopping-bag fa-2x" style={{ color: 'var(--theme-accent-color)' }}></i>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
         <div className="col-md-3 col-sm-6">
-          <div className="card bg-warning text-white shadow-sm">
+          <div className="card border-0 shadow-sm" style={{ backgroundColor: 'var(--theme-card-bg)' }}>
             <div className="card-body">
               <div className="d-flex justify-content-between align-items-center">
                 <div>
-                  <h6 className="card-subtitle mb-1 text-white-50">Pendientes</h6>
-                  <h3 className="mb-0">{estadisticas.pendientes}</h3>
+                  <h6 className="card-subtitle mb-1 text-muted">Pendientes</h6>
+                  <h3 className="mb-0" style={{ color: 'var(--theme-text)' }}>{estadisticas.pendientes}</h3>
                 </div>
-                <i className="fas fa-clock fa-2x opacity-50"></i>
+                <div className="rounded-3 p-3" style={{ backgroundColor: 'var(--theme-highlight-bg)' }}>
+                  <i className="fas fa-clock fa-2x" style={{ color: 'var(--theme-accent-color)' }}></i>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
         <div className="col-md-3 col-sm-6">
-          <div className="card bg-success text-white shadow-sm">
+          <div className="card border-0 shadow-sm" style={{ backgroundColor: 'var(--theme-card-bg)' }}>
             <div className="card-body">
               <div className="d-flex justify-content-between align-items-center">
                 <div>
-                  <h6 className="card-subtitle mb-1 text-white-50">Completadas</h6>
-                  <h3 className="mb-0">{estadisticas.entregados}</h3>
+                  <h6 className="card-subtitle mb-1 text-muted">Completadas</h6>
+                  <h3 className="mb-0" style={{ color: 'var(--theme-text)' }}>{estadisticas.entregados}</h3>
                 </div>
-                <i className="fas fa-check-circle fa-2x opacity-50"></i>
+                <div className="rounded-3 p-3" style={{ backgroundColor: 'var(--theme-highlight-bg)' }}>
+                  <i className="fas fa-check-circle fa-2x" style={{ color: 'var(--theme-accent-color)' }}></i>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
         <div className="col-md-3 col-sm-6">
-          <div className="card bg-info text-white shadow-sm">
+          <div className="card border-0 shadow-sm" style={{ backgroundColor: 'var(--theme-card-bg)' }}>
             <div className="card-body">
               <div className="d-flex justify-content-between align-items-center">
                 <div>
-                  <h6 className="card-subtitle mb-1 text-white-50">Total Gastado</h6>
-                  <h3 className="mb-0">${estadisticas.totalGastado.toFixed(0)}</h3>
+                  <h6 className="card-subtitle mb-1 text-muted">Total Gastado</h6>
+                  <h3 className="mb-0" style={{ color: 'var(--theme-text)' }}>${estadisticas.totalGastado.toFixed(0)}</h3>
                 </div>
-                <i className="fas fa-dollar-sign fa-2x opacity-50"></i>
+                <div className="rounded-3 p-3" style={{ backgroundColor: 'var(--theme-highlight-bg)' }}>
+                  <i className="fas fa-dollar-sign fa-2x" style={{ color: 'var(--theme-accent-color)' }}></i>
+                </div>
               </div>
             </div>
           </div>
