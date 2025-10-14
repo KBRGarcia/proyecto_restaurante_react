@@ -4,6 +4,8 @@ import { useCart } from '../contexts/CartContext.tsx'
 import { useAuth } from '../contexts/AuthContext.tsx'
 import { API_ENDPOINTS } from '../config'
 import PaymentMethodSelector from '../components/PaymentMethodSelector.tsx'
+import PaymentDataModal from '../components/PaymentDataModal.tsx'
+import '../components/PaymentComponents.css'
 import type { MetodoPago, DatosTarjeta, DatosPayPal, DatosZinli, DatosZelle, TipoServicio } from '../types.ts'
 
 /**
@@ -28,6 +30,10 @@ function CheckoutPage() {
   const [notasEspeciales, setNotasEspeciales] = useState('')
   const [metodoPago, setMetodoPago] = useState<MetodoPago>('tarjeta')
   const [procesando, setProcesando] = useState(false)
+  
+  // Estados para el modal de datos de pago
+  const [mostrarModalPago, setMostrarModalPago] = useState(false)
+  const [datosPagoCompletos, setDatosPagoCompletos] = useState(false)
   
   // Datos de tarjeta
   const [datosTarjeta, setDatosTarjeta] = useState<DatosTarjeta>({
@@ -57,6 +63,35 @@ function CheckoutPage() {
 
   // Validaciones
   const [errores, setErrores] = useState<Record<string, string>>({})
+
+  // Funciones para manejar el modal de datos de pago
+  const abrirModalPago = (metodo: MetodoPago) => {
+    setMetodoPago(metodo)
+    setMostrarModalPago(true)
+  }
+
+  const cerrarModalPago = () => {
+    setMostrarModalPago(false)
+  }
+
+  const guardarDatosPago = (datos: DatosTarjeta | DatosPayPal | DatosZinli | DatosZelle) => {
+    // Guardar los datos según el método de pago
+    switch (metodoPago) {
+      case 'tarjeta':
+        setDatosTarjeta(datos as DatosTarjeta)
+        break
+      case 'paypal':
+        setDatosPayPal(datos as DatosPayPal)
+        break
+      case 'zinli':
+        setDatosZinli(datos as DatosZinli)
+        break
+      case 'zelle':
+        setDatosZelle(datos as DatosZelle)
+        break
+    }
+    setDatosPagoCompletos(true)
+  }
 
   /**
    * Detectar tipo de tarjeta según el número
@@ -124,61 +159,12 @@ function CheckoutPage() {
       console.log('❌ Error: Teléfono de contacto requerido')
     }
 
-    if (metodoPago === 'tarjeta') {
-      console.log('🔍 Validando datos de tarjeta:', datosTarjeta)
-      if (!datosTarjeta.numeroTarjeta || datosTarjeta.numeroTarjeta.length !== 16) {
-        nuevosErrores.numeroTarjeta = 'Número de tarjeta inválido (16 dígitos)'
-        console.log('❌ Error: Número de tarjeta inválido')
-      }
-      if (!datosTarjeta.nombreTitular.trim()) {
-        nuevosErrores.nombreTitular = 'Nombre del titular es requerido'
-        console.log('❌ Error: Nombre del titular requerido')
-      }
-      if (!datosTarjeta.fechaExpiracion || !/^\d{2}\/\d{2}$/.test(datosTarjeta.fechaExpiracion)) {
-        nuevosErrores.fechaExpiracion = 'Fecha inválida (MM/AA)'
-        console.log('❌ Error: Fecha de expiración inválida')
-      }
-      if (!datosTarjeta.cvv || datosTarjeta.cvv.length < 3) {
-        nuevosErrores.cvv = 'CVV inválido (3-4 dígitos)'
-        console.log('❌ Error: CVV inválido')
-      }
+    // Validar que los datos de pago estén completos
+    if (!datosPagoCompletos) {
+      nuevosErrores.datosPago = 'Debes completar los datos de pago antes de proceder'
+      console.log('❌ Error: Datos de pago incompletos')
     }
 
-    if (metodoPago === 'paypal') {
-      console.log('🔍 Validando datos de PayPal:', datosPayPal)
-      if (!datosPayPal.correo || !/\S+@\S+\.\S+/.test(datosPayPal.correo)) {
-        nuevosErrores.correoPayPal = 'Correo de PayPal inválido'
-        console.log('❌ Error: Correo de PayPal inválido')
-      }
-      if (!datosPayPal.password) {
-        nuevosErrores.passwordPayPal = 'Contraseña de PayPal requerida'
-        console.log('❌ Error: Contraseña de PayPal requerida')
-      }
-    }
-
-    if (metodoPago === 'zinli') {
-      console.log('🔍 Validando datos de Zinli:', datosZinli)
-      if (!datosZinli.numeroTelefono || datosZinli.numeroTelefono.length < 10) {
-        nuevosErrores.numeroZinli = 'Número de teléfono inválido'
-        console.log('❌ Error: Número de teléfono Zinli inválido')
-      }
-      if (!datosZinli.pin || datosZinli.pin.length !== 4) {
-        nuevosErrores.pinZinli = 'PIN debe tener 4 dígitos'
-        console.log('❌ Error: PIN Zinli inválido')
-      }
-    }
-
-    if (metodoPago === 'zelle') {
-      console.log('🔍 Validando datos de Zelle:', datosZelle)
-      if (!datosZelle.correoZelle || !/\S+@\S+\.\S+/.test(datosZelle.correoZelle)) {
-        nuevosErrores.correoZelle = 'Correo de Zelle inválido'
-        console.log('❌ Error: Correo de Zelle inválido')
-      }
-      if (!datosZelle.nombreCompleto.trim()) {
-        nuevosErrores.nombreZelle = 'Nombre completo es requerido'
-        console.log('❌ Error: Nombre completo Zelle requerido')
-      }
-    }
 
     console.log('📋 Errores encontrados:', nuevosErrores)
     setErrores(nuevosErrores)
@@ -513,11 +499,12 @@ function CheckoutPage() {
               <PaymentMethodSelector
                 metodoSeleccionado={metodoPago}
                 onSeleccionar={setMetodoPago}
+                onAbrirModal={abrirModalPago}
               />
             </div>
           </div>
 
-          {/* Formulario según método seleccionado */}
+          {/* Estado de datos de pago */}
           <div className="card shadow-sm">
             <div className="card-header bg-info text-white">
               <h5 className="mb-0">
@@ -526,274 +513,36 @@ function CheckoutPage() {
               </h5>
             </div>
             <div className="card-body">
-              
-              {/* Formulario de Tarjeta */}
-              {metodoPago === 'tarjeta' && (
-                <div className="payment-form">
-                  <div className="row g-3">
-                    {/* Número de tarjeta */}
-                    <div className="col-12">
-                      <label className="form-label">
-                        <i className="fas fa-credit-card me-1"></i>
-                        Número de Tarjeta *
-                      </label>
-                      <div className="input-group">
-                        <input
-                          type="text"
-                          className={`form-control ${errores.numeroTarjeta ? 'is-invalid' : ''}`}
-                          placeholder="1234 5678 9012 3456"
-                          value={formatearNumeroTarjeta(datosTarjeta.numeroTarjeta)}
-                          onChange={handleNumeroTarjetaChange}
-                          maxLength={19}
-                        />
-                        <span className="input-group-text">
-                          {datosTarjeta.tipoTarjeta === 'visa' && (
-                            <i className="fab fa-cc-visa fa-2x text-primary"></i>
-                          )}
-                          {datosTarjeta.tipoTarjeta === 'mastercard' && (
-                            <i className="fab fa-cc-mastercard fa-2x text-danger"></i>
-                          )}
-                          {!datosTarjeta.tipoTarjeta && (
-                            <i className="fas fa-credit-card text-muted"></i>
-                          )}
-                        </span>
-                        {errores.numeroTarjeta && (
-                          <div className="invalid-feedback">{errores.numeroTarjeta}</div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Nombre del titular */}
-                    <div className="col-12">
-                      <label className="form-label">
-                        <i className="fas fa-user me-1"></i>
-                        Nombre del Titular *
-                      </label>
-                      <input
-                        type="text"
-                        className={`form-control ${errores.nombreTitular ? 'is-invalid' : ''}`}
-                        placeholder="Como aparece en la tarjeta"
-                        value={datosTarjeta.nombreTitular}
-                        onChange={(e) => {
-                          setDatosTarjeta({ ...datosTarjeta, nombreTitular: e.target.value.toUpperCase() })
-                          if (errores.nombreTitular) setErrores({ ...errores, nombreTitular: '' })
-                        }}
-                      />
-                      {errores.nombreTitular && (
-                        <div className="invalid-feedback">{errores.nombreTitular}</div>
-                      )}
-                    </div>
-
-                    {/* Fecha de expiración */}
-                    <div className="col-md-6">
-                      <label className="form-label">
-                        <i className="fas fa-calendar me-1"></i>
-                        Fecha de Expiración *
-                      </label>
-                      <input
-                        type="text"
-                        className={`form-control ${errores.fechaExpiracion ? 'is-invalid' : ''}`}
-                        placeholder="MM/AA"
-                        value={datosTarjeta.fechaExpiracion}
-                        onChange={(e) => {
-                          const formatted = formatearFechaExpiracion(e.target.value)
-                          setDatosTarjeta({ ...datosTarjeta, fechaExpiracion: formatted })
-                          if (errores.fechaExpiracion) setErrores({ ...errores, fechaExpiracion: '' })
-                        }}
-                        maxLength={5}
-                      />
-                      {errores.fechaExpiracion && (
-                        <div className="invalid-feedback">{errores.fechaExpiracion}</div>
-                      )}
-                    </div>
-
-                    {/* CVV */}
-                    <div className="col-md-6">
-                      <label className="form-label">
-                        <i className="fas fa-lock me-1"></i>
-                        CVV *
-                      </label>
-                      <input
-                        type="text"
-                        className={`form-control ${errores.cvv ? 'is-invalid' : ''}`}
-                        placeholder="123"
-                        value={datosTarjeta.cvv}
-                        onChange={(e) => {
-                          const valor = e.target.value.replace(/\D/g, '')
-                          if (valor.length <= 4) {
-                            setDatosTarjeta({ ...datosTarjeta, cvv: valor })
-                            if (errores.cvv) setErrores({ ...errores, cvv: '' })
-                          }
-                        }}
-                        maxLength={4}
-                      />
-                      {errores.cvv && (
-                        <div className="invalid-feedback">{errores.cvv}</div>
-                      )}
-                      <small className="text-muted">
-                        <i className="fas fa-info-circle me-1"></i>
-                        3-4 dígitos en el reverso de la tarjeta
-                      </small>
-                    </div>
-                  </div>
+              {datosPagoCompletos ? (
+                <div className="alert alert-success">
+                  <i className="fas fa-check-circle me-2"></i>
+                  <strong>Datos de pago completados</strong>
+                  <p className="mb-0 mt-2">
+                    Los datos para {metodoPago === 'tarjeta' ? 'tarjeta de crédito/débito' : 
+                                   metodoPago === 'paypal' ? 'PayPal' :
+                                   metodoPago === 'zinli' ? 'Zinli' : 'Zelle'} han sido guardados correctamente.
+                  </p>
+                  <button 
+                    className="btn btn-outline-primary btn-sm mt-2"
+                    onClick={() => abrirModalPago(metodoPago)}
+                  >
+                    <i className="fas fa-edit me-1"></i>
+                    Modificar datos
+                  </button>
                 </div>
-              )}
-
-              {/* Formulario PayPal */}
-              {metodoPago === 'paypal' && (
-                <div className="payment-form">
-                  <div className="row g-3">
-                    <div className="col-12">
-                      <label className="form-label">
-                        <i className="fas fa-envelope me-1"></i>
-                        Correo de PayPal *
-                      </label>
-                      <input
-                        type="email"
-                        className={`form-control ${errores.correoPayPal ? 'is-invalid' : ''}`}
-                        placeholder="tu@correo.com"
-                        value={datosPayPal.correo}
-                        onChange={(e) => {
-                          setDatosPayPal({ ...datosPayPal, correo: e.target.value })
-                          if (errores.correoPayPal) setErrores({ ...errores, correoPayPal: '' })
-                        }}
-                      />
-                      {errores.correoPayPal && (
-                        <div className="invalid-feedback">{errores.correoPayPal}</div>
-                      )}
+              ) : (
+                <div className="alert alert-warning">
+                  <i className="fas fa-exclamation-triangle me-2"></i>
+                  <strong>Datos de pago requeridos</strong>
+                  <p className="mb-0 mt-2">
+                    Haz clic en el método de pago seleccionado para ingresar los datos necesarios.
+                  </p>
+                  {errores.datosPago && (
+                    <div className="text-danger mt-2">
+                      <i className="fas fa-times-circle me-1"></i>
+                      {errores.datosPago}
                     </div>
-                    <div className="col-12">
-                      <label className="form-label">
-                        <i className="fas fa-lock me-1"></i>
-                        Contraseña de PayPal *
-                      </label>
-                      <input
-                        type="password"
-                        className={`form-control ${errores.passwordPayPal ? 'is-invalid' : ''}`}
-                        placeholder="••••••••"
-                        value={datosPayPal.password}
-                        onChange={(e) => {
-                          setDatosPayPal({ ...datosPayPal, password: e.target.value })
-                          if (errores.passwordPayPal) setErrores({ ...errores, passwordPayPal: '' })
-                        }}
-                      />
-                      {errores.passwordPayPal && (
-                        <div className="invalid-feedback">{errores.passwordPayPal}</div>
-                      )}
-                    </div>
-                    <div className="col-12">
-                      <div className="alert alert-info mb-0">
-                        <i className="fab fa-paypal me-2"></i>
-                        Serás redirigido a PayPal para completar el pago de forma segura
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Formulario Zinli */}
-              {metodoPago === 'zinli' && (
-                <div className="payment-form">
-                  <div className="row g-3">
-                    <div className="col-12">
-                      <label className="form-label">
-                        <i className="fas fa-mobile-alt me-1"></i>
-                        Número de Teléfono *
-                      </label>
-                      <input
-                        type="tel"
-                        className={`form-control ${errores.numeroZinli ? 'is-invalid' : ''}`}
-                        placeholder="+58 412-1234567"
-                        value={datosZinli.numeroTelefono}
-                        onChange={(e) => {
-                          setDatosZinli({ ...datosZinli, numeroTelefono: e.target.value })
-                          if (errores.numeroZinli) setErrores({ ...errores, numeroZinli: '' })
-                        }}
-                      />
-                      {errores.numeroZinli && (
-                        <div className="invalid-feedback">{errores.numeroZinli}</div>
-                      )}
-                    </div>
-                    <div className="col-12">
-                      <label className="form-label">
-                        <i className="fas fa-key me-1"></i>
-                        PIN de Zinli *
-                      </label>
-                      <input
-                        type="password"
-                        className={`form-control ${errores.pinZinli ? 'is-invalid' : ''}`}
-                        placeholder="••••"
-                        maxLength={4}
-                        value={datosZinli.pin}
-                        onChange={(e) => {
-                          const valor = e.target.value.replace(/\D/g, '')
-                          setDatosZinli({ ...datosZinli, pin: valor })
-                          if (errores.pinZinli) setErrores({ ...errores, pinZinli: '' })
-                        }}
-                      />
-                      {errores.pinZinli && (
-                        <div className="invalid-feedback">{errores.pinZinli}</div>
-                      )}
-                    </div>
-                    <div className="col-12">
-                      <div className="alert alert-success mb-0">
-                        <i className="fas fa-shield-alt me-2"></i>
-                        Pago seguro procesado a través de Zinli
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Formulario Zelle */}
-              {metodoPago === 'zelle' && (
-                <div className="payment-form">
-                  <div className="row g-3">
-                    <div className="col-12">
-                      <label className="form-label">
-                        <i className="fas fa-envelope me-1"></i>
-                        Correo de Zelle *
-                      </label>
-                      <input
-                        type="email"
-                        className={`form-control ${errores.correoZelle ? 'is-invalid' : ''}`}
-                        placeholder="tu@correo.com"
-                        value={datosZelle.correoZelle}
-                        onChange={(e) => {
-                          setDatosZelle({ ...datosZelle, correoZelle: e.target.value })
-                          if (errores.correoZelle) setErrores({ ...errores, correoZelle: '' })
-                        }}
-                      />
-                      {errores.correoZelle && (
-                        <div className="invalid-feedback">{errores.correoZelle}</div>
-                      )}
-                    </div>
-                    <div className="col-12">
-                      <label className="form-label">
-                        <i className="fas fa-user me-1"></i>
-                        Nombre Completo *
-                      </label>
-                      <input
-                        type="text"
-                        className={`form-control ${errores.nombreZelle ? 'is-invalid' : ''}`}
-                        placeholder="Como está registrado en Zelle"
-                        value={datosZelle.nombreCompleto}
-                        onChange={(e) => {
-                          setDatosZelle({ ...datosZelle, nombreCompleto: e.target.value })
-                          if (errores.nombreZelle) setErrores({ ...errores, nombreZelle: '' })
-                        }}
-                      />
-                      {errores.nombreZelle && (
-                        <div className="invalid-feedback">{errores.nombreZelle}</div>
-                      )}
-                    </div>
-                    <div className="col-12">
-                      <div className="alert alert-warning mb-0">
-                        <i className="fas fa-university me-2"></i>
-                        Transferencia segura a través de tu banco con Zelle
-                      </div>
-                    </div>
-                  </div>
+                  )}
                 </div>
               )}
             </div>
@@ -887,6 +636,20 @@ function CheckoutPage() {
           </div>
         </div>
       </div>
+
+      {/* Modal de datos de pago */}
+      <PaymentDataModal
+        show={mostrarModalPago}
+        onClose={cerrarModalPago}
+        metodoPago={metodoPago}
+        onSave={guardarDatosPago}
+        datosExistentes={
+          metodoPago === 'tarjeta' ? datosTarjeta :
+          metodoPago === 'paypal' ? datosPayPal :
+          metodoPago === 'zinli' ? datosZinli :
+          datosZelle
+        }
+      />
     </div>
   )
 }

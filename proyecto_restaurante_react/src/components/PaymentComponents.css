@@ -1,0 +1,182 @@
+/* Estilos para componentes de pago */
+
+/* Modal de datos de pago */
+.modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal.show {
+  display: block !important;
+}
+
+.modal.show .modal-dialog {
+  transform: none;
+}
+
+/* Animación de entrada del modal */
+.modal.fade .modal-dialog {
+  transition: transform 0.3s ease-out;
+  transform: translate(0, -50px);
+}
+
+.modal.show .modal-dialog {
+  transform: none;
+}
+
+/* Estilos para las tarjetas de método de pago */
+.payment-method-card {
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.payment-method-card:hover {
+  border-color: #0d6efd;
+  box-shadow: 0 4px 12px rgba(13, 110, 253, 0.15);
+  transform: translateY(-2px);
+}
+
+.payment-method-card.selected {
+  border-color: #28a745;
+  background: linear-gradient(135deg, #f8fff9 0%, #e8f5e8 100%);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
+}
+
+.payment-method-card.selected::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #28a745, #20c997);
+}
+
+/* Iconos de métodos de pago */
+.payment-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: white;
+  flex-shrink: 0;
+}
+
+.payment-icon.bg-primary {
+  background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+}
+
+.payment-icon.bg-info {
+  background: linear-gradient(135deg, #0dcaf0, #0aa2c0);
+}
+
+.payment-icon.bg-success {
+  background: linear-gradient(135deg, #28a745, #1e7e34);
+}
+
+.payment-icon.bg-warning {
+  background: linear-gradient(135deg, #ffc107, #d39e00);
+}
+
+/* Checkbox de selección */
+.payment-check {
+  flex-shrink: 0;
+  margin-left: 15px;
+}
+
+/* Grid de métodos de pago */
+.payment-methods-grid {
+  margin: 0;
+}
+
+/* Estilos para el estado de datos de pago */
+.alert-success {
+  border-left: 4px solid #28a745;
+}
+
+.alert-warning {
+  border-left: 4px solid #ffc107;
+}
+
+/* Botones del modal */
+.modal-footer .btn {
+  min-width: 120px;
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-body {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .payment-method-card {
+    padding: 15px;
+  }
+  
+  .payment-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+  }
+  
+  .modal-dialog {
+    margin: 10px;
+  }
+}
+
+/* Estilos para los logos de tarjetas */
+.fab.fa-cc-visa {
+  color: #1a1f71 !important;
+}
+
+.fab.fa-cc-mastercard {
+  color: #eb001b !important;
+}
+
+/* Mejoras en los inputs del modal */
+.modal-body .form-control:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.modal-body .form-label {
+  font-weight: 600;
+  color: #495057;
+}
+
+/* Indicador de "Haz clic para ingresar datos" */
+.text-primary {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Estilos para el botón de modificar datos */
+.btn-outline-primary.btn-sm {
+  border-width: 1px;
+  font-weight: 500;
+}
+
+.btn-outline-primary.btn-sm:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(13, 110, 253, 0.2);
+}
