@@ -272,12 +272,18 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     setThemeMode(newMode)
   }
 
+  // Función para convertir hex a RGB
+  const hexToRgb = (hex: string): string => {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+    return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '0, 0, 0'
+  }
+
   // Función para aplicar el tema al documento usando CSS custom properties
   const applyThemeToDocument = ({ mode, palette }: { mode: ThemeMode; palette: ColorPalette }) => {
     const colors = colorPalettes[palette][mode]
     const root = document.documentElement
 
-    // Aplicar variables CSS
+    // Aplicar variables CSS de Bootstrap
     root.style.setProperty('--bs-primary', colors.primary)
     root.style.setProperty('--bs-secondary', colors.secondary)
     root.style.setProperty('--bs-success', colors.success)
@@ -287,6 +293,14 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     root.style.setProperty('--bs-light', colors.light)
     root.style.setProperty('--bs-dark', colors.dark)
 
+    // Variables RGB para transparencias
+    root.style.setProperty('--bs-primary-rgb', hexToRgb(colors.primary))
+    root.style.setProperty('--bs-secondary-rgb', hexToRgb(colors.secondary))
+    root.style.setProperty('--bs-success-rgb', hexToRgb(colors.success))
+    root.style.setProperty('--bs-danger-rgb', hexToRgb(colors.danger))
+    root.style.setProperty('--bs-warning-rgb', hexToRgb(colors.warning))
+    root.style.setProperty('--bs-info-rgb', hexToRgb(colors.info))
+
     // Variables personalizadas para el tema
     root.style.setProperty('--theme-bg', colors.background)
     root.style.setProperty('--theme-surface', colors.surface)
@@ -294,6 +308,16 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     root.style.setProperty('--theme-text-secondary', colors.textSecondary)
     root.style.setProperty('--theme-border', colors.border)
     root.style.setProperty('--theme-shadow', colors.shadow)
+
+    // Variables específicas para elementos de la interfaz
+    root.style.setProperty('--theme-header-bg', colors.primary)
+    root.style.setProperty('--theme-footer-bg', colors.dark)
+    root.style.setProperty('--theme-card-bg', colors.surface)
+    root.style.setProperty('--theme-button-primary', colors.primary)
+    root.style.setProperty('--theme-button-secondary', colors.secondary)
+    root.style.setProperty('--theme-link-color', colors.primary)
+    root.style.setProperty('--theme-accent-color', colors.primary)
+    root.style.setProperty('--theme-highlight-bg', `rgba(${hexToRgb(colors.primary)}, 0.1)`)
 
     // Aplicar clase de modo oscuro al body
     if (mode === 'dark') {

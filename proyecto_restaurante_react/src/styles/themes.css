@@ -1,4 +1,4 @@
-/* === SISTEMA DE TEMAS === */
+/* === SISTEMA DE TEMAS COMPLETO === */
 
 /* Variables CSS para temas dinámicos */
 :root {
@@ -9,6 +9,214 @@
   --theme-text-secondary: #6c757d;
   --theme-border: #dee2e6;
   --theme-shadow: rgba(0, 0, 0, 0.15);
+  
+  /* Variables adicionales para elementos específicos */
+  --theme-header-bg: var(--bs-primary);
+  --theme-footer-bg: var(--bs-dark);
+  --theme-card-bg: var(--theme-surface);
+  --theme-button-primary: var(--bs-primary);
+  --theme-button-secondary: var(--bs-secondary);
+  --theme-link-color: var(--bs-primary);
+  --theme-accent-color: var(--bs-primary);
+  --theme-highlight-bg: rgba(var(--bs-primary-rgb), 0.1);
+}
+
+/* === APLICACIÓN GLOBAL DE TEMAS === */
+
+/* Aplicar colores de tema a todos los elementos principales */
+.navbar {
+  background-color: var(--theme-header-bg) !important;
+}
+
+.navbar-brand,
+.navbar-nav .nav-link {
+  color: white !important;
+}
+
+.navbar-nav .nav-link:hover {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Botones principales */
+.btn-primary {
+  background-color: var(--theme-button-primary) !important;
+  border-color: var(--theme-button-primary) !important;
+}
+
+.btn-primary:hover {
+  background-color: var(--theme-button-primary) !important;
+  border-color: var(--theme-button-primary) !important;
+  filter: brightness(0.9);
+}
+
+.btn-secondary {
+  background-color: var(--theme-button-secondary) !important;
+  border-color: var(--theme-button-secondary) !important;
+}
+
+.btn-secondary:hover {
+  background-color: var(--theme-button-secondary) !important;
+  border-color: var(--theme-button-secondary) !important;
+  filter: brightness(0.9);
+}
+
+/* Enlaces */
+a {
+  color: var(--theme-link-color) !important;
+}
+
+a:hover {
+  color: var(--theme-link-color) !important;
+  filter: brightness(0.8);
+}
+
+/* Tarjetas */
+.card {
+  background-color: var(--theme-card-bg) !important;
+  border-color: var(--theme-border) !important;
+  color: var(--theme-text) !important;
+}
+
+.card-header {
+  background-color: var(--theme-accent-color) !important;
+  color: white !important;
+  border-bottom-color: var(--theme-border) !important;
+}
+
+/* Badges */
+.badge {
+  background-color: var(--theme-accent-color) !important;
+}
+
+/* Alertas */
+.alert-primary {
+  background-color: var(--theme-highlight-bg) !important;
+  border-color: var(--theme-accent-color) !important;
+  color: var(--theme-text) !important;
+}
+
+/* Títulos y encabezados */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--theme-text) !important;
+}
+
+.text-primary {
+  color: var(--theme-accent-color) !important;
+}
+
+/* Formularios */
+.form-control:focus {
+  border-color: var(--theme-accent-color) !important;
+  box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25) !important;
+}
+
+.form-select:focus {
+  border-color: var(--theme-accent-color) !important;
+  box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25) !important;
+}
+
+/* Progress bars */
+.progress-bar {
+  background-color: var(--theme-accent-color) !important;
+}
+
+/* Paginación */
+.page-link {
+  color: var(--theme-accent-color) !important;
+}
+
+.page-link:hover {
+  color: var(--theme-accent-color) !important;
+  filter: brightness(0.8);
+}
+
+.page-item.active .page-link {
+  background-color: var(--theme-accent-color) !important;
+  border-color: var(--theme-accent-color) !important;
+}
+
+/* Breadcrumbs */
+.breadcrumb-item + .breadcrumb-item::before {
+  color: var(--theme-text-secondary) !important;
+}
+
+/* Listas */
+.list-group-item {
+  background-color: var(--theme-card-bg) !important;
+  border-color: var(--theme-border) !important;
+  color: var(--theme-text) !important;
+}
+
+.list-group-item.active {
+  background-color: var(--theme-accent-color) !important;
+  border-color: var(--theme-accent-color) !important;
+}
+
+/* Tablas */
+.table {
+  color: var(--theme-text) !important;
+}
+
+.table-hover tbody tr:hover {
+  background-color: var(--theme-highlight-bg) !important;
+}
+
+/* Modales */
+.modal-content {
+  background-color: var(--theme-card-bg) !important;
+  border-color: var(--theme-border) !important;
+  color: var(--theme-text) !important;
+}
+
+.modal-header {
+  background-color: var(--theme-accent-color) !important;
+  color: white !important;
+  border-bottom-color: var(--theme-border) !important;
+}
+
+.modal-footer {
+  border-top-color: var(--theme-border) !important;
+}
+
+/* Dropdowns */
+.dropdown-menu {
+  background-color: var(--theme-card-bg) !important;
+  border-color: var(--theme-border) !important;
+}
+
+.dropdown-item {
+  color: var(--theme-text) !important;
+}
+
+.dropdown-item:hover {
+  background-color: var(--theme-highlight-bg) !important;
+  color: var(--theme-text) !important;
+}
+
+.dropdown-item.active {
+  background-color: var(--theme-accent-color) !important;
+  color: white !important;
+}
+
+/* Tooltips */
+.tooltip .tooltip-inner {
+  background-color: var(--theme-accent-color) !important;
+}
+
+/* Popovers */
+.popover {
+  background-color: var(--theme-card-bg) !important;
+  border-color: var(--theme-border) !important;
+}
+
+.popover-header {
+  background-color: var(--theme-accent-color) !important;
+  color: white !important;
+  border-bottom-color: var(--theme-border) !important;
+}
+
+.popover-body {
+  color: var(--theme-text) !important;
 }
 
 /* Modo oscuro global */
@@ -624,23 +832,127 @@ body:not(.dark-mode) {
   animation: themeChange 0.5s ease-in-out;
 }
 
-/* === ESTILOS PARA COMPONENTES ESPECÍFICOS === */
+/* === ESTILOS PARA COMPONENTES ESPECÍFICOS DEL PROYECTO === */
 
-/* Payment Method Cards con tema */
-body.dark-mode .payment-method-card {
-  background-color: var(--theme-surface) !important;
+/* Payment Method Cards */
+.payment-method-card {
+  background-color: var(--theme-card-bg) !important;
   border-color: var(--theme-border) !important;
   color: var(--theme-text) !important;
 }
 
-body.dark-mode .payment-method-card:hover {
-  border-color: var(--bs-primary) !important;
+.payment-method-card:hover {
+  border-color: var(--theme-accent-color) !important;
   box-shadow: 0 4px 12px var(--theme-shadow) !important;
 }
 
-body.dark-mode .payment-method-card.selected {
-  background: linear-gradient(135deg, var(--theme-surface) 0%, var(--theme-bg) 100%) !important;
-  border-color: var(--bs-success) !important;
+.payment-method-card.selected {
+  background: linear-gradient(135deg, var(--theme-card-bg) 0%, var(--theme-highlight-bg) 100%) !important;
+  border-color: var(--theme-accent-color) !important;
+}
+
+/* Order Cards */
+.order-card {
+  background-color: var(--theme-card-bg) !important;
+  border-color: var(--theme-border) !important;
+  color: var(--theme-text) !important;
+}
+
+.order-card:hover {
+  background-color: var(--theme-card-bg) !important;
+  border-left-color: var(--theme-accent-color) !important;
+}
+
+/* Product Cards */
+.product-card {
+  background-color: var(--theme-card-bg) !important;
+  border-color: var(--theme-border) !important;
+  color: var(--theme-text) !important;
+}
+
+.product-card:hover {
+  border-color: var(--theme-accent-color) !important;
+  box-shadow: 0 4px 12px var(--theme-shadow) !important;
+}
+
+/* Dashboard Cards */
+.dashboard-card {
+  background-color: var(--theme-card-bg) !important;
+  border-color: var(--theme-border) !important;
+  color: var(--theme-text) !important;
+}
+
+.dashboard-card .card-header {
+  background-color: var(--theme-accent-color) !important;
+  color: white !important;
+}
+
+/* Timeline */
+.timeline::before {
+  background: linear-gradient(to bottom, var(--theme-accent-color), var(--theme-border));
+}
+
+.timeline-item i {
+  background-color: var(--theme-card-bg);
+  color: var(--theme-text);
+  border-color: var(--theme-border);
+}
+
+/* Progress bars personalizados */
+.progress-bar {
+  background: linear-gradient(90deg, var(--theme-accent-color), var(--theme-accent-color));
+}
+
+/* Status badges */
+.status-badge {
+  background-color: var(--theme-accent-color) !important;
+  color: white !important;
+}
+
+/* Filter bars */
+.filter-bar {
+  background-color: var(--theme-card-bg) !important;
+  border-color: var(--theme-border) !important;
+}
+
+.filter-bar .btn {
+  background-color: var(--theme-button-secondary) !important;
+  border-color: var(--theme-button-secondary) !important;
+  color: white !important;
+}
+
+.filter-bar .btn.active {
+  background-color: var(--theme-accent-color) !important;
+  border-color: var(--theme-accent-color) !important;
+}
+
+/* Navigation tabs */
+.nav-tabs .nav-link {
+  color: var(--theme-text) !important;
+}
+
+.nav-tabs .nav-link.active {
+  background-color: var(--theme-accent-color) !important;
+  border-color: var(--theme-accent-color) !important;
+  color: white !important;
+}
+
+.nav-tabs .nav-link:hover {
+  border-color: var(--theme-border) !important;
+}
+
+/* Footer */
+.footer {
+  background-color: var(--theme-footer-bg) !important;
+  color: white !important;
+}
+
+.footer a {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.footer a:hover {
+  color: white !important;
 }
 
 /* Order Cards con tema */
