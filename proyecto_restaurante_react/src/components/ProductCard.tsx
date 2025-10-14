@@ -107,7 +107,7 @@ function ProductCard({
           {/* Badge de especial */}
           {producto.es_especial && (
             <div className="position-absolute bottom-0 start-0 p-2">
-              <span className="badge bg-warning text-dark">
+              <span className="badge text-white" style={{ backgroundColor: 'var(--theme-accent-color)' }}>
                 <i className="fas fa-star me-1"></i>
                 Especial
               </span>

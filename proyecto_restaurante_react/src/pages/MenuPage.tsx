@@ -258,19 +258,10 @@ function MenuPage() {
         <FilterBar
           categorias={categorias}
           categoriaActiva={categoriaActiva}
-          categoriaSeleccionada={categoriaActiva?.toString() || ''}
           onCategoriaChange={(categoria) => {
-            if (typeof categoria === 'number') {
-              setCategoriaActiva(categoria)
-            } else if (categoria === null) {
-              setCategoriaActiva(null)
-            } else {
-              setCategoriaActiva(parseInt(categoria) || null)
-            }
+            console.log('Categoría seleccionada:', categoria, 'Tipo:', typeof categoria)
+            setCategoriaActiva(categoria)
           }}
-          precioMinimo={0}
-          precioMaximo={1000}
-          onPrecioChange={() => {}}
         />
       )}
 

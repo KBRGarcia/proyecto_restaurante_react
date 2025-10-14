@@ -297,12 +297,8 @@ export interface ProductCardProps {
 
 export interface FilterBarProps {
   categorias: Categoria[]
-  categoriaActiva: string | number | null
-  categoriaSeleccionada: string
-  onCategoriaChange: (categoria: string | number | null) => void
-  precioMinimo: number
-  precioMaximo: number
-  onPrecioChange: (min: number, max: number) => void
+  categoriaActiva: number | null
+  onCategoriaChange: (categoria: number | null) => void
 }
 
 export interface LoadingSpinnerProps {
