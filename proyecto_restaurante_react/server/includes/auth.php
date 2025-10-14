@@ -32,7 +32,7 @@ function verificarAuth() {
     global $conn;
     
     // Buscar sesión activa con este token
-    $stmt = $conn->prepare("SELECT s.*, u.id, u.nombre, u.apellido, u.correo, u.rol, u.estado, u.telefono, u.direccion, u.foto_perfil, u.fecha_registro 
+    $stmt = $conn->prepare("SELECT s.*, u.id, u.nombre, u.apellido, u.correo, u.rol, u.estado, u.codigo_area, u.numero_telefono, u.direccion, u.foto_perfil, u.fecha_registro 
                             FROM sessions s 
                             JOIN usuarios u ON s.usuario_id = u.id 
                             WHERE s.token = ? AND s.expires_at > NOW()");
@@ -75,7 +75,7 @@ function verificarAuth() {
             'correo' => $session['correo'],
             'rol' => $session['rol'],
             'estado' => $session['estado'],
-            'telefono' => $session['telefono'],
+            'telefono' => $session['codigo_area'] . $session['numero_telefono'],
             'direccion' => $session['direccion'],
             'foto_perfil' => $session['foto_perfil'],
             'fecha_registro' => $session['fecha_registro']

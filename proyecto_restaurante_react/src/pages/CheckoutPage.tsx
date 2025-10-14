@@ -110,77 +110,120 @@ function CheckoutPage() {
    * Validar formulario según método de pago y tipo de servicio
    */
   const validarFormulario = (): boolean => {
+    console.log('🔍 Iniciando validación del formulario...')
     const nuevosErrores: Record<string, string> = {}
 
     // Validar tipo de servicio
     if (tipoServicio === 'domicilio' && !direccionEntrega.trim()) {
       nuevosErrores.direccionEntrega = 'La dirección de entrega es requerida para servicio a domicilio'
+      console.log('❌ Error: Dirección de entrega requerida')
     }
 
     if (!telefonoContacto.trim()) {
       nuevosErrores.telefonoContacto = 'El teléfono de contacto es requerido'
+      console.log('❌ Error: Teléfono de contacto requerido')
     }
 
     if (metodoPago === 'tarjeta') {
+      console.log('🔍 Validando datos de tarjeta:', datosTarjeta)
       if (!datosTarjeta.numeroTarjeta || datosTarjeta.numeroTarjeta.length !== 16) {
         nuevosErrores.numeroTarjeta = 'Número de tarjeta inválido (16 dígitos)'
+        console.log('❌ Error: Número de tarjeta inválido')
       }
       if (!datosTarjeta.nombreTitular.trim()) {
         nuevosErrores.nombreTitular = 'Nombre del titular es requerido'
+        console.log('❌ Error: Nombre del titular requerido')
       }
       if (!datosTarjeta.fechaExpiracion || !/^\d{2}\/\d{2}$/.test(datosTarjeta.fechaExpiracion)) {
         nuevosErrores.fechaExpiracion = 'Fecha inválida (MM/AA)'
+        console.log('❌ Error: Fecha de expiración inválida')
       }
       if (!datosTarjeta.cvv || datosTarjeta.cvv.length < 3) {
         nuevosErrores.cvv = 'CVV inválido (3-4 dígitos)'
+        console.log('❌ Error: CVV inválido')
       }
     }
 
     if (metodoPago === 'paypal') {
+      console.log('🔍 Validando datos de PayPal:', datosPayPal)
       if (!datosPayPal.correo || !/\S+@\S+\.\S+/.test(datosPayPal.correo)) {
         nuevosErrores.correoPayPal = 'Correo de PayPal inválido'
+        console.log('❌ Error: Correo de PayPal inválido')
       }
       if (!datosPayPal.password) {
         nuevosErrores.passwordPayPal = 'Contraseña de PayPal requerida'
+        console.log('❌ Error: Contraseña de PayPal requerida')
       }
     }
 
     if (metodoPago === 'zinli') {
+      console.log('🔍 Validando datos de Zinli:', datosZinli)
       if (!datosZinli.numeroTelefono || datosZinli.numeroTelefono.length < 10) {
         nuevosErrores.numeroZinli = 'Número de teléfono inválido'
+        console.log('❌ Error: Número de teléfono Zinli inválido')
       }
       if (!datosZinli.pin || datosZinli.pin.length !== 4) {
         nuevosErrores.pinZinli = 'PIN debe tener 4 dígitos'
+        console.log('❌ Error: PIN Zinli inválido')
       }
     }
 
     if (metodoPago === 'zelle') {
+      console.log('🔍 Validando datos de Zelle:', datosZelle)
       if (!datosZelle.correoZelle || !/\S+@\S+\.\S+/.test(datosZelle.correoZelle)) {
         nuevosErrores.correoZelle = 'Correo de Zelle inválido'
+        console.log('❌ Error: Correo de Zelle inválido')
       }
       if (!datosZelle.nombreCompleto.trim()) {
         nuevosErrores.nombreZelle = 'Nombre completo es requerido'
+        console.log('❌ Error: Nombre completo Zelle requerido')
       }
     }
 
+    console.log('📋 Errores encontrados:', nuevosErrores)
     setErrores(nuevosErrores)
-    return Object.keys(nuevosErrores).length === 0
+    const esValido = Object.keys(nuevosErrores).length === 0
+    console.log('✅ Formulario válido:', esValido)
+    return esValido
   }
 
   /**
    * Procesar pago y crear orden
    */
   const procesarPago = async () => {
-    if (!validarFormulario()) {
+    console.log('=== INICIANDO PROCESAMIENTO DE PAGO ===')
+    console.log('Datos del formulario:', {
+      tipoServicio,
+      direccionEntrega,
+      telefonoContacto,
+      notasEspeciales,
+      metodoPago,
+      datosTarjeta,
+      datosPayPal,
+      datosZinli,
+      datosZelle
+    })
+    
+    console.log('Items en el carrito:', items)
+    
+    const esValido = validarFormulario()
+    console.log('Formulario válido:', esValido)
+    console.log('Errores encontrados:', errores)
+    
+    if (!esValido) {
+      console.log('❌ Validación falló, no se puede proceder')
       return
     }
 
     setProcesando(true)
+    console.log('✅ Iniciando procesamiento...')
 
     try {
       const token = localStorage.getItem('token')
+      console.log('Token encontrado:', token ? 'Sí' : 'No')
       
       if (!token) {
+        console.log('❌ No hay token de autenticación')
         alert('Sesión no válida. Por favor inicia sesión nuevamente.')
         navigate('/login')
         return
@@ -201,6 +244,7 @@ function CheckoutPage() {
       }
 
       console.log('Creando orden con datos:', ordenData)
+      console.log('URL de la API:', API_ENDPOINTS.crearOrden)
 
       // Crear la orden en la base de datos
       const response = await fetch(API_ENDPOINTS.crearOrden, {
@@ -213,6 +257,7 @@ function CheckoutPage() {
       })
 
       console.log('Respuesta de la API:', response.status)
+      console.log('Headers de respuesta:', Object.fromEntries(response.headers.entries()))
 
       if (!response.ok) {
         const errorText = await response.text()
@@ -228,12 +273,15 @@ function CheckoutPage() {
       }
 
       // Simular procesamiento de pago (2 segundos)
+      console.log('⏳ Simulando procesamiento de pago...')
       await new Promise(resolve => setTimeout(resolve, 2000))
 
       // Limpiar carrito
+      console.log('🧹 Limpiando carrito...')
       vaciarCarrito()
 
       // Mostrar notificación de éxito y redirigir
+      console.log('✅ Guardando datos de éxito...')
       localStorage.setItem('paymentSuccess', 'true')
       localStorage.setItem('ordenCreada', JSON.stringify({
         ordenId: result.orden_id,
@@ -241,12 +289,15 @@ function CheckoutPage() {
         fecha: new Date().toISOString()
       }))
       
+      console.log('🏠 Redirigiendo a home...')
       // Redirigir a home
       navigate('/')
     } catch (error) {
-      console.error('Error procesando pago:', error)
+      console.error('❌ Error procesando pago:', error)
+      console.error('Stack trace:', error instanceof Error ? error.stack : 'No stack trace')
       alert(`Error al procesar el pago: ${error instanceof Error ? error.message : 'Error desconocido'}\n\nPor favor intenta nuevamente.`)
     } finally {
+      console.log('🏁 Finalizando procesamiento...')
       setProcesando(false)
     }
   }
