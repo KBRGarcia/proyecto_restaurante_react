@@ -24,7 +24,11 @@ function CheckoutPage() {
   // Estados
   const [tipoServicio, setTipoServicio] = useState<TipoServicio>('recoger')
   const [direccionEntrega, setDireccionEntrega] = useState('')
-  const [telefonoContacto, setTelefonoContacto] = useState(usuario?.telefono || '')
+  const [telefonoContacto, setTelefonoContacto] = useState(
+    usuario?.codigo_area && usuario?.numero_telefono 
+      ? `${usuario.codigo_area}-${usuario.numero_telefono}` 
+      : ''
+  )
   const [notasEspeciales, setNotasEspeciales] = useState('')
   const [metodoPago, setMetodoPago] = useState<MetodoPago>('tarjeta')
   const [procesando, setProcesando] = useState(false)
@@ -305,9 +309,9 @@ function CheckoutPage() {
                   <div className="col-md-6 mb-2">
                     <strong>Correo:</strong> {usuario.correo}
                   </div>
-                  {usuario.telefono && (
+                  {usuario.codigo_area && usuario.numero_telefono && (
                     <div className="col-md-6 mb-2">
-                      <strong>Teléfono:</strong> {usuario.telefono}
+                      <strong>Teléfono:</strong> {usuario.codigo_area}-{usuario.numero_telefono}
                     </div>
                   )}
                   {usuario.direccion && (

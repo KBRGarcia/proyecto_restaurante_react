@@ -124,7 +124,7 @@ function ProductFormModal({ show, onClose, onSave, producto, categorias }: Produ
         descripcion: formData.descripcion.trim(),
         precio: parseFloat(formData.precio),
         categoria_id: parseInt(formData.categoria_id),
-        imagen: formData.imagen.trim() || null,
+        imagen: formData.imagen.trim() || undefined,
         estado: formData.estado,
         tiempo_preparacion: parseInt(formData.tiempo_preparacion),
         ingredientes: formData.ingredientes.trim(),

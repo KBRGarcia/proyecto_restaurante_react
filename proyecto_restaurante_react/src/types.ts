@@ -152,6 +152,7 @@ export interface ItemCarrito {
   imagen?: string
   descripcion?: string
   tiempo_preparacion?: number
+  notas?: string
 }
 
 export interface CartContextType {

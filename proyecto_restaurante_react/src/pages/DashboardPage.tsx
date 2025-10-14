@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext.tsx'
 import { API_ENDPOINTS } from '../config'
-import LoadingSpinner from '../components/LoadingSpinner.tsx'
+import LoadingSpinner from '../components/LoadingSpinner'
 import type { EstadisticasDashboard, UsuarioAdmin, TopUsuario, Orden } from '../types'
 
 /**

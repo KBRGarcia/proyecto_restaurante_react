@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { API_ENDPOINTS } from '../config'
 import OrderCard from '../components/OrderCard.tsx'
 import OrderDetailsModal from '../components/OrderDetailsModal.tsx'
-import LoadingSpinner from '../components/LoadingSpinner.tsx'
+import LoadingSpinner from '../components/LoadingSpinner'
 import type { Orden, EstadoOrden, TipoServicio } from '../types.ts'
 
 /**

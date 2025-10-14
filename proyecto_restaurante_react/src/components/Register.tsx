@@ -1,13 +1,15 @@
 import { useState, type FormEvent, type ChangeEvent } from 'react'
-import { useAuth } from '../contexts/AuthContext.tsx'
 import { useNavigate, Link } from 'react-router-dom'
 import type { RegisterData, CodigoArea } from '../types.ts'
+import { API_ENDPOINTS } from '../config'
+import VerificationCode from './VerificationCode.tsx'
 
 /**
- * Componente de Registro
- * Permite a nuevos usuarios crear una cuenta
+ * Componente de Registro con Verificación de 2 Pasos
+ * Permite a nuevos usuarios crear una cuenta con verificación por correo
  */
 function Register() {
+  const [step, setStep] = useState<'form' | 'verification'>('form')
   const [formData, setFormData] = useState<RegisterData & { confirmPassword: string }>({
     nombre: '',
     apellido: '',
@@ -25,7 +27,6 @@ function Register() {
   // Códigos de área disponibles
   const codigosArea: CodigoArea[] = ['0414', '0424', '0412', '0416', '0426']
   
-  const { register } = useAuth()
   const navigate = useNavigate()
 
   // Funciones de validación
@@ -128,22 +129,71 @@ function Register() {
     }
 
     try {
-      // Preparar datos para enviar (sin confirmPassword)
-      const { confirmPassword, ...datosRegistro } = formData
-      
-      const resultado = await register(datosRegistro)
+      // Enviar código de verificación
+      const response = await fetch(API_ENDPOINTS.sendVerificationCode, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email: formData.correo,
+          password: formData.password,
+          nombre: formData.nombre,
+          apellido: formData.apellido,
+          codigo_area: formData.codigo_area,
+          numero_telefono: formData.numero_telefono
+        })
+      })
 
-      if (resultado.success) {
-        // Redirigir al menú después de registro exitoso
-        navigate('/menu')
+      const data = await response.json()
+
+      if (data.success) {
+        setStep('verification')
       } else {
-        setError(resultado.message || 'Error al registrarse')
+        setError(data.message || 'Error al enviar código de verificación')
       }
     } catch (err) {
-      setError('Error al registrarse')
+      setError('Error de conexión. Inténtalo de nuevo.')
     } finally {
       setLoading(false)
     }
+  }
+
+  // Manejar verificación exitosa
+  const handleVerificationSuccess = (token: string, usuario: any) => {
+    // Guardar token y datos del usuario
+    localStorage.setItem('token', token)
+    localStorage.setItem('usuario', JSON.stringify(usuario))
+    
+    // Redirigir al menú
+    navigate('/menu')
+  }
+
+  // Volver al formulario de registro
+  const handleBackToForm = () => {
+    setStep('form')
+    setError(null)
+  }
+
+  // Mostrar componente de verificación si estamos en ese paso
+  if (step === 'verification') {
+    return (
+      <div className="container mt-5 mb-5">
+        <div className="row justify-content-center">
+          <div className="col-md-8 col-lg-6">
+            <div className="card shadow-lg">
+              <div className="card-body p-5">
+                <VerificationCode
+                  email={formData.correo}
+                  onVerificationSuccess={handleVerificationSuccess}
+                  onBack={handleBackToForm}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -364,12 +414,12 @@ function Register() {
                   {loading ? (
                     <>
                       <span className="spinner-border spinner-border-sm me-2" />
-                      Creando cuenta...
+                      Enviando código...
                     </>
                   ) : (
                     <>
-                      <i className="fas fa-user-plus me-2"></i>
-                      Crear Cuenta
+                      <i className="fas fa-envelope me-2"></i>
+                      Enviar Código de Verificación
                     </>
                   )}
                 </button>

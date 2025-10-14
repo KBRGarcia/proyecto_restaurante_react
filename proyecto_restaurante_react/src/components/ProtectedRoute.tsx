@@ -1,6 +1,6 @@
 import { Navigate, Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext.tsx'
-import LoadingSpinner from './LoadingSpinner.tsx'
+import LoadingSpinner from './LoadingSpinner'
 import type { ProtectedRouteProps } from '../types.ts'
 
 /**

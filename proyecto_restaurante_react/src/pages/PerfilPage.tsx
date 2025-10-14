@@ -1,7 +1,7 @@
 import { useState, useEffect, type ChangeEvent, type FormEvent } from 'react'
 import { useAuth } from '../contexts/AuthContext.tsx'
 import { API_ENDPOINTS } from '../config'
-import LoadingSpinner from '../components/LoadingSpinner.tsx'
+import LoadingSpinner from '../components/LoadingSpinner'
 import ErrorMessage from '../components/ErrorMessage.tsx'
 import type { Usuario, PerfilFormData, Estadisticas } from '../types'
 
@@ -126,7 +126,9 @@ function PerfilPage() {
     setFormData({
       nombre: perfil?.nombre || '',
       apellido: perfil?.apellido || '',
-      telefono: perfil?.telefono || '',
+      telefono: perfil?.codigo_area && perfil?.numero_telefono 
+        ? `${perfil.codigo_area}-${perfil.numero_telefono}` 
+        : '',
       direccion: perfil?.direccion || ''
     })
     setEditando(false)

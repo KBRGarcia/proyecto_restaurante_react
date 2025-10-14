@@ -27,7 +27,16 @@ export const API_ENDPOINTS = {
   logout: `${API_BASE_URL}/auth/logout.php`,
   me: `${API_BASE_URL}/auth/me.php`,
   uploadFoto: `${API_BASE_URL}/auth/upload-foto.php`,
-  recuperarPassword: `${API_BASE_URL}/auth/recuperar-password.php`,
+  
+  // Verificación de 2 pasos
+  sendVerificationCode: `${API_BASE_URL}/auth/send-verification-code.php`,
+  verifyCode: `${API_BASE_URL}/auth/verify-code.php`,
+  resendVerificationCode: `${API_BASE_URL}/auth/resend-verification-code.php`,
+  
+  // Recuperación de contraseña con 2FA
+  requestPasswordRecovery: `${API_BASE_URL}/auth/request-password-recovery.php`,
+  verifyRecoveryCode: `${API_BASE_URL}/auth/verify-recovery-code.php`,
+  changePassword: `${API_BASE_URL}/auth/change-password.php`,
   
   // Carrito
   carrito: `${API_BASE_URL}/carrito.php`,
