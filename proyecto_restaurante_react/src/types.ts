@@ -152,16 +152,29 @@ export interface CartContextType {
 export type EstadoOrden = 'pendiente' | 'preparando' | 'listo' | 'en_camino' | 'entregado' | 'cancelado'
 export type TipoServicio = 'domicilio' | 'recoger'
 
+export interface OrdenDetalle {
+  id: number
+  producto_id: number
+  cantidad: number
+  precio_unitario: number
+  subtotal: number
+  notas_producto?: string
+  producto_nombre: string
+  producto_descripcion?: string
+  producto_imagen?: string
+}
+
 export interface Orden {
   id: number
   usuario_id: number
-  productos: Array<{
+  productos?: Array<{
     producto_id: number
     cantidad: number
     precio_unitario: number
     subtotal: number
     producto?: Producto
   }>
+  detalles?: OrdenDetalle[]
   total: number
   estado: EstadoOrden
   tipo_servicio: TipoServicio
