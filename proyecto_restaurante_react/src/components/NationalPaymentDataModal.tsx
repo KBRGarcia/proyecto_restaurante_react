@@ -199,7 +199,7 @@ function NationalPaymentDataModal({
           <div className="modal-content">
             {/* Header */}
             <div className="modal-header bg-success text-white">
-              <h5 className="modal-title">
+              <h5 className="modal-title text-white">
                 <i className={`${getIconoModal()} me-2`}></i>
                 {getTituloModal()}
               </h5>
@@ -493,6 +493,7 @@ function NationalPaymentDataModal({
                           <div className="card-body text-center">
                             <i className="fas fa-clock fa-3x text-primary mb-3"></i>
                             <h6>Horario de Atención</h6>
+                            <p>De lunes a domingo: <b>8:00 AM - 9:00 PM</b></p>
                             <p className="text-muted" style={{ whiteSpace: 'pre-line' }}>{datosPagoFisico.horarioAtencion}</p>
                           </div>
                         </div>
@@ -502,6 +503,7 @@ function NationalPaymentDataModal({
                           <div className="card-body text-center">
                             <i className="fas fa-map-marker-alt fa-3x text-success mb-3"></i>
                             <h6>Dirección del Restaurante</h6>
+                            <p>Calle Principal #123, Ciudad, Municipio, Estado.</p>
                             <p className="text-muted">{datosPagoFisico.direccionRestaurante}</p>
                           </div>
                         </div>

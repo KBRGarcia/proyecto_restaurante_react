@@ -416,7 +416,7 @@ function CheckoutPage() {
           {usuario && (
             <div className="card shadow-sm mb-4">
               <div className="card-header bg-primary text-white">
-                <h5 className="mb-0">
+                <h5 className="mb-0 text-white">
                   <i className="fas fa-user me-2"></i>
                   Información de Facturación
                 </h5>
@@ -447,7 +447,7 @@ function CheckoutPage() {
           {/* Tipo de Servicio */}
           <div className="card shadow-sm mb-4">
             <div className="card-header bg-warning text-dark">
-              <h5 className="mb-0">
+              <h5 className="mb-0 text-white">
                 <i className="fas fa-truck me-2"></i>
                 Tipo de Servicio
               </h5>
@@ -577,7 +577,7 @@ function CheckoutPage() {
           {/* Selector de Moneda */}
           <div className="card shadow-sm mb-4">
             <div className="card-header bg-primary text-white">
-              <h5 className="mb-0">
+              <h5 className="mb-0 text-white">
                 <i className="fas fa-coins me-2"></i>
                 Tipo de Moneda
               </h5>
@@ -593,7 +593,7 @@ function CheckoutPage() {
           {/* Métodos de Pago */}
           <div className="card shadow-sm mb-4">
             <div className="card-header bg-success text-white">
-              <h5 className="mb-0">
+              <h5 className="mb-0 text-white">
                 <i className="fas fa-credit-card me-2"></i>
                 Método de Pago
               </h5>
@@ -619,7 +619,7 @@ function CheckoutPage() {
           {/* Estado de datos de pago */}
           <div className="card shadow-sm">
             <div className="card-header bg-info text-white">
-              <h5 className="mb-0">
+              <h5 className="mb-0 text-white">
                 <i className="fas fa-file-invoice-dollar me-2"></i>
                 Datos de Pago
               </h5>
@@ -672,7 +672,7 @@ function CheckoutPage() {
         <div className="col-lg-4">
           <div className="card shadow-sm sticky-top" style={{ top: '20px' }}>
             <div className="card-header bg-dark text-white">
-              <h5 className="mb-0">
+              <h5 className="mb-0 text-white">
                 <i className="fas fa-receipt me-2"></i>
                 Resumen del Pedido
               </h5>

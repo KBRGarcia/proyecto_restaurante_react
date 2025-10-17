@@ -26,6 +26,7 @@
 /* Aplicar colores de tema a todos los elementos principales */
 .navbar {
   background-color: var(--theme-header-bg) !important;
+  z-index: 1030 !important;
 }
 
 .navbar-brand,
@@ -182,6 +183,7 @@ h1, h2, h3, h4, h5, h6 {
 .dropdown-menu {
   background-color: var(--theme-card-bg) !important;
   border-color: var(--theme-border) !important;
+  z-index: 1040 !important;
 }
 
 .dropdown-item {
@@ -344,6 +346,7 @@ body.dark-mode .alert {
   padding: 0.5rem 0;
   min-width: 200px;
   max-width: 250px;
+  z-index: 1040 !important;
 }
 
 .dropdown-item {
@@ -414,6 +417,16 @@ body.dark-mode .alert {
 body.dark-mode .dropdown-menu {
   background-color: var(--theme-surface);
   border-color: var(--theme-border);
+  z-index: 1040 !important;
+}
+
+/* Estilos específicos para el dropdown del usuario */
+.navbar .dropdown-menu {
+  z-index: 1040 !important;
+}
+
+.navbar .dropdown-menu.show {
+  z-index: 1040 !important;
 }
 
 body.dark-mode .dropdown-item {

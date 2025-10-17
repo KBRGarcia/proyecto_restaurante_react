@@ -209,7 +209,7 @@ function PaymentDataModal({ show, onClose, metodoPago, onSave, datosExistentes }
           <div className="modal-content">
             {/* Header */}
             <div className="modal-header bg-primary text-white">
-              <h5 className="modal-title">
+              <h5 className="modal-title text-white">
                 <i className={`${getIconoModal()} me-2`}></i>
                 {getTituloModal()}
               </h5>
