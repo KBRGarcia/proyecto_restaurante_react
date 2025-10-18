@@ -336,6 +336,36 @@ body.dark-mode .alert {
   position: relative;
 }
 
+/* === ANIMACIONES PARA NOTIFICACIONES === */
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* Estilos para campos con error temporal */
+.border-danger {
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+}
+
 /* === ESTILOS MEJORADOS PARA DROPDOWN === */
 
 /* Mejorar el estilo del dropdown del navbar */

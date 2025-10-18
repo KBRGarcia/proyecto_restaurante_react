@@ -242,7 +242,8 @@ function PaymentDataModal({ show, onClose, metodoPago, onSave, datosExistentes }
                           value={formatearNumeroTarjeta(datosTarjeta.numeroTarjeta)}
                           onChange={(e) => {
                             const valor = e.target.value.replace(/\s/g, '')
-                            if (valor.length <= 16 && /^\d*$/.test(valor)) {
+                            // Solo permitir números enteros
+                            if (valor.length <= 16 && /^\d+$/.test(valor)) {
                               setDatosTarjeta({
                                 ...datosTarjeta,
                                 numeroTarjeta: valor,
@@ -329,7 +330,8 @@ function PaymentDataModal({ show, onClose, metodoPago, onSave, datosExistentes }
                         value={datosTarjeta.cvv}
                         onChange={(e) => {
                           const valor = e.target.value.replace(/\D/g, '')
-                          if (valor.length <= 4) {
+                          // Solo permitir números enteros
+                          if (valor.length <= 4 && /^\d+$/.test(valor)) {
                             setDatosTarjeta({ ...datosTarjeta, cvv: valor })
                             if (errores.cvv) setErrores({ ...errores, cvv: '' })
                           }
@@ -361,8 +363,12 @@ function PaymentDataModal({ show, onClose, metodoPago, onSave, datosExistentes }
                         placeholder="tu@correo.com"
                         value={datosPayPal.correo}
                         onChange={(e) => {
-                          setDatosPayPal({ ...datosPayPal, correo: e.target.value })
-                          if (errores.correoPayPal) setErrores({ ...errores, correoPayPal: '' })
+                          const valor = e.target.value
+                          // Solo permitir formato de email válido
+                          if (/^[a-zA-Z0-9._%+-@]*$/.test(valor)) {
+                            setDatosPayPal({ ...datosPayPal, correo: valor })
+                            if (errores.correoPayPal) setErrores({ ...errores, correoPayPal: '' })
+                          }
                         }}
                       />
                       {errores.correoPayPal && (
@@ -411,8 +417,12 @@ function PaymentDataModal({ show, onClose, metodoPago, onSave, datosExistentes }
                         placeholder="+58 412-1234567"
                         value={datosZinli.numeroTelefono}
                         onChange={(e) => {
-                          setDatosZinli({ ...datosZinli, numeroTelefono: e.target.value })
-                          if (errores.numeroZinli) setErrores({ ...errores, numeroZinli: '' })
+                          const valor = e.target.value.replace(/\D/g, '')
+                          // Solo permitir números enteros
+                          if (valor.length <= 15 && /^\d+$/.test(valor)) {
+                            setDatosZinli({ ...datosZinli, numeroTelefono: valor })
+                            if (errores.numeroZinli) setErrores({ ...errores, numeroZinli: '' })
+                          }
                         }}
                       />
                       {errores.numeroZinli && (
@@ -432,8 +442,11 @@ function PaymentDataModal({ show, onClose, metodoPago, onSave, datosExistentes }
                         value={datosZinli.pin}
                         onChange={(e) => {
                           const valor = e.target.value.replace(/\D/g, '')
-                          setDatosZinli({ ...datosZinli, pin: valor })
-                          if (errores.pinZinli) setErrores({ ...errores, pinZinli: '' })
+                          // Solo permitir números enteros
+                          if (valor.length <= 4 && /^\d+$/.test(valor)) {
+                            setDatosZinli({ ...datosZinli, pin: valor })
+                            if (errores.pinZinli) setErrores({ ...errores, pinZinli: '' })
+                          }
                         }}
                       />
                       {errores.pinZinli && (
@@ -463,8 +476,12 @@ function PaymentDataModal({ show, onClose, metodoPago, onSave, datosExistentes }
                         placeholder="tu@correo.com"
                         value={datosZelle.correoZelle}
                         onChange={(e) => {
-                          setDatosZelle({ ...datosZelle, correoZelle: e.target.value })
-                          if (errores.correoZelle) setErrores({ ...errores, correoZelle: '' })
+                          const valor = e.target.value
+                          // Solo permitir formato de email válido
+                          if (/^[a-zA-Z0-9._%+-@]*$/.test(valor)) {
+                            setDatosZelle({ ...datosZelle, correoZelle: valor })
+                            if (errores.correoZelle) setErrores({ ...errores, correoZelle: '' })
+                          }
                         }}
                       />
                       {errores.correoZelle && (

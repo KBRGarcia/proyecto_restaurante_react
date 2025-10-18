@@ -247,12 +247,97 @@ function CheckoutPage() {
       }
     }
 
-
     console.log('📋 Errores encontrados:', nuevosErrores)
     setErrores(nuevosErrores)
     const esValido = Object.keys(nuevosErrores).length === 0
     console.log('✅ Formulario válido:', esValido)
     return esValido
+  }
+
+  /**
+   * Hacer scroll al primer campo con error y mostrar notificación
+   */
+  const scrollToFirstError = () => {
+    // Buscar el primer campo con error
+    const errorFields = Object.keys(errores)
+    
+    if (errorFields.length > 0) {
+      let targetElement: HTMLElement | null = null
+      let errorMessage = ''
+      
+      // Priorizar campos específicos
+      if (errores.direccionEntrega) {
+        targetElement = document.querySelector('[name="direccionEntrega"]') as HTMLElement
+        errorMessage = 'Por favor completa la dirección de entrega'
+      } else if (errores.telefonoContacto) {
+        targetElement = document.querySelector('[name="telefonoContacto"]') as HTMLElement
+        errorMessage = 'Por favor completa el teléfono de contacto'
+      } else if (errores.datosPago) {
+        targetElement = document.querySelector('.alert-warning') as HTMLElement
+        errorMessage = 'Por favor completa los datos de pago'
+      }
+      
+      // Si no se encuentra el elemento específico, buscar el primero con error
+      if (!targetElement) {
+        for (const fieldName of errorFields) {
+          targetElement = document.querySelector(`[name="${fieldName}"]`) as HTMLElement
+          if (targetElement) {
+            errorMessage = `Por favor completa el campo requerido`
+            break
+          }
+        }
+      }
+      
+      if (targetElement) {
+        // Mostrar notificación de error
+        if (errorMessage) {
+          // Crear notificación temporal
+          const notification = document.createElement('div')
+          notification.className = 'alert alert-danger position-fixed'
+          notification.style.cssText = `
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 300px;
+            animation: slideInRight 0.3s ease-out;
+          `
+          notification.innerHTML = `
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>Campos requeridos:</strong><br>
+            ${errorMessage}
+          `
+          
+          document.body.appendChild(notification)
+          
+          // Remover la notificación después de 4 segundos
+          setTimeout(() => {
+            notification.style.animation = 'slideOutRight 0.3s ease-out'
+            setTimeout(() => {
+              if (notification.parentNode) {
+                notification.parentNode.removeChild(notification)
+              }
+            }, 300)
+          }, 4000)
+        }
+        
+        // Hacer scroll suave al elemento
+        targetElement.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center' 
+        })
+        
+        // Resaltar el campo por un momento
+        setTimeout(() => {
+          targetElement?.focus()
+          
+          // Agregar clase de resaltado temporal
+          targetElement?.classList.add('border-danger')
+          setTimeout(() => {
+            targetElement?.classList.remove('border-danger')
+          }, 3000)
+        }, 500)
+      }
+    }
   }
 
   /**
@@ -285,6 +370,10 @@ function CheckoutPage() {
     
     if (!esValido) {
       console.log('❌ Validación falló, no se puede proceder')
+      // Hacer scroll al primer campo con error después de un pequeño delay
+      setTimeout(() => {
+        scrollToFirstError()
+      }, 100)
       return
     }
 
@@ -497,6 +586,7 @@ function CheckoutPage() {
                       Dirección de Entrega *
                     </label>
                     <textarea
+                      name="direccionEntrega"
                       className={`form-control ${errores.direccionEntrega ? 'is-invalid' : ''}`}
                       rows={2}
                       placeholder="Calle, número, colonia, referencias..."
@@ -516,9 +606,10 @@ function CheckoutPage() {
                 <div className="col-md-6">
                   <label className="form-label">
                     <i className="fas fa-phone me-1"></i>
-                    Teléfono de Contacto *
+                    Teléfono de Contacto Alternativo*
                   </label>
                   <input
+                    name="telefonoContacto"
                     type="tel"
                     className={`form-control ${errores.telefonoContacto ? 'is-invalid' : ''}`}
                     placeholder="+1 (555) 123-4567"

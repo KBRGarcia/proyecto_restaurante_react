@@ -30,6 +30,7 @@ function NationalPaymentDataModal({
       cedula: '',
       telefono: '',
       banco: 'provincial',
+      tipoCedula: 'V',
       numeroReferencia: '',
       fechaPago: ''
     }
@@ -41,6 +42,7 @@ function NationalPaymentDataModal({
       cedula: '',
       telefono: '',
       banco: 'provincial',
+      tipoCedula: 'V',
       numeroReferencia: '',
       fechaPago: ''
     }
@@ -71,10 +73,13 @@ function NationalPaymentDataModal({
     const nuevosErrores: Record<string, string> = {}
 
     if (metodoPago === 'pago_movil') {
+      if (!datosPagoMovil.tipoCedula) {
+        nuevosErrores.tipoCedula = 'El tipo de identificación es requerido'
+      }
       if (!datosPagoMovil.cedula.trim()) {
-        nuevosErrores.cedula = 'La cédula de identidad es requerida'
-      } else if (!/^[VE]-\d{7,8}$/.test(datosPagoMovil.cedula)) {
-        nuevosErrores.cedula = 'Formato de cédula inválido (V-12345678)'
+        nuevosErrores.cedula = 'El número de cédula es requerido'
+      } else if (!/^\d{7,8}$/.test(datosPagoMovil.cedula)) {
+        nuevosErrores.cedula = 'Formato de cédula inválido (7-8 dígitos)'
       }
       
       if (!datosPagoMovil.telefono.trim()) {
@@ -93,10 +98,13 @@ function NationalPaymentDataModal({
     }
 
     if (metodoPago === 'transferencia') {
+      if (!datosTransferencia.tipoCedula) {
+        nuevosErrores.tipoCedula = 'El tipo de identificación es requerido'
+      }
       if (!datosTransferencia.cedula.trim()) {
-        nuevosErrores.cedula = 'La cédula de identidad es requerida'
-      } else if (!/^[VE]-\d{7,8}$/.test(datosTransferencia.cedula)) {
-        nuevosErrores.cedula = 'Formato de cédula inválido (V-12345678)'
+        nuevosErrores.cedula = 'El número de cédula es requerido'
+      } else if (!/^\d{7,8}$/.test(datosTransferencia.cedula)) {
+        nuevosErrores.cedula = 'Formato de cédula inválido (7-8 dígitos)'
       }
       
       if (!datosTransferencia.telefono?.trim()) {
@@ -233,24 +241,54 @@ function NationalPaymentDataModal({
                     </div>
 
                     <div className="row g-3">
-                      {/* Cédula */}
+                      {/* Tipo y Cédula */}
                       <div className="col-md-6">
                         <label className="form-label">
                           <i className="fas fa-id-card me-1"></i>
-                          Cédula de Identidad *
+                          Tipo de Identificación *
                         </label>
-                        <input
-                          type="text"
-                          className={`form-control ${errores.cedula ? 'is-invalid' : ''}`}
-                          placeholder="V-12345678"
-                          value={datosPagoMovil.cedula}
-                          onChange={(e) => {
-                            setDatosPagoMovil({ ...datosPagoMovil, cedula: e.target.value.toUpperCase() })
-                            if (errores.cedula) setErrores({ ...errores, cedula: '' })
-                          }}
-                        />
+                        <div className="row g-2">
+                          <div className="col-4">
+                            <select
+                              className={`form-select ${errores.tipoCedula ? 'is-invalid' : ''}`}
+                              value={datosPagoMovil.tipoCedula || 'V'}
+                              onChange={(e) => {
+                                setDatosPagoMovil({ ...datosPagoMovil, tipoCedula: e.target.value as 'V' | 'E' | 'J' })
+                                if (errores.tipoCedula) setErrores({ ...errores, tipoCedula: '' })
+                              }}
+                            >
+                              <option value="V">V</option>
+                              <option value="E">E</option>
+                              <option value="J">J</option>
+                            </select>
+                            <small className="text-muted d-block mt-1">
+                              V: Venezolano(a)<br/>
+                              E: Extranjero(a)<br/>
+                              J: Jurídico
+                            </small>
+                          </div>
+                          <div className="col-8">
+                            <input
+                              type="text"
+                              className={`form-control ${errores.cedula ? 'is-invalid' : ''}`}
+                              placeholder="12345678"
+                              value={datosPagoMovil.cedula}
+                              onChange={(e) => {
+                                const valor = e.target.value.replace(/\D/g, '')
+                                // Solo permitir números enteros
+                                if (valor.length <= 8 && /^\d+$/.test(valor)) {
+                                  setDatosPagoMovil({ ...datosPagoMovil, cedula: valor })
+                                  if (errores.cedula) setErrores({ ...errores, cedula: '' })
+                                }
+                              }}
+                            />
+                          </div>
+                        </div>
                         {errores.cedula && (
                           <div className="invalid-feedback">{errores.cedula}</div>
+                        )}
+                        {errores.tipoCedula && (
+                          <div className="invalid-feedback">{errores.tipoCedula}</div>
                         )}
                       </div>
 
@@ -267,7 +305,8 @@ function NationalPaymentDataModal({
                           value={datosPagoMovil.telefono}
                           onChange={(e) => {
                             const valor = e.target.value.replace(/\D/g, '')
-                            if (valor.length <= 11) {
+                            // Solo permitir números enteros
+                            if (valor.length <= 11 && /^\d+$/.test(valor)) {
                               setDatosPagoMovil({ ...datosPagoMovil, telefono: valor })
                               if (errores.telefono) setErrores({ ...errores, telefono: '' })
                             }
@@ -335,8 +374,12 @@ function NationalPaymentDataModal({
                           placeholder="Número de referencia de la transacción"
                           value={datosPagoMovil.numeroReferencia}
                           onChange={(e) => {
-                            setDatosPagoMovil({ ...datosPagoMovil, numeroReferencia: e.target.value })
-                            if (errores.numeroReferencia) setErrores({ ...errores, numeroReferencia: '' })
+                            const valor = e.target.value.replace(/\D/g, '')
+                            // Solo permitir números enteros
+                            if (valor.length <= 20 && /^\d+$/.test(valor)) {
+                              setDatosPagoMovil({ ...datosPagoMovil, numeroReferencia: valor })
+                              if (errores.numeroReferencia) setErrores({ ...errores, numeroReferencia: '' })
+                            }
                           }}
                         />
                         {errores.numeroReferencia && (
@@ -365,24 +408,54 @@ function NationalPaymentDataModal({
                     </div>
 
                     <div className="row g-3">
-                      {/* Cédula */}
+                      {/* Tipo y Cédula */}
                       <div className="col-md-6">
                         <label className="form-label">
                           <i className="fas fa-id-card me-1"></i>
-                          Cédula de Identidad *
+                          Tipo de Identificación *
                         </label>
-                        <input
-                          type="text"
-                          className={`form-control ${errores.cedula ? 'is-invalid' : ''}`}
-                          placeholder="V-12345678"
-                          value={datosTransferencia.cedula}
-                          onChange={(e) => {
-                            setDatosTransferencia({ ...datosTransferencia, cedula: e.target.value.toUpperCase() })
-                            if (errores.cedula) setErrores({ ...errores, cedula: '' })
-                          }}
-                        />
+                        <div className="row g-2">
+                          <div className="col-4">
+                            <select
+                              className={`form-select ${errores.tipoCedula ? 'is-invalid' : ''}`}
+                              value={datosTransferencia.tipoCedula || 'V'}
+                              onChange={(e) => {
+                                setDatosTransferencia({ ...datosTransferencia, tipoCedula: e.target.value as 'V' | 'E' | 'J' })
+                                if (errores.tipoCedula) setErrores({ ...errores, tipoCedula: '' })
+                              }}
+                            >
+                              <option value="V">V</option>
+                              <option value="E">E</option>
+                              <option value="J">J</option>
+                            </select>
+                            <small className="text-muted d-block mt-1">
+                              V: Venezolano(a)<br/>
+                              E: Extranjero(a)<br/>
+                              J: Jurídico
+                            </small>
+                          </div>
+                          <div className="col-8">
+                            <input
+                              type="text"
+                              className={`form-control ${errores.cedula ? 'is-invalid' : ''}`}
+                              placeholder="12345678"
+                              value={datosTransferencia.cedula}
+                              onChange={(e) => {
+                                const valor = e.target.value.replace(/\D/g, '')
+                                // Solo permitir números enteros
+                                if (valor.length <= 8 && /^\d+$/.test(valor)) {
+                                  setDatosTransferencia({ ...datosTransferencia, cedula: valor })
+                                  if (errores.cedula) setErrores({ ...errores, cedula: '' })
+                                }
+                              }}
+                            />
+                          </div>
+                        </div>
                         {errores.cedula && (
                           <div className="invalid-feedback">{errores.cedula}</div>
+                        )}
+                        {errores.tipoCedula && (
+                          <div className="invalid-feedback">{errores.tipoCedula}</div>
                         )}
                       </div>
 
@@ -399,7 +472,8 @@ function NationalPaymentDataModal({
                           value={datosTransferencia.telefono}
                           onChange={(e) => {
                             const valor = e.target.value.replace(/\D/g, '')
-                            if (valor.length <= 11) {
+                            // Solo permitir números enteros
+                            if (valor.length <= 11 && /^\d+$/.test(valor)) {
                               setDatosTransferencia({ ...datosTransferencia, telefono: valor })
                               if (errores.telefono) setErrores({ ...errores, telefono: '' })
                             }
@@ -467,8 +541,12 @@ function NationalPaymentDataModal({
                           placeholder="Número de referencia de la transferencia"
                           value={datosTransferencia.numeroReferencia}
                           onChange={(e) => {
-                            setDatosTransferencia({ ...datosTransferencia, numeroReferencia: e.target.value })
-                            if (errores.numeroReferencia) setErrores({ ...errores, numeroReferencia: '' })
+                            const valor = e.target.value.replace(/\D/g, '')
+                            // Solo permitir números enteros
+                            if (valor.length <= 20 && /^\d+$/.test(valor)) {
+                              setDatosTransferencia({ ...datosTransferencia, numeroReferencia: valor })
+                              if (errores.numeroReferencia) setErrores({ ...errores, numeroReferencia: '' })
+                            }
                           }}
                         />
                         {errores.numeroReferencia && (

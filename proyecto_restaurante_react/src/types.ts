@@ -236,6 +236,7 @@ export interface DatosPagoMovil {
   banco: BancoVenezuela
   telefono: string
   cedula: string
+  tipoCedula?: 'V' | 'E' | 'J'
   numeroReferencia?: string
   fechaPago?: string
 }
@@ -244,6 +245,7 @@ export interface DatosTransferencia {
   banco: BancoVenezuela
   numero_cuenta: string
   cedula: string
+  tipoCedula?: 'V' | 'E' | 'J'
   nombre_titular: string
   telefono?: string
   numeroReferencia?: string
