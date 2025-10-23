@@ -78,7 +78,7 @@ function ProductCard({
                 title="Editar producto"
                 disabled={isDeleting}
               >
-                <i className="fas fa-edit text-primary"></i>
+                <i className="fas fa-edit" style={{ color: 'var(--theme-accent-color)' }}></i>
               </button>
               <button
                 className="btn btn-sm btn-light"
@@ -87,16 +87,16 @@ function ProductCard({
                 disabled={isDeleting}
               >
                 {isDeleting ? (
-                  <span className="spinner-border spinner-border-sm text-danger"></span>
+                  <span className="spinner-border spinner-border-sm" style={{ color: 'var(--theme-accent-color)' }}></span>
                 ) : (
-                  <i className="fas fa-trash text-danger"></i>
+                  <i className="fas fa-trash" style={{ color: 'var(--theme-accent-color)' }}></i>
                 )}
               </button>
             </div>
           )}
           
           {/* Badge de estado si no está activo */}
-          {producto.estado !== 'activo' && (
+          {producto.estado && producto.estado !== 'activo' && (
             <div className="position-absolute top-0 start-0 p-2">
               <span className={`badge bg-${producto.estado === 'agotado' ? 'warning' : 'secondary'}`}>
                 {producto.estado.charAt(0).toUpperCase() + producto.estado.slice(1)}
@@ -107,7 +107,7 @@ function ProductCard({
           {/* Badge de especial */}
           {producto.es_especial && (
             <div className="position-absolute bottom-0 start-0 p-2">
-              <span className="badge bg-warning text-dark">
+              <span className="badge text-white" style={{ backgroundColor: 'var(--theme-accent-color)' }}>
                 <i className="fas fa-star me-1"></i>
                 Especial
               </span>

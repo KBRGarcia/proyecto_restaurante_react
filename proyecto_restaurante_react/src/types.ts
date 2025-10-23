@@ -1,156 +1,132 @@
-/**
- * Tipos TypeScript del Sistema de Restaurante
- */
+// === TIPOS PARA SISTEMA DE TEMAS ===
+
+export type ThemeMode = 'light' | 'dark'
+
+export type ColorPalette = 
+  | 'default'    // Paleta actual (rojo/primary)
+  | 'gray'       // Paleta gris
+  | 'black'      // Paleta negro
+  | 'pink'       // Paleta rosa
+  | 'blue'       // Paleta azul
+  | 'green'      // Paleta verde
+
+export interface ThemeColors {
+  primary: string
+  secondary: string
+  success: string
+  danger: string
+  warning: string
+  info: string
+  light: string
+  dark: string
+  background: string
+  surface: string
+  text: string
+  textSecondary: string
+  border: string
+  shadow: string
+}
+
+export interface ThemeConfig {
+  mode: ThemeMode
+  palette: ColorPalette
+  colors: ThemeColors
+}
 
 // === TIPOS DE USUARIO ===
+
 export type RolUsuario = 'admin' | 'empleado' | 'cliente'
-export type EstadoUsuario = 'activo' | 'inactivo'
 
 export interface Usuario {
   id: number
   nombre: string
   apellido: string
   correo: string
+  telefono: string
   rol: RolUsuario
+  estado: 'activo' | 'inactivo' | 'baneado'
+  foto_perfil?: string
+  fecha_registro: string
+  ultima_conexion?: string
+  direccion?: string
   codigo_area?: string
   numero_telefono?: string
-  direccion?: string
-  foto_perfil?: string
-  estado: EstadoUsuario
-  fecha_registro?: string
 }
 
 // === TIPOS DE AUTENTICACIÓN ===
+
+export interface AuthContextType {
+  usuario: Usuario | null
+  estaAutenticado: () => boolean
+  login: (correo: string, password: string) => Promise<AuthResponse>
+  logout: () => Promise<void>
+  register: (data: RegisterData) => Promise<AuthResponse>
+  loading: boolean
+  tieneRol: (rol: RolUsuario) => boolean
+  actualizarUsuario: (usuario: Usuario) => void
+  error?: string
+}
+
 export interface LoginCredentials {
   correo: string
   password: string
-}
-
-// === TIPOS DE VALIDACIÓN ===
-export type CodigoArea = '0414' | '0424' | '0412' | '0416' | '0426'
-
-export interface ValidationRules {
-  nombre: {
-    minLength: number
-    maxLength: number
-    pattern: RegExp
-  }
-  apellido: {
-    minLength: number
-    maxLength: number
-    pattern: RegExp
-  }
-  password: {
-    minLength: number
-    maxLength: number
-  }
-  numero_telefono: {
-    length: number
-    pattern: RegExp
-  }
 }
 
 export interface RegisterData {
   nombre: string
   apellido: string
   correo: string
-  codigo_area: string
-  numero_telefono: string
+  telefono: string
   password: string
+  confirmarPassword: string
+  codigo_area?: string
+  numero_telefono?: string
 }
 
 export interface AuthResponse {
   success: boolean
-  message?: string
+  message: string
   token?: string
   usuario?: Usuario
 }
 
-export interface AuthContextType {
-  usuario: Usuario | null
-  loading: boolean
-  error: string | null
-  login: (correo: string, password: string) => Promise<AuthResponse>
-  register: (datos: RegisterData) => Promise<AuthResponse>
-  logout: () => Promise<void>
-  tieneRol: (rol: RolUsuario) => boolean
-  estaAutenticado: () => boolean
-  actualizarUsuario: () => Promise<void>
-}
-
 // === TIPOS DE PRODUCTOS ===
-export type EstadoProducto = 'activo' | 'inactivo' | 'agotado'
 
 export interface Producto {
   id: number
   nombre: string
-  descripcion?: string
-  precio: string | number
+  descripcion: string
+  precio: number
   categoria_id: number
-  categoria_nombre?: string
-  imagen?: string
-  estado: EstadoProducto
+  imagen: string | null
+  fecha_creacion: string
+  categoria?: Categoria
+  estado?: 'activo' | 'inactivo' | 'agotado'
   tiempo_preparacion?: number
   ingredientes?: string
   es_especial?: boolean
-  fecha_creacion?: string
+  categoria_nombre?: string
+  sucursal_ids?: number[]
+  sucursal_nombres?: string
 }
 
 export interface Categoria {
   id: number
   nombre: string
   descripcion?: string
-  imagen?: string
-  estado?: string
-  orden_mostrar?: number
-}
-
-// === TIPOS DE RESPUESTA DE API ===
-export interface ApiResponse<T = any> {
-  success: boolean
-  message?: string
-  data?: T
-}
-
-// === TIPOS DE COMPONENTES ===
-export interface ProductCardProps {
-  producto: Producto
-  onAddToCart: (producto: Producto) => void | Promise<void>
-  mostrarBotonCompra?: boolean
-  onEdit?: (producto: Producto) => void
-  onDelete?: (productoId: number) => Promise<void>
-  modoAdmin?: boolean
-}
-
-export interface FilterBarProps {
-  categorias: Categoria[]
-  categoriaActiva: number | null
-  onCategoriaChange: (categoriaId: number | null) => void
-}
-
-export interface LoadingSpinnerProps {
-  mensaje?: string
-}
-
-export interface ErrorMessageProps {
-  mensaje: string
-  onRetry?: () => void
-}
-
-export interface ProtectedRouteProps {
-  children: React.ReactNode
-  requiredRole?: RolUsuario
-  excludedRoles?: RolUsuario[]
+  icono?: string
 }
 
 // === TIPOS DE CARRITO ===
+
 export interface ItemCarrito {
   id: number
-  nombre: string
-  precio: number
+  producto: Producto
   cantidad: number
-  imagen?: string
-  descripcion?: string
+  precio: number
+  imagen: string
+  nombre: string
+  descripcion: string
   tiempo_preparacion?: number
   notas?: string
 }
@@ -158,61 +134,255 @@ export interface ItemCarrito {
 export interface CartContextType {
   items: ItemCarrito[]
   cantidadTotal: number
+  precioTotal: number
   subtotal: number
   impuestos: number
   total: number
   agregarItem: (producto: Producto, cantidad?: number) => void
-  eliminarItem: (productoId: number) => void
+  removerItem: (productoId: number) => void
   actualizarCantidad: (productoId: number, cantidad: number) => void
+  limpiarCarrito: () => void
+  eliminarItem: (productoId: number) => void
   vaciarCarrito: () => void
   estaEnCarrito: (productoId: number) => boolean
-  obtenerCantidad: (productoId: number) => number
 }
 
 // === TIPOS DE ÓRDENES ===
+
 export type EstadoOrden = 'pendiente' | 'preparando' | 'listo' | 'en_camino' | 'entregado' | 'cancelado'
 export type TipoServicio = 'domicilio' | 'recoger'
+
+export interface OrdenDetalle {
+  id: number
+  producto_id: number
+  cantidad: number
+  precio_unitario: number
+  subtotal: number
+  notas_producto?: string
+  producto_nombre: string
+  producto_descripcion?: string
+  producto_imagen?: string
+}
 
 export interface Orden {
   id: number
   usuario_id: number
+  productos?: Array<{
+    producto_id: number
+    cantidad: number
+    precio_unitario: number
+    subtotal: number
+    producto?: Producto
+  }>
+  detalles?: OrdenDetalle[]
+  total: number
   estado: EstadoOrden
   tipo_servicio: TipoServicio
-  subtotal: number
-  impuestos: number
-  total: number
+  direccion?: string
+  telefono?: string
+  notas?: string
+  fecha_creacion: string
+  fecha_actualizacion: string
+  fecha_orden: string
+  usuario?: Usuario
+  usuario_nombre?: string
+  usuario_apellido?: string
+  fecha_entrega_estimada?: string
   direccion_entrega?: string
   telefono_contacto?: string
   notas_especiales?: string
-  fecha_orden: string
-  fecha_entrega_estimada?: string
-  empleado_asignado_id?: number
-  // Campos de timestamps para seguimiento
-  fecha_pendiente?: string
   fecha_preparando?: string
   fecha_listo?: string
   fecha_en_camino?: string
   fecha_entregado?: string
   fecha_cancelado?: string
-  // Campos adicionales para el dashboard
-  usuario_nombre?: string
-  usuario_apellido?: string
+  subtotal?: number
+  impuestos?: number
+}
+
+// === TIPOS DE PAGOS ===
+
+export type MetodoPagoInternacional = 'tarjeta' | 'paypal' | 'zinli' | 'zelle'
+export type MetodoPagoNacional = 'pago_movil' | 'transferencia' | 'fisico'
+export type MetodoPago = MetodoPagoInternacional | MetodoPagoNacional
+export type TipoMoneda = 'USD' | 'VES' | 'internacional' | 'nacional'
+
+export interface DatosTarjeta {
+  numeroTarjeta: string
+  nombre: string
+  fecha_expiracion: string
+  fechaExpiracion: string
+  nombreTitular: string
+  tipoTarjeta?: string
+  cvv: string
+}
+
+export interface DatosPayPal {
+  correo: string
+  password: string
+}
+
+export interface DatosZinli {
+  numeroTelefono: string
+  pin: string
+}
+
+export interface DatosZelle {
+  correoZelle: string
+  nombreCompleto: string
+}
+
+export interface DatosPagoMovil {
+  banco: BancoVenezuela
+  telefono: string
+  cedula: string
+  tipoCedula?: 'V' | 'E' | 'J'
+  numeroReferencia?: string
+  fechaPago?: string
+}
+
+export interface DatosTransferencia {
+  banco: BancoVenezuela
+  numero_cuenta: string
+  cedula: string
+  tipoCedula?: 'V' | 'E' | 'J'
+  nombre_titular: string
+  telefono?: string
+  numeroReferencia?: string
+  fechaPago?: string
+}
+
+export interface DatosPagoFisico {
+  metodo: 'efectivo' | 'pos'
+  horarioAtencion?: string
+  direccionRestaurante?: string
+  limiteTiempo?: number
+}
+
+export type BancoVenezuela = 
+  | 'banco_de_venezuela'
+  | 'banco_mercantil'
+  | 'banco_provincial'
+  | 'banco_bicentenario'
+  | 'banco_venezuela'
+  | 'banco_del_tesoro'
+  | 'banco_agrario'
+  | 'banco_caroni'
+  | 'banco_exterior'
+  | 'banco_plaza'
+  | 'banco_sofitasa'
+  | 'banco_100_por_ciento_banco'
+  | 'banco_activo'
+  | 'banco_banesco'
+  | 'banco_banplus'
+  | 'banco_central_de_venezuela'
+  | 'banco_citibank'
+  | 'banco_de_america_latina'
+  | 'banco_de_la_gente'
+  | 'banco_de_los_trabajadores'
+  | 'banco_del_pueblo_soberano'
+  | 'banco_familias'
+  | 'banco_fondo_comun'
+  | 'banco_internacional'
+  | 'banco_lara'
+  | 'banco_nacional_de_credito'
+  | 'banco_occidental_de_descuento'
+  | 'banco_territorial'
+  | 'banco_union'
+  | 'banco_vzla'
+  | 'banco_zerpa'
+  | 'banco_otro'
+  | 'provincial'
+  | 'mercantil'
+  | 'banesco'
+  | 'bnc'
+  | 'bdv'
+  | 'venezolano'
+
+// === TIPOS DE COMPONENTES ===
+
+export interface ProductCardProps {
+  producto: Producto
+  onAddToCart: (producto: Producto) => void
+  mostrarBotonCompra?: boolean
+  modoAdmin?: boolean
+  onEdit?: (producto: Producto) => void
+  onDelete?: (productoId: number) => Promise<void>
+}
+
+export interface FilterBarProps {
+  categorias: Categoria[]
+  categoriaActiva: number | null
+  onCategoriaChange: (categoria: number | null) => void
+}
+
+export interface LoadingSpinnerProps {
+  size?: 'sm' | 'md' | 'lg'
+  text?: string
+  mensaje?: string
+}
+
+export interface ErrorMessageProps {
+  mensaje: string
+  tipo?: 'error' | 'warning' | 'info'
+  onRetry?: () => Promise<void>
+}
+
+export interface ProtectedRouteProps {
+  children: React.ReactNode
+  requiredRole?: RolUsuario
+  excludedRoles?: string[]
+}
+
+// === TIPOS DE DASHBOARD ===
+
+export interface EstadisticasDashboard {
+  totalUsuarios: number
+  totalOrdenes: number
+  totalIngresos: number
+  ordenesHoy: number
+  ingresosHoy: number
+  nuevosusuarios: number
+  promedioOrden: number
+}
+
+export interface UsuarioAdmin extends Usuario {
+  total_gastado?: number
+  total_ordenes?: number
+  ultima_orden?: string
+  codigo_area?: string
+  numero_telefono?: string
+}
+
+export interface TopUsuario {
+  id: number
+  nombre: string
+  apellido: string
+  correo: string
+  total_gastado: number
+  total_ordenes: number
 }
 
 // === TIPOS DE PERFIL ===
+
 export interface PerfilFormData {
   nombre: string
   apellido: string
   telefono: string
-  direccion: string
+  direccion?: string
 }
 
 export interface Estadisticas {
-  totalOrdenes: number
-  totalGastado: number
+  total_ordenes: number
+  total_gastado: number
+  ultima_orden: string
+  ordenes_mes_actual: number
+  totalOrdenes?: number
+  totalGastado?: number
 }
 
 // === TIPOS DE CONFIGURACIÓN ===
+
 export interface PasswordData {
   passwordActual: string
   passwordNueva: string
@@ -231,79 +401,52 @@ export interface ShowPasswordState {
   confirmacion: boolean
 }
 
-// === TIPOS DE PAGO ===
-export type MetodoPago = 'tarjeta' | 'paypal' | 'zinli' | 'zelle'
-export type TipoTarjeta = 'visa' | 'mastercard'
+// === TIPOS DE REGISTRO ===
 
-export interface DatosTarjeta {
-  numeroTarjeta: string
-  nombreTitular: string
-  fechaExpiracion: string
-  cvv: string
-  tipoTarjeta?: TipoTarjeta
-}
+export type CodigoArea = '0414' | '0424' | '0412' | '0416' | '0426'
 
-export interface DatosPayPal {
-  correo: string
-  password: string
-}
+// === TIPOS DE API ===
 
-export interface DatosZinli {
-  numeroTelefono: string
-  pin: string
-}
-
-export interface DatosZelle {
-  correoZelle: string
-  nombreCompleto: string
-}
-
-export interface DatosPago {
-  metodoPago: MetodoPago
-  tarjeta?: DatosTarjeta
-  paypal?: DatosPayPal
-  zinli?: DatosZinli
-  zelle?: DatosZelle
-}
-
-export interface ResultadoPago {
+export interface ApiResponse<T = any> {
   success: boolean
-  mensaje: string
-  transaccionId?: string
-  fecha?: string
+  message: string
+  data?: T
+  error?: string
 }
 
-// === TIPOS DE DASHBOARD ADMINISTRATIVO ===
-export interface EstadisticasDashboard {
-  totalUsuarios: number
-  totalOrdenes: number
-  totalIngresos: number
-  ordenesHoy: number
-  ingresosHoy: number
-  nuevosusuarios: number
-  promedioOrden: number
+// === TIPOS DE CURRENCY SELECTOR ===
+
+export interface TipoMonedaConfig {
+  codigo: string
+  nombre: string
+  simbolo: string
+  tasa_cambio: number
 }
 
-export interface UsuarioAdmin extends Usuario {
-  total_gastado?: number
-  total_ordenes?: number
-  ultima_orden?: string
-}
+// === TIPOS DE SUCURSALES ===
 
-export interface TopUsuario {
+export interface Sucursal {
   id: number
   nombre: string
-  apellido: string
-  correo: string
-  total_gastado: number
-  total_ordenes: number
+  direccion: string
+  ciudad: string
+  estado: string
+  codigo_postal?: string
+  telefono: string
+  email?: string
+  horario_apertura: string
+  horario_cierre: string
+  dias_operacion: string
+  latitud?: number
+  longitud?: number
+  es_principal: boolean
+  tiene_delivery: boolean
+  tiene_estacionamiento: boolean
+  capacidad_personas?: number
+  imagen?: string
+  descripcion?: string
+  activo: boolean
+  fecha_apertura?: string
+  gerente?: string
+  fecha_creacion?: string
 }
-
-export interface ProductoPopular {
-  id: number
-  nombre: string
-  categoria: string
-  veces_pedido: number
-  ingresos_generados: number
-}
-

@@ -92,10 +92,11 @@ export function CartProvider({ children }: CartProviderProps) {
         // Si no existe, agregarlo
         const nuevoItem: ItemCarrito = {
           id: producto.id,
+          producto: producto,
           nombre: producto.nombre,
           precio: Number(producto.precio),
           cantidad: cantidad,
-          imagen: producto.imagen,
+          imagen: producto.imagen || '',
           descripcion: producto.descripcion,
           tiempo_preparacion: producto.tiempo_preparacion
         }
@@ -158,10 +159,10 @@ export function CartProvider({ children }: CartProviderProps) {
    * @param productoId - ID del producto
    * @returns La cantidad del producto o 0 si no está en el carrito
    */
-  const obtenerCantidad = (productoId: number): number => {
-    const item = items.find(item => item.id === productoId)
-    return item ? item.cantidad : 0
-  }
+  // const obtenerCantidad = (productoId: number): number => {
+  //   const item = items.find(item => item.id === productoId)
+  //   return item ? item.cantidad : 0
+  // }
 
   /**
    * Calcular la cantidad total de items en el carrito
@@ -187,15 +188,17 @@ export function CartProvider({ children }: CartProviderProps) {
   const value: CartContextType = {
     items,
     cantidadTotal,
+    precioTotal: total,
     subtotal,
     impuestos,
     total,
     agregarItem,
-    eliminarItem,
+    removerItem: eliminarItem,
     actualizarCantidad,
+    limpiarCarrito: vaciarCarrito,
+    eliminarItem,
     vaciarCarrito,
     estaEnCarrito,
-    obtenerCantidad,
   }
 
   return (

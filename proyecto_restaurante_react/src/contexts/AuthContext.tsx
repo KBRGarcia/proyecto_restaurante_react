@@ -105,7 +105,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         // Actualizar estado del usuario
         setUsuario(data.usuario)
         
-        return { success: true, usuario: data.usuario }
+        return { success: true, usuario: data.usuario, message: 'Login exitoso' }
       } else {
         const errorMsg = data.message || 'Error al iniciar sesión'
         setError(errorMsg)
@@ -224,7 +224,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const value: AuthContextType = {
     usuario,
     loading,
-    error,
+    error: error || undefined,
     login,
     register,
     logout,

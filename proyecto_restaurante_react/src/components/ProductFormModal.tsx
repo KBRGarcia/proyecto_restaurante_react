@@ -1,5 +1,5 @@
 import { useState, useEffect, type FormEvent, type ChangeEvent } from 'react'
-import type { Producto, Categoria } from '../types'
+import type { Producto, Categoria, Sucursal } from '../types'
 
 /**
  * Interfaz para los props del componente
@@ -7,9 +7,10 @@ import type { Producto, Categoria } from '../types'
 interface ProductFormModalProps {
   show: boolean
   onClose: () => void
-  onSave: (producto: Partial<Producto>) => Promise<void>
+  onSave: (producto: Partial<Producto> & { sucursal_ids?: number[] }) => Promise<void>
   producto?: Producto | null
   categorias: Categoria[]
+  sucursales: Sucursal[]
 }
 
 /**
@@ -24,12 +25,13 @@ interface ProductFormModalProps {
  * @param onSave - Callback para guardar el producto
  * @param producto - Producto a editar (null para crear nuevo)
  * @param categorias - Lista de categorías disponibles
+ * @param sucursales - Lista de sucursales disponibles
  * 
  * Fuentes:
  * - https://react.dev/reference/react/useState
  * - https://getbootstrap.com/docs/5.3/components/modal/
  */
-function ProductFormModal({ show, onClose, onSave, producto, categorias }: ProductFormModalProps) {
+function ProductFormModal({ show, onClose, onSave, producto, categorias, sucursales }: ProductFormModalProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   
@@ -44,6 +46,8 @@ function ProductFormModal({ show, onClose, onSave, producto, categorias }: Produ
     ingredientes: '',
     es_especial: false
   })
+  
+  const [sucursalesSeleccionadas, setSucursalesSeleccionadas] = useState<number[]>([])
 
   // Cargar datos del producto cuando se está editando
   useEffect(() => {
@@ -59,6 +63,9 @@ function ProductFormModal({ show, onClose, onSave, producto, categorias }: Produ
         ingredientes: producto.ingredientes || '',
         es_especial: Boolean(producto.es_especial)
       })
+      
+      // Cargar sucursales del producto
+      setSucursalesSeleccionadas(producto.sucursal_ids || [])
     } else {
       // Resetear formulario para nuevo producto
       setFormData({
@@ -72,9 +79,12 @@ function ProductFormModal({ show, onClose, onSave, producto, categorias }: Produ
         ingredientes: '',
         es_especial: false
       })
+      
+      // Seleccionar todas las sucursales por defecto para nuevo producto
+      setSucursalesSeleccionadas(sucursales.map(s => s.id))
     }
     setError(null)
-  }, [producto, categorias, show])
+  }, [producto, categorias, sucursales, show])
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target
@@ -116,10 +126,16 @@ function ProductFormModal({ show, onClose, onSave, producto, categorias }: Produ
       setLoading(false)
       return
     }
+    
+    if (sucursalesSeleccionadas.length === 0) {
+      setError('Debes seleccionar al menos una sucursal')
+      setLoading(false)
+      return
+    }
 
     try {
       // Preparar datos para enviar
-      const productoData: Partial<Producto> = {
+      const productoData: Partial<Producto> & { sucursal_ids?: number[] } = {
         nombre: formData.nombre.trim(),
         descripcion: formData.descripcion.trim(),
         precio: parseFloat(formData.precio),
@@ -128,7 +144,8 @@ function ProductFormModal({ show, onClose, onSave, producto, categorias }: Produ
         estado: formData.estado,
         tiempo_preparacion: parseInt(formData.tiempo_preparacion),
         ingredientes: formData.ingredientes.trim(),
-        es_especial: formData.es_especial
+        es_especial: formData.es_especial,
+        sucursal_ids: sucursalesSeleccionadas
       }
 
       if (producto) {
@@ -143,6 +160,29 @@ function ProductFormModal({ show, onClose, onSave, producto, categorias }: Produ
     } finally {
       setLoading(false)
     }
+  }
+  
+  /**
+   * Toggle de selección de sucursal
+   */
+  const toggleSucursal = (sucursalId: number) => {
+    setSucursalesSeleccionadas(prev => {
+      if (prev.includes(sucursalId)) {
+        // Si ya está seleccionada, quitarla (pero mantener al menos una)
+        const nuevasSeleccionadas = prev.filter(id => id !== sucursalId)
+        return nuevasSeleccionadas.length > 0 ? nuevasSeleccionadas : prev
+      } else {
+        // Si no está seleccionada, agregarla
+        return [...prev, sucursalId]
+      }
+    })
+  }
+  
+  /**
+   * Seleccionar todas las sucursales
+   */
+  const seleccionarTodasSucursales = () => {
+    setSucursalesSeleccionadas(sucursales.map(s => s.id))
   }
 
   if (!show) return null
@@ -376,6 +416,56 @@ function ProductFormModal({ show, onClose, onSave, producto, categorias }: Produ
                     <i className="fas fa-star me-2 text-warning"></i>
                     Marcar como Especial
                   </label>
+                </div>
+                
+                {/* Sucursales */}
+                <div className="mb-3">
+                  <label className="form-label">
+                    <i className="fas fa-store me-2"></i>
+                    Sucursales donde está disponible <span className="text-danger">*</span>
+                  </label>
+                  <div className="card">
+                    <div className="card-body">
+                      <div className="d-flex justify-content-between align-items-center mb-3">
+                        <small className="text-muted">
+                          {sucursalesSeleccionadas.length} de {sucursales.length} seleccionada(s)
+                        </small>
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-outline-primary"
+                          onClick={seleccionarTodasSucursales}
+                          disabled={loading || sucursalesSeleccionadas.length === sucursales.length}
+                        >
+                          <i className="fas fa-check-double me-1"></i>
+                          Seleccionar Todas
+                        </button>
+                      </div>
+                      <div className="d-flex flex-wrap gap-2">
+                        {sucursales.map(sucursal => (
+                          <button
+                            key={sucursal.id}
+                            type="button"
+                            className={`btn btn-sm ${
+                              sucursalesSeleccionadas.includes(sucursal.id)
+                                ? 'btn-primary'
+                                : 'btn-outline-secondary'
+                            }`}
+                            onClick={() => toggleSucursal(sucursal.id)}
+                            disabled={loading}
+                          >
+                            <i className={`fas fa-${sucursalesSeleccionadas.includes(sucursal.id) ? 'check-circle' : 'circle'} me-1`}></i>
+                            {sucursal.nombre}
+                            {sucursal.es_principal && (
+                              <i className="fas fa-star text-warning ms-1"></i>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <small className="text-muted">
+                    Selecciona las sucursales donde este producto estará disponible
+                  </small>
                 </div>
               </form>
             </div>

@@ -43,9 +43,9 @@ function HomePage() {
   return (
     <div>
       {/* Hero Section */}
-      <section className="hero-section bg-danger text-white py-5">
+      <section className="hero-section text-white py-5" style={{ backgroundColor: 'var(--theme-header-bg)' }}>
         <div className="container text-center py-5">
-          <h1 className="display-3 mb-4">
+          <h1 className="display-3 mb-4 fw-bold text-white">
             Bienvenido a Sabor & Tradición
           </h1>
           <p className="lead mb-4">
@@ -75,8 +75,8 @@ function HomePage() {
           <div className="col-lg-4 col-md-6 mb-4">
             <div className="card text-center h-100 shadow-sm">
               <div className="card-body">
-                <div className="bg-danger text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
-                     style={{ width: '80px', height: '80px' }}>
+                <div className="text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                     style={{ width: '80px', height: '80px', backgroundColor: 'var(--theme-accent-color)' }}>
                   <i className="fas fa-utensils fa-2x"></i>
                 </div>
                 <h5 className="card-title">Para Llevar</h5>
@@ -90,8 +90,8 @@ function HomePage() {
           <div className="col-lg-4 col-md-6 mb-4">
             <div className="card text-center h-100 shadow-sm">
               <div className="card-body">
-                <div className="bg-danger text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
-                     style={{ width: '80px', height: '80px' }}>
+                <div className="text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                     style={{ width: '80px', height: '80px', backgroundColor: 'var(--theme-accent-color)' }}>
                   <i className="fas fa-motorcycle fa-2x"></i>
                 </div>
                 <h5 className="card-title">Entrega a Domicilio</h5>
@@ -110,7 +110,7 @@ function HomePage() {
           <div className="row">
             <div className="col-lg-6">
               <h3 className="mb-4">
-                <i className="fas fa-map-marker-alt me-3 text-danger"></i>
+                <i className="fas fa-map-marker-alt me-3" style={{ color: 'var(--theme-accent-color)' }}></i>
                 Encuéntranos
               </h3>
               <p className="mb-3"><strong>Dirección:</strong> Calle Principal #123, Ciudad</p>
@@ -124,7 +124,7 @@ function HomePage() {
             </div>
             <div className="col-lg-6">
               <h3 className="mb-4">
-                <i className="fas fa-star me-3 text-danger"></i>
+                <i className="fas fa-star me-3" style={{ color: 'var(--theme-accent-color)' }}></i>
                 ¿Por qué elegirnos?
               </h3>
               <ul className="list-unstyled">
@@ -155,7 +155,7 @@ function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-dark text-white py-4">
+      <footer className="text-white py-4" style={{ backgroundColor: 'var(--theme-footer-bg)' }}>
         <div className="container text-center">
           <p className="mb-0">
             &copy; 2025 Sabor & Tradición. Todos los derechos reservados.

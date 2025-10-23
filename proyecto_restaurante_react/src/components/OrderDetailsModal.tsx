@@ -1,4 +1,7 @@
-import type { Orden } from '../types.ts'
+import { useState, useEffect } from 'react'
+import { API_ENDPOINTS } from '../config'
+import LoadingSpinner from './LoadingSpinner'
+import type { Orden, OrdenDetalle } from '../types.ts'
 
 /**
  * Modal de Detalles de Orden
@@ -12,17 +15,61 @@ interface OrderDetailsModalProps {
   onClose: () => void
 }
 
-// Datos mock de productos en la orden
-// TODO: Integrar con backend para obtener detalles reales
-interface DetalleProducto {
-  id: number
-  nombre: string
-  cantidad: number
-  precio: number
-  subtotal: number
-}
-
 function OrderDetailsModal({ orden, onClose }: OrderDetailsModalProps) {
+  const [detallesOrden, setDetallesOrden] = useState<OrdenDetalle[]>([])
+  const [loadingDetalles, setLoadingDetalles] = useState(false)
+  const [errorDetalles, setErrorDetalles] = useState<string | null>(null)
+
+  /**
+   * Cargar detalles de productos de la orden desde la API
+   */
+  useEffect(() => {
+    if (orden?.id) {
+      cargarDetallesOrden()
+    }
+  }, [orden?.id])
+
+  const cargarDetallesOrden = async () => {
+    if (!orden?.id) return
+
+    setLoadingDetalles(true)
+    setErrorDetalles(null)
+
+    try {
+      const token = localStorage.getItem('token')
+      
+      if (!token) {
+        throw new Error('No hay token de autenticación')
+      }
+
+      const response = await fetch(`${API_ENDPOINTS.ordenes}?id=${orden.id}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Error ${response.status}: ${errorText}`)
+      }
+
+      const data = await response.json()
+
+      if (data.success && data.data?.detalles) {
+        setDetallesOrden(data.data.detalles)
+      } else {
+        throw new Error('No se pudieron cargar los detalles de la orden')
+      }
+    } catch (error) {
+      console.error('Error al cargar detalles de la orden:', error)
+      setErrorDetalles(error instanceof Error ? error.message : 'Error desconocido')
+    } finally {
+      setLoadingDetalles(false)
+    }
+  }
+
   if (!orden) return null
 
   /**
@@ -70,12 +117,6 @@ function OrderDetailsModal({ orden, onClose }: OrderDetailsModalProps) {
     return textos[estado] || estado
   }
 
-  // Mock de productos (en producción vendría del backend)
-  const productosEjemplo: DetalleProducto[] = [
-    { id: 1, nombre: 'Pizza Margarita', cantidad: 2, precio: 150.00, subtotal: 300.00 },
-    { id: 2, nombre: 'Refresco Grande', cantidad: 2, precio: 35.00, subtotal: 70.00 },
-    { id: 3, nombre: 'Ensalada César', cantidad: 1, precio: 80.00, subtotal: 80.00 },
-  ]
 
   return (
     <div 
@@ -91,7 +132,7 @@ function OrderDetailsModal({ orden, onClose }: OrderDetailsModalProps) {
           
           {/* Header */}
           <div className="modal-header bg-primary text-white">
-            <h5 className="modal-title">
+            <h5 className="modal-title text-white">
               <i className="fas fa-receipt me-2"></i>
               Detalles de la Orden #{orden.id}
             </h5>
@@ -260,35 +301,84 @@ function OrderDetailsModal({ orden, onClose }: OrderDetailsModalProps) {
                 <i className="fas fa-utensils me-2"></i>
                 Productos Ordenados
               </h6>
-              <div className="table-responsive">
-                <table className="table table-hover">
-                  <thead className="table-light">
-                    <tr>
-                      <th>Producto</th>
-                      <th className="text-center">Cantidad</th>
-                      <th className="text-end">Precio Unit.</th>
-                      <th className="text-end">Subtotal</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {productosEjemplo.map(producto => (
-                      <tr key={producto.id}>
-                        <td>
-                          <i className="fas fa-utensils me-2 text-muted"></i>
-                          {producto.nombre}
-                        </td>
-                        <td className="text-center">
-                          <span className="badge bg-secondary">{producto.cantidad}</span>
-                        </td>
-                        <td className="text-end">${producto.precio.toFixed(2)}</td>
-                        <td className="text-end">
-                          <strong>${producto.subtotal.toFixed(2)}</strong>
-                        </td>
+              
+              {loadingDetalles ? (
+                <div className="text-center py-4">
+                  <LoadingSpinner mensaje="Cargando productos..." />
+                </div>
+              ) : errorDetalles ? (
+                <div className="alert alert-warning">
+                  <i className="fas fa-exclamation-triangle me-2"></i>
+                  <strong>Error al cargar productos:</strong> {errorDetalles}
+                  <button 
+                    className="btn btn-sm btn-outline-warning ms-2"
+                    onClick={cargarDetallesOrden}
+                  >
+                    <i className="fas fa-redo me-1"></i>
+                    Reintentar
+                  </button>
+                </div>
+              ) : detallesOrden.length > 0 ? (
+                <div className="table-responsive">
+                  <table className="table table-hover">
+                    <thead className="table-light">
+                      <tr>
+                        <th>Producto</th>
+                        <th className="text-center">Cantidad</th>
+                        <th className="text-end">Precio Unit.</th>
+                        <th className="text-end">Subtotal</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {detallesOrden.map(detalle => (
+                        <tr key={detalle.id}>
+                          <td>
+                            <div className="d-flex align-items-center">
+                              {detalle.producto_imagen && (
+                                <img 
+                                  src={detalle.producto_imagen} 
+                                  alt={detalle.producto_nombre}
+                                  className="me-3 rounded"
+                                  style={{ width: '40px', height: '40px', objectFit: 'cover' }}
+                                />
+                              )}
+                              <div>
+                                <div className="fw-medium">
+                                  <i className="fas fa-utensils me-2 text-muted"></i>
+                                  {detalle.producto_nombre}
+                                </div>
+                                {detalle.producto_descripcion && (
+                                  <small className="text-muted">{detalle.producto_descripcion}</small>
+                                )}
+                                {detalle.notas_producto && (
+                                  <div className="mt-1">
+                                    <small className="text-warning">
+                                      <i className="fas fa-sticky-note me-1"></i>
+                                      <em>{detalle.notas_producto}</em>
+                                    </small>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="text-center">
+                            <span className="badge bg-secondary">{detalle.cantidad}</span>
+                          </td>
+                          <td className="text-end">${detalle.precio_unitario.toFixed(2)}</td>
+                          <td className="text-end">
+                            <strong>${detalle.subtotal.toFixed(2)}</strong>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="alert alert-info">
+                  <i className="fas fa-info-circle me-2"></i>
+                  No se encontraron productos para esta orden.
+                </div>
+              )}
             </div>
 
             {/* Resumen de pago */}
@@ -302,11 +392,11 @@ function OrderDetailsModal({ orden, onClose }: OrderDetailsModalProps) {
               <div className="card-body">
                 <div className="d-flex justify-content-between mb-2">
                   <span>Subtotal:</span>
-                  <strong>${orden.subtotal.toFixed(2)}</strong>
+                  <strong>${orden.subtotal?.toFixed(2) || '0.00'}</strong>
                 </div>
                 <div className="d-flex justify-content-between mb-2">
                   <span>Impuestos (IVA 16%):</span>
-                  <strong>${orden.impuestos.toFixed(2)}</strong>
+                  <strong>${orden.impuestos?.toFixed(2) || '0.00'}</strong>
                 </div>
                 <hr />
                 <div className="d-flex justify-content-between">

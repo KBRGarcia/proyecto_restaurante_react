@@ -14,9 +14,11 @@ function Register() {
     nombre: '',
     apellido: '',
     correo: '',
+    telefono: '',
     codigo_area: '0414',
     numero_telefono: '',
     password: '',
+    confirmarPassword: '',
     confirmPassword: ''
   })
   const [loading, setLoading] = useState(false)

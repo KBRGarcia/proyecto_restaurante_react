@@ -13,7 +13,7 @@ function Login() {
   const [error, setError] = useState<string | null>(null)
   const [showPassword, setShowPassword] = useState(false)
   
-  const { login } = useAuth()
+  const { login, loading: authLoading } = useAuth()
   const navigate = useNavigate()
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -46,6 +46,26 @@ function Login() {
     } finally {
       setLoading(false)
     }
+  }
+
+  // Mostrar spinner mientras se verifica la sesión inicial
+  if (authLoading) {
+    return (
+      <div className="container mt-5">
+        <div className="row justify-content-center">
+          <div className="col-md-6 col-lg-4">
+            <div className="card shadow-lg">
+              <div className="card-body p-5 text-center">
+                <div className="spinner-border text-primary mb-3" role="status">
+                  <span className="visually-hidden">Cargando...</span>
+                </div>
+                <p className="text-muted">Verificando sesión...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -85,7 +105,7 @@ function Login() {
                     onChange={(e) => setCorreo(e.target.value)}
                     placeholder="tu@email.com"
                     required
-                    disabled={loading}
+                    disabled={loading || authLoading}
                   />
                 </div>
 
@@ -104,13 +124,13 @@ function Login() {
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
                       required
-                      disabled={loading}
+                      disabled={loading || authLoading}
                     />
                     <button
                       type="button"
                       className="btn btn-outline-secondary"
                       onClick={() => setShowPassword(!showPassword)}
-                      disabled={loading}
+                      disabled={loading || authLoading}
                       title={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                     >
                       <i className={`fas fa-${showPassword ? 'eye-slash' : 'eye'}`}></i>
@@ -134,7 +154,7 @@ function Login() {
                 <button
                   type="submit"
                   className="btn btn-primary w-100 mb-3"
-                  disabled={loading}
+                  disabled={loading || authLoading}
                 >
                   {loading ? (
                     <>
@@ -178,7 +198,7 @@ function Login() {
               <small className="text-muted">
                 <strong>Cuenta demo:</strong><br />
                 Email: admin@restaurante.com<br />
-                Password: password
+                Password: 987654321
               </small>
             </div>
           </div>

@@ -1,26 +1,27 @@
-import type { MetodoPago } from '../types.ts'
+import type { MetodoPagoInternacional } from '../types.ts'
 
 /**
- * Selector de Método de Pago
- * Permite al usuario elegir entre diferentes métodos de pago
+ * Selector de Métodos de Pago Internacionales
+ * Permite al usuario elegir entre diferentes métodos de pago internacionales
  * 
  * Fuente: https://react.dev/learn/conditional-rendering
  */
 
 interface PaymentMethodSelectorProps {
-  metodoSeleccionado: MetodoPago
-  onSeleccionar: (metodo: MetodoPago) => void
+  metodoSeleccionado: MetodoPagoInternacional
+  onSeleccionar: (metodo: MetodoPagoInternacional) => void
+  onAbrirModal: (metodo: MetodoPagoInternacional) => void
 }
 
 interface MetodoPagoOption {
-  id: MetodoPago
+  id: MetodoPagoInternacional
   nombre: string
   icono: string
   descripcion: string
   color: string
 }
 
-function PaymentMethodSelector({ metodoSeleccionado, onSeleccionar }: PaymentMethodSelectorProps) {
+function PaymentMethodSelector({ metodoSeleccionado, onSeleccionar, onAbrirModal }: PaymentMethodSelectorProps) {
   
   const metodosPago: MetodoPagoOption[] = [
     {
@@ -60,12 +61,16 @@ function PaymentMethodSelector({ metodoSeleccionado, onSeleccionar }: PaymentMet
           <div key={metodo.id} className="col-md-6">
             <div
               className={`payment-method-card ${metodoSeleccionado === metodo.id ? 'selected' : ''}`}
-              onClick={() => onSeleccionar(metodo.id)}
+              onClick={() => {
+                onSeleccionar(metodo.id)
+                onAbrirModal(metodo.id)
+              }}
               role="button"
               tabIndex={0}
               onKeyPress={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   onSeleccionar(metodo.id)
+                  onAbrirModal(metodo.id)
                 }
               }}
             >
@@ -79,6 +84,10 @@ function PaymentMethodSelector({ metodoSeleccionado, onSeleccionar }: PaymentMet
                 <div className="flex-grow-1 ms-3">
                   <h6 className="mb-0">{metodo.nombre}</h6>
                   <small className="text-muted">{metodo.descripcion}</small>
+                  <small className="text-primary d-block mt-1">
+                    <i className="fas fa-edit me-1"></i>
+                    Haz clic para ingresar datos
+                  </small>
                 </div>
 
                 {/* Checkbox */}

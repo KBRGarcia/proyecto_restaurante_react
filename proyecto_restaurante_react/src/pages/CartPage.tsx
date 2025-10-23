@@ -9,10 +9,6 @@ import type { ItemCarrito } from '../types.ts'
  * 
  * Permite al usuario visualizar, modificar y gestionar los productos
  * que desea ordenar antes de proceder al pago.
- * 
- * Fuentes oficiales:
- * - React Router: https://reactrouter.com/en/main/hooks/use-navigate
- * - React Hooks: https://react.dev/reference/react
  */
 function CartPage() {
   const navigate = useNavigate()
@@ -134,7 +130,7 @@ function CartPage() {
         <div className="col-lg-8 mb-4">
           <div className="card shadow-sm">
             <div className="card-header bg-primary text-white">
-              <h5 className="mb-0">
+              <h5 className="mb-0 text-white">
                 Productos ({cantidadTotal} {cantidadTotal === 1 ? 'item' : 'items'})
               </h5>
             </div>
@@ -245,7 +241,7 @@ function CartPage() {
         <div className="col-lg-4">
           <div className="card shadow-sm sticky-top" style={{ top: '20px' }}>
             <div className="card-header bg-success text-white">
-              <h5 className="mb-0">
+              <h5 className="mb-0 text-white">
                 <i className="fas fa-receipt me-2"></i>
                 Resumen del Pedido
               </h5>
