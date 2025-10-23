@@ -326,7 +326,7 @@ function MenuPage() {
         <div className="card mb-4 shadow-sm">
           <div className="card-header bg-transparent">
             <div className="d-flex justify-content-between align-items-center">
-              <h6 className="mb-0">
+              <h6 className="mb-0 text-white">
                 <i className="fas fa-store me-2" style={{ color: 'var(--theme-accent-color)' }}></i>
                 Filtrar por Sucursal
               </h6>
@@ -392,7 +392,7 @@ function MenuPage() {
                         color: '#000'
                       }}
                     >
-                      <i className="fas fa-star"></i>
+                      <i className="fas fa-star text-white"></i>
                     </span>
                   )}
                 </button>
