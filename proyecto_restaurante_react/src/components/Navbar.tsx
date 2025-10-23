@@ -78,6 +78,12 @@ function Navbar() {
                 Menú
               </Link>
             </li>
+            <li className="nav-item">
+              <Link className="nav-link" to="/sucursales">
+                <i className="fas fa-store me-1"></i>
+                Sucursales
+              </Link>
+            </li>
             {/* Solo mostrar "Mis Órdenes" para usuarios NO admin */}
             {estaAutenticado() && usuario?.rol !== 'admin' && (
               <li className="nav-item">

@@ -422,3 +422,31 @@ export interface TipoMonedaConfig {
   simbolo: string
   tasa_cambio: number
 }
+
+// === TIPOS DE SUCURSALES ===
+
+export interface Sucursal {
+  id: number
+  nombre: string
+  direccion: string
+  ciudad: string
+  estado: string
+  codigo_postal?: string
+  telefono: string
+  email?: string
+  horario_apertura: string
+  horario_cierre: string
+  dias_operacion: string
+  latitud?: number
+  longitud?: number
+  es_principal: boolean
+  tiene_delivery: boolean
+  tiene_estacionamiento: boolean
+  capacidad_personas?: number
+  imagen?: string
+  descripcion?: string
+  activo: boolean
+  fecha_apertura?: string
+  gerente?: string
+  fecha_creacion?: string
+}

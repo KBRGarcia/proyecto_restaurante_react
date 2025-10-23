@@ -4,6 +4,7 @@ import ProtectedRoute from '../components/ProtectedRoute.tsx'
 // Importaciones directas (sin lazy loading para garantizar que funcione)
 import HomePage from '../pages/HomePage.tsx'
 import MenuPage from '../pages/MenuPage.tsx'
+import SucursalesPage from '../pages/SucursalesPage.tsx'
 import Login from '../components/Login.tsx'
 import Register from '../components/Register.tsx'
 import RecuperarPasswordPage from '../pages/RecuperarPasswordPage.tsx'
@@ -35,6 +36,7 @@ export const publicRoutes = (
   <>
     <Route path="/" element={<HomePage />} />
     <Route path="/menu" element={<MenuPage />} />
+    <Route path="/sucursales" element={<SucursalesPage />} />
     <Route path="/login" element={<Login />} />
     <Route path="/register" element={<Register />} />
     <Route path="/recuperar-password" element={<RecuperarPasswordPage />} />
