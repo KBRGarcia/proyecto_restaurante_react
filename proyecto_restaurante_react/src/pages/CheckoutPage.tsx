@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCart } from '../contexts/CartContext.tsx'
 import { useAuth } from '../contexts/AuthContext.tsx'
+import { useNotification } from '../contexts/NotificationContext'
 import { API_ENDPOINTS } from '../config'
 import CurrencySelector from '../components/CurrencySelector.tsx'
 import PaymentMethodSelector from '../components/PaymentMethodSelector.tsx'
@@ -37,6 +38,7 @@ function CheckoutPage() {
   const navigate = useNavigate()
   const { usuario } = useAuth()
   const { items, total, subtotal, impuestos, vaciarCarrito } = useCart()
+  const { error: showError } = useNotification()
 
   // Estados
   const [tipoServicio, setTipoServicio] = useState<TipoServicio>('recoger')
@@ -386,7 +388,11 @@ function CheckoutPage() {
       
       if (!token) {
         console.log('❌ No hay token de autenticación')
-        alert('Sesión no válida. Por favor inicia sesión nuevamente.')
+        showError(
+          'Sesión Inválida',
+          'Por favor inicia sesión nuevamente para continuar con tu compra.',
+          6000
+        )
         navigate('/login')
         return
       }
@@ -457,7 +463,11 @@ function CheckoutPage() {
     } catch (error) {
       console.error('❌ Error procesando pago:', error)
       console.error('Stack trace:', error instanceof Error ? error.stack : 'No stack trace')
-      alert(`Error al procesar el pago: ${error instanceof Error ? error.message : 'Error desconocido'}\n\nPor favor intenta nuevamente.`)
+      showError(
+        'Error al Procesar el Pago',
+        `${error instanceof Error ? error.message : 'Error desconocido'}. Por favor, intenta nuevamente o contacta con soporte.`,
+        8000
+      )
     } finally {
       console.log('🏁 Finalizando procesamiento...')
       setProcesando(false)

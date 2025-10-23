@@ -479,7 +479,9 @@ function actualizarOrden($conn, $usuario, $orden_id) {
 }
 
 /**
- * Cancelar orden (solo si está pendiente)
+ * Cancelar orden
+ * - Usuarios: Solo pueden cancelar órdenes pendientes o preparando
+ * - Admin/Empleado: Pueden cancelar en cualquier estado excepto entregado
  */
 function cancelarOrden($conn, $usuario, $orden_id) {
     try {
@@ -488,11 +490,19 @@ function cancelarOrden($conn, $usuario, $orden_id) {
         }
         
         $usuario_id = $usuario['id'];
+        $es_admin = ($usuario['rol'] === 'admin' || $usuario['rol'] === 'empleado');
         
-        // Verificar que la orden pertenece al usuario y está pendiente
-        $sql = "SELECT estado FROM ordenes WHERE id = ? AND usuario_id = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ii", $orden_id, $usuario_id);
+        // Verificar que la orden existe y pertenece al usuario (o es admin)
+        if ($es_admin) {
+            $sql = "SELECT estado, usuario_id FROM ordenes WHERE id = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("i", $orden_id);
+        } else {
+            $sql = "SELECT estado, usuario_id FROM ordenes WHERE id = ? AND usuario_id = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("ii", $orden_id, $usuario_id);
+        }
+        
         $stmt->execute();
         $result = $stmt->get_result();
         
@@ -509,19 +519,35 @@ function cancelarOrden($conn, $usuario, $orden_id) {
         
         $orden = $result->fetch_assoc();
         
-        if ($orden['estado'] !== 'pendiente') {
-            ob_clean();
-            http_response_code(400);
-            echo json_encode([
-                'success' => false,
-                'message' => 'Solo se pueden cancelar órdenes pendientes'
-            ]);
-            ob_end_flush();
-            return;
+        // Validar que se puede cancelar según el rol
+        if ($es_admin) {
+            // Admin puede cancelar cualquier orden excepto las ya entregadas
+            if ($orden['estado'] === 'entregado') {
+                ob_clean();
+                http_response_code(400);
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'No se pueden cancelar órdenes ya entregadas'
+                ]);
+                ob_end_flush();
+                return;
+            }
+        } else {
+            // Usuario solo puede cancelar órdenes pendientes o preparando
+            if (!in_array($orden['estado'], ['pendiente', 'preparando'])) {
+                ob_clean();
+                http_response_code(400);
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Solo se pueden cancelar órdenes pendientes o en preparación'
+                ]);
+                ob_end_flush();
+                return;
+            }
         }
         
-        // Actualizar estado a cancelado
-        $sql_update = "UPDATE ordenes SET estado = 'cancelado' WHERE id = ?";
+        // Actualizar estado a cancelado con timestamp
+        $sql_update = "UPDATE ordenes SET estado = 'cancelado', fecha_cancelado = NOW() WHERE id = ?";
         $stmt_update = $conn->prepare($sql_update);
         $stmt_update->bind_param("i", $orden_id);
         
@@ -529,7 +555,8 @@ function cancelarOrden($conn, $usuario, $orden_id) {
             ob_clean();
             echo json_encode([
                 'success' => true,
-                'message' => 'Orden cancelada exitosamente'
+                'message' => 'Orden cancelada exitosamente',
+                'orden_id' => $orden_id
             ]);
             ob_end_flush();
         } else {

@@ -322,6 +322,7 @@ function MisOrdenesPage() {
         <OrderDetailsModal
           orden={ordenSeleccionada}
           onClose={() => setOrdenSeleccionada(null)}
+          onOrdenActualizada={cargarOrdenes}
         />
       )}
     </div>

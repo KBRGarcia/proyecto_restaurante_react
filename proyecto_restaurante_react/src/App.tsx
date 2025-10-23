@@ -2,8 +2,10 @@ import { BrowserRouter as Router, Routes } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext.tsx'
 import { CartProvider } from './contexts/CartContext.tsx'
 import { ThemeProvider } from './contexts/ThemeContext.tsx'
+import { NotificationProvider } from './contexts/NotificationContext.tsx'
 import Navbar from './components/Navbar.tsx'
 import FloatingCartButton from './components/FloatingCartButton.tsx'
+import NotificationContainer from './components/NotificationContainer.tsx'
 import { publicRoutes, protectedRoutes, adminRoutes, notFoundRoute } from './routes/routes.tsx'
 import './App.css'
 import './styles/themes.css'
@@ -29,30 +31,35 @@ function App() {
   return (
     <Router>
       <ThemeProvider>
-        <AuthProvider>
-          <CartProvider>
-                <div className="app">
-                  <Navbar />
-                  
-                  <Routes>
-                    {/* Rutas públicas - accesibles sin autenticación */}
-                    {publicRoutes}
+        <NotificationProvider>
+          <AuthProvider>
+            <CartProvider>
+                  <div className="app">
+                    <Navbar />
                     
-                    {/* Rutas protegidas - requieren autenticación */}
-                    {protectedRoutes}
+                    <Routes>
+                      {/* Rutas públicas - accesibles sin autenticación */}
+                      {publicRoutes}
+                      
+                      {/* Rutas protegidas - requieren autenticación */}
+                      {protectedRoutes}
+                      
+                      {/* Rutas admin - requieren rol de administrador */}
+                      {adminRoutes}
+                      
+                      {/* Ruta 404 - página no encontrada */}
+                      {notFoundRoute}
+                    </Routes>
                     
-                    {/* Rutas admin - requieren rol de administrador */}
-                    {adminRoutes}
+                    {/* Botón flotante del carrito */}
+                    <FloatingCartButton />
                     
-                    {/* Ruta 404 - página no encontrada */}
-                    {notFoundRoute}
-                  </Routes>
-                  
-                  {/* Botón flotante del carrito */}
-                  <FloatingCartButton />
-                </div>
-          </CartProvider>
-        </AuthProvider>
+                    {/* Contenedor de notificaciones */}
+                    <NotificationContainer />
+                  </div>
+            </CartProvider>
+          </AuthProvider>
+        </NotificationProvider>
       </ThemeProvider>
     </Router>
   )

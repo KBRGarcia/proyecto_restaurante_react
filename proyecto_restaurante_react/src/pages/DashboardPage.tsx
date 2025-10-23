@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext.tsx'
+import { useNotification } from '../contexts/NotificationContext'
 import { API_ENDPOINTS } from '../config'
 import LoadingSpinner from '../components/LoadingSpinner.tsx'
 import type { EstadisticasDashboard, UsuarioAdmin, TopUsuario, Orden } from '../types'
@@ -21,6 +22,7 @@ import type { EstadisticasDashboard, UsuarioAdmin, TopUsuario, Orden } from '../
  */
 function DashboardPage() {
   const { usuario } = useAuth()
+  const { success, error: showError } = useNotification()
   const [loading, setLoading] = useState(true)
   const [estadisticas, setEstadisticas] = useState<EstadisticasDashboard | null>(null)
   const [usuarios, setUsuarios] = useState<UsuarioAdmin[]>([])
@@ -52,7 +54,11 @@ function DashboardPage() {
       
       if (!token) {
         console.error('No hay token de autenticación')
-        alert('Sesión no válida. Por favor inicia sesión nuevamente.')
+        showError(
+          'Sesión Inválida',
+          'Por favor inicia sesión nuevamente para acceder al dashboard.',
+          6000
+        )
         setLoading(false)
         return
       }
@@ -123,7 +129,11 @@ function DashboardPage() {
 
     } catch (error) {
       console.error('Error detallado al cargar datos del dashboard:', error)
-      alert(`Error al cargar los datos del dashboard.\n\nDetalles: ${error instanceof Error ? error.message : 'Error desconocido'}\n\nAbre la consola (F12) para más información.`)
+      showError(
+        'Error al Cargar Dashboard',
+        `No se pudieron cargar los datos: ${error instanceof Error ? error.message : 'Error desconocido'}. Revisa la consola para más detalles.`,
+        8000
+      )
     } finally {
       setLoading(false)
     }
@@ -177,9 +187,17 @@ function DashboardPage() {
               ? { ...u, estado: data.nuevo_estado }
               : u
           ))
-          alert(`Usuario ${data.nuevo_estado === 'inactivo' ? 'baneado' : 'desbaneado'} exitosamente`)
+          success(
+            'Estado Actualizado',
+            `Usuario ${data.nuevo_estado === 'inactivo' ? 'baneado' : 'desbaneado'} exitosamente.`,
+            5000
+          )
         } else {
-          alert(data.message || 'Error al cambiar el estado del usuario')
+          showError(
+            'Error al Actualizar Estado',
+            data.message || 'No se pudo cambiar el estado del usuario.',
+            6000
+          )
         }
       } else if (accionModal === 'eliminar') {
         // Llamada a la API para eliminar
@@ -194,16 +212,28 @@ function DashboardPage() {
         if (data.success) {
           // Eliminar del estado local
           setUsuarios(prev => prev.filter(u => u.id !== usuarioSeleccionado.id))
-          alert('Usuario eliminado exitosamente')
+          success(
+            'Usuario Eliminado',
+            'El usuario ha sido eliminado exitosamente del sistema.',
+            5000
+          )
         } else {
-          alert(data.message || 'Error al eliminar el usuario')
+          showError(
+            'Error al Eliminar Usuario',
+            data.message || 'No se pudo eliminar el usuario.',
+            6000
+          )
         }
       }
 
       cerrarModal()
     } catch (error) {
       console.error('Error al ejecutar acción:', error)
-      alert('Error de conexión al ejecutar la acción')
+      showError(
+        'Error de Conexión',
+        'No se pudo conectar con el servidor. Por favor, intenta nuevamente.',
+        6000
+      )
     }
   }
 
@@ -265,14 +295,87 @@ function DashboardPage() {
             : orden
         ))
         
-        alert(`Estado de la orden #${ordenSeleccionada.id} actualizado a "${nuevoEstado}"`)
+        success(
+          'Orden Actualizada',
+          `El estado de la orden #${ordenSeleccionada.id} se actualizó a "${nuevoEstado}" exitosamente.`,
+          5000
+        )
         cerrarModalOrden()
       } else {
-        alert(data.message || 'Error al actualizar el estado de la orden')
+        showError(
+          'Error al Actualizar Orden',
+          data.message || 'No se pudo actualizar el estado de la orden.',
+          6000
+        )
       }
     } catch (error) {
       console.error('Error al actualizar orden:', error)
-      alert('Error de conexión al actualizar la orden')
+      showError(
+        'Error de Conexión',
+        'No se pudo conectar con el servidor. Por favor, intenta nuevamente.',
+        6000
+      )
+    } finally {
+      setActualizandoOrden(false)
+    }
+  }
+
+  /**
+   * Cancelar orden (solo admin)
+   */
+  const cancelarOrden = async (orden: Orden) => {
+    const confirmar = window.confirm(
+      `¿Estás seguro de cancelar la orden #${orden.id}?\n\n` +
+      `Cliente: ${orden.usuario_nombre} ${orden.usuario_apellido}\n` +
+      `Total: $${orden.total.toFixed(2)}\n\n` +
+      `El cliente será reembolsado en un plazo máximo de 30 minutos.`
+    )
+
+    if (!confirmar) return
+
+    setActualizandoOrden(true)
+
+    try {
+      const token = localStorage.getItem('token')
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+
+      const response = await fetch(`${API_ENDPOINTS.ordenes}?id=${orden.id}`, {
+        method: 'DELETE',
+        headers
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        // Actualizar la orden en el estado local
+        setOrdenesRecientes(prev => prev.map(o =>
+          o.id === orden.id
+            ? { ...o, estado: 'cancelado' as any }
+            : o
+        ))
+        
+        success(
+          'Orden Cancelada Exitosamente',
+          `La orden #${orden.id} ha sido cancelada. El cliente recibirá el reembolso de $${orden.total.toFixed(2)} en un plazo máximo de 30 minutos.`,
+          8000
+        )
+      } else {
+        showError(
+          'Error al Cancelar Orden',
+          data.message || 'No se pudo cancelar la orden. Por favor, intenta nuevamente.',
+          6000
+        )
+      }
+    } catch (error) {
+      console.error('Error al cancelar orden:', error)
+      showError(
+        'Error de Conexión',
+        'No se pudo conectar con el servidor. Por favor, intenta nuevamente.',
+        6000
+      )
     } finally {
       setActualizandoOrden(false)
     }
@@ -486,6 +589,7 @@ function DashboardPage() {
                   <thead className="table-light">
                     <tr>
                       <th>ID</th>
+                      <th>Cliente</th>
                       <th>Tipo</th>
                       <th>Estado</th>
                       <th>Total</th>
@@ -497,6 +601,11 @@ function DashboardPage() {
                     {ordenesRecientes.map(orden => (
                       <tr key={orden.id}>
                         <td><strong>#{orden.id}</strong></td>
+                        <td>
+                          <small>
+                            {orden.usuario_nombre} {orden.usuario_apellido}
+                          </small>
+                        </td>
                         <td>
                           <span className={`badge bg-${orden.tipo_servicio === 'domicilio' ? 'primary' : 'info'}`}>
                             <i className={`fas fa-${orden.tipo_servicio === 'domicilio' ? 'motorcycle' : 'shopping-bag'} me-1`}></i>
@@ -518,13 +627,25 @@ function DashboardPage() {
                         <td><strong>${orden.total.toFixed(2)}</strong></td>
                         <td><small>{formatearFecha(orden.fecha_orden)}</small></td>
                         <td>
-                          <button 
-                            className="btn btn-sm btn-outline-primary"
-                            onClick={() => abrirModalOrden(orden)}
-                            title="Cambiar estado de la orden"
-                          >
-                            <i className="fas fa-edit"></i>
-                          </button>
+                          <div className="btn-group btn-group-sm">
+                            <button 
+                              className="btn btn-outline-primary"
+                              onClick={() => abrirModalOrden(orden)}
+                              title="Cambiar estado de la orden"
+                              disabled={orden.estado === 'entregado' || orden.estado === 'cancelado'}
+                            >
+                              <i className="fas fa-edit"></i>
+                            </button>
+                            {orden.estado !== 'entregado' && orden.estado !== 'cancelado' && (
+                              <button 
+                                className="btn btn-outline-danger"
+                                onClick={() => cancelarOrden(orden)}
+                                title="Cancelar orden"
+                              >
+                                <i className="fas fa-ban"></i>
+                              </button>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))}

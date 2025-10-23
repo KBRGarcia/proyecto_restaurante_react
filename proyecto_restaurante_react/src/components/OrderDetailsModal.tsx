@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { API_ENDPOINTS } from '../config'
+import { useNotification } from '../contexts/NotificationContext'
 import LoadingSpinner from './LoadingSpinner'
 import type { Orden, OrdenDetalle } from '../types.ts'
 
@@ -13,12 +14,16 @@ import type { Orden, OrdenDetalle } from '../types.ts'
 interface OrderDetailsModalProps {
   orden: Orden | null
   onClose: () => void
+  onOrdenActualizada?: () => void // Callback para recargar órdenes después de cancelar
 }
 
-function OrderDetailsModal({ orden, onClose }: OrderDetailsModalProps) {
+function OrderDetailsModal({ orden, onClose, onOrdenActualizada }: OrderDetailsModalProps) {
+  const { success, error: showError } = useNotification()
   const [detallesOrden, setDetallesOrden] = useState<OrdenDetalle[]>([])
   const [loadingDetalles, setLoadingDetalles] = useState(false)
   const [errorDetalles, setErrorDetalles] = useState<string | null>(null)
+  const [cancelando, setCancelando] = useState(false)
+  const [mostrarModalConfirmacion, setMostrarModalConfirmacion] = useState(false)
 
   /**
    * Cargar detalles de productos de la orden desde la API
@@ -67,6 +72,66 @@ function OrderDetailsModal({ orden, onClose }: OrderDetailsModalProps) {
       setErrorDetalles(error instanceof Error ? error.message : 'Error desconocido')
     } finally {
       setLoadingDetalles(false)
+    }
+  }
+
+  /**
+   * Cancelar orden
+   */
+  const cancelarOrden = async () => {
+    if (!orden?.id) return
+
+    setCancelando(true)
+
+    try {
+      const token = localStorage.getItem('token')
+      
+      if (!token) {
+        throw new Error('No hay token de autenticación')
+      }
+
+      const response = await fetch(`${API_ENDPOINTS.ordenes}?id=${orden.id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        // Mostrar notificación de éxito con información sobre el reembolso
+        success(
+          '¡Orden Cancelada Exitosamente!',
+          `Tu orden #${orden.id} ha sido cancelada. El monto de $${orden.total.toFixed(2)} será devuelto a tu método de pago original en un plazo máximo de 30 minutos.`,
+          8000
+        )
+        
+        // Llamar al callback para recargar las órdenes
+        if (onOrdenActualizada) {
+          onOrdenActualizada()
+        }
+        
+        // Cerrar el modal
+        onClose()
+      } else {
+        showError(
+          'Error al Cancelar',
+          data.message || 'No se pudo cancelar la orden. Por favor, intenta nuevamente.',
+          6000
+        )
+      }
+    } catch (error) {
+      console.error('Error al cancelar orden:', error)
+      showError(
+        'Error de Conexión',
+        'No se pudo conectar con el servidor. Por favor, verifica tu conexión e intenta nuevamente.',
+        6000
+      )
+    } finally {
+      setCancelando(false)
+      setMostrarModalConfirmacion(false)
     }
   }
 
@@ -140,7 +205,8 @@ function OrderDetailsModal({ orden, onClose }: OrderDetailsModalProps) {
               type="button" 
               className="btn-close btn-close-white" 
               onClick={onClose}
-            ></button>
+            >
+            </button>
           </div>
 
           {/* Body */}
@@ -417,14 +483,12 @@ function OrderDetailsModal({ orden, onClose }: OrderDetailsModalProps) {
               <i className="fas fa-times me-2"></i>
               Cerrar
             </button>
-            {orden.estado === 'pendiente' && (
+            {['pendiente', 'preparando'].includes(orden.estado) && (
               <button 
                 type="button" 
                 className="btn btn-danger"
-                onClick={() => {
-                  // TODO: Implementar cancelación de orden
-                  alert('Funcionalidad de cancelación en desarrollo')
-                }}
+                onClick={() => setMostrarModalConfirmacion(true)}
+                disabled={cancelando}
               >
                 <i className="fas fa-ban me-2"></i>
                 Cancelar Orden
@@ -435,7 +499,11 @@ function OrderDetailsModal({ orden, onClose }: OrderDetailsModalProps) {
               className="btn btn-primary"
               onClick={() => {
                 // TODO: Implementar descarga de factura
-                alert('Descarga de factura en desarrollo')
+                showError(
+                  'Función en Desarrollo',
+                  'La descarga de recibos estará disponible próximamente.',
+                  4000
+                )
               }}
             >
               <i className="fas fa-download me-2"></i>
@@ -444,6 +512,95 @@ function OrderDetailsModal({ orden, onClose }: OrderDetailsModalProps) {
           </div>
         </div>
       </div>
+
+      {/* Modal de Confirmación de Cancelación */}
+      {mostrarModalConfirmacion && (
+        <div 
+          className="modal fade show d-block" 
+          style={{ backgroundColor: 'rgba(0,0,0,0.7)', zIndex: 1060 }}
+          onClick={() => setMostrarModalConfirmacion(false)}
+        >
+          <div 
+            className="modal-dialog modal-dialog-centered" 
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-content">
+              <div className="modal-header bg-danger text-white">
+                <h5 className="modal-title text-white">
+                  <i className="fas fa-exclamation-triangle me-2"></i>
+                  Confirmar Cancelación
+                </h5>
+                <button 
+                  type="button" 
+                  className="btn-close btn-close-white" 
+                  onClick={() => setMostrarModalConfirmacion(false)}
+                  disabled={cancelando}
+                ></button>
+              </div>
+              <div className="modal-body">
+                <div className="alert alert-warning">
+                  <i className="fas fa-info-circle me-2"></i>
+                  <strong>¿Estás seguro de cancelar esta orden?</strong>
+                </div>
+                
+                <div className="card bg-light mb-3">
+                  <div className="card-body">
+                    <p className="mb-2"><strong>Orden #:</strong> {orden.id}</p>
+                    <p className="mb-2"><strong>Total:</strong> ${orden.total.toFixed(2)}</p>
+                    <p className="mb-0"><strong>Estado Actual:</strong> 
+                      <span className={`badge bg-${
+                        orden.estado === 'pendiente' ? 'warning' : 'info'
+                      } ms-2`}>
+                        {orden.estado.charAt(0).toUpperCase() + orden.estado.slice(1)}
+                      </span>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="alert alert-info mb-0">
+                  <h6 className="alert-heading">
+                    <i className="fas fa-money-bill-wave me-2"></i>
+                    Información de Reembolso
+                  </h6>
+                  <p className="mb-0">
+                    El monto de <strong>${orden.total.toFixed(2)}</strong> será devuelto a tu método de pago original 
+                    en un plazo <strong>no mayor a 30 minutos</strong>.
+                  </p>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button 
+                  type="button" 
+                  className="btn btn-secondary"
+                  onClick={() => setMostrarModalConfirmacion(false)}
+                  disabled={cancelando}
+                >
+                  <i className="fas fa-arrow-left me-2"></i>
+                  Volver
+                </button>
+                <button 
+                  type="button" 
+                  className="btn btn-danger"
+                  onClick={cancelarOrden}
+                  disabled={cancelando}
+                >
+                  {cancelando ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm me-2"></span>
+                      Cancelando...
+                    </>
+                  ) : (
+                    <>
+                      <i className="fas fa-ban me-2"></i>
+                      Sí, Cancelar Orden
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
