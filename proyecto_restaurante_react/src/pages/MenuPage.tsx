@@ -327,24 +327,38 @@ function MenuPage() {
           <div className="card-header bg-transparent">
             <div className="d-flex justify-content-between align-items-center">
               <h6 className="mb-0">
-                <i className="fas fa-store me-2 text-primary"></i>
+                <i className="fas fa-store me-2" style={{ color: 'var(--theme-accent-color)' }}></i>
                 Filtrar por Sucursal
               </h6>
               <div className="btn-group btn-group-sm">
                 <button
-                  className="btn btn-outline-primary"
+                  className="btn"
+                  style={{
+                    backgroundColor: 'white',
+                    color: 'var(--theme-accent-color)',
+                    border: '1px solid var(--theme-accent-color)',
+                    opacity: sucursalesSeleccionadas.length === sucursales.length ? 0.6 : 1,
+                    cursor: sucursalesSeleccionadas.length === sucursales.length ? 'not-allowed' : 'pointer'
+                  }}
                   onClick={seleccionarTodasSucursales}
                   disabled={sucursalesSeleccionadas.length === sucursales.length}
                 >
-                  <i className="fas fa-check-double me-1 text-white"></i>
+                  <i className="fas fa-check-double me-1"></i>
                   Todas
                 </button>
                 <button
-                  className="btn btn-outline-secondary"
+                  className="btn"
+                  style={{
+                    backgroundColor: 'white',
+                    color: 'var(--theme-accent-color)',
+                    border: '1px solid var(--theme-accent-color)',
+                    opacity: sucursalesSeleccionadas.length === 1 ? 0.6 : 1,
+                    cursor: sucursalesSeleccionadas.length === 1 ? 'not-allowed' : 'pointer'
+                  }}
                   onClick={limpiarFiltroSucursales}
                   disabled={sucursalesSeleccionadas.length === 1}
                 >
-                  <i className="fas fa-times me-1 text-white"></i>
+                  <i className="fas fa-times me-1"></i>
                   Limpiar
                 </button>
               </div>
@@ -355,17 +369,29 @@ function MenuPage() {
               {sucursales.map(sucursal => (
                 <button
                   key={sucursal.id}
-                  className={`btn btn-sm ${
-                    sucursalesSeleccionadas.includes(sucursal.id)
-                      ? 'btn-primary'
-                      : 'btn-outline-secondary'
-                  }`}
+                  className="btn btn-sm"
+                  style={{
+                    backgroundColor: sucursalesSeleccionadas.includes(sucursal.id)
+                      ? 'var(--theme-accent-color)'
+                      : 'white',
+                    color: sucursalesSeleccionadas.includes(sucursal.id)
+                      ? 'white'
+                      : 'var(--theme-accent-color)',
+                    border: '1px solid var(--theme-accent-color)',
+                    transition: 'all 0.3s ease'
+                  }}
                   onClick={() => toggleSucursal(sucursal.id)}
                 >
                   <i className={`fas fa-${sucursalesSeleccionadas.includes(sucursal.id) ? 'check-circle' : 'circle'} me-1`}></i>
                   {sucursal.nombre}
                   {sucursal.es_principal && (
-                    <span className="badge bg-warning text-dark ms-1">
+                    <span 
+                      className="badge ms-1"
+                      style={{
+                        backgroundColor: '#ffc107',
+                        color: '#000'
+                      }}
+                    >
                       <i className="fas fa-star"></i>
                     </span>
                   )}
