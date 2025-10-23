@@ -1,16 +1,17 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { API_ENDPOINTS } from '../config'
 
 /**
  * Página de Recuperación de Contraseña
- * Permite a los usuarios recuperar su contraseña mediante código por correo
+ * Permite a los usuarios recuperar su contraseña de forma simplificada
  * 
  * Flujo:
  * 1. Ingresar correo electrónico
- * 2. Verificar código de 6 dígitos (60 segundos)
- * 3. Crear nueva contraseña
- * 4. Redirigir al login
+ * 2. Verificar que el correo existe en la base de datos
+ * 3. Ingresar nueva contraseña y confirmarla
+ * 4. Actualizar la contraseña en el sistema
+ * 5. Redirigir al login
  * 
  * Fuentes oficiales:
  * - React Hooks: https://react.dev/reference/react
@@ -18,7 +19,7 @@ import { API_ENDPOINTS } from '../config'
  * - TypeScript con React: https://react.dev/learn/typescript
  */
 
-type Step = 'email' | 'code' | 'password'
+type Step = 'email' | 'password'
 
 function RecuperarPasswordPage() {
   const [step, setStep] = useState<Step>('email')
@@ -28,58 +29,24 @@ function RecuperarPasswordPage() {
   
   // Estados para el formulario
   const [correo, setCorreo] = useState('')
-  const [codigo, setCodigo] = useState('')
   const [nuevaPassword, setNuevaPassword] = useState('')
   const [confirmarPassword, setConfirmarPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   
-  // Estados para el temporizador
-  const [timeLeft, setTimeLeft] = useState(60)
-  const [timerActive, setTimerActive] = useState(false)
-  const [canResend, setCanResend] = useState(false)
-  const [token, setToken] = useState<string | null>(null)
-  
   const navigate = useNavigate()
-  const timerRef = useRef<number | null>(null)
-
-  // Efecto para el temporizador
-  useEffect(() => {
-    if (timerActive && timeLeft > 0) {
-      timerRef.current = setTimeout(() => {
-        setTimeLeft(timeLeft - 1)
-      }, 1000)
-    } else if (timeLeft === 0) {
-      setTimerActive(false)
-      setCanResend(true)
-    }
-    
-    return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current)
-      }
-    }
-  }, [timerActive, timeLeft])
-
-  // Limpiar timer al desmontar
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current)
-      }
-    }
-  }, [])
 
   /**
-   * Solicitar código de recuperación
+   * Verificar que el correo existe en la base de datos
    */
-  const solicitarCodigo = async () => {
+  const verificarCorreo = async () => {
     setLoading(true)
     setError(null)
+    setSuccess(null)
     
     try {
-      const url = `${API_ENDPOINTS.recuperarPassword}?action=solicitar`
-      console.log('🔗 URL de solicitud:', url)
+      const url = `${API_ENDPOINTS.recuperarPassword}?action=verificar-correo`
+      console.log('🔗 Verificando correo:', url)
       console.log('📧 Correo:', correo)
       
       const response = await fetch(url, {
@@ -100,60 +67,14 @@ function RecuperarPasswordPage() {
       console.log('📦 Datos recibidos:', data)
       
       if (data.success) {
-        setSuccess('Código enviado a tu correo electrónico')
-        setStep('code')
-        setTimeLeft(60)
-        setTimerActive(true)
-        setCanResend(false)
-      } else {
-        setError(data.message || 'Error al enviar el código')
-      }
-    } catch (err) {
-      console.error('❌ Error en solicitarCodigo:', err)
-      setError(`Error de conexión: ${err instanceof Error ? err.message : 'Error desconocido'}`)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  /**
-   * Reenviar código
-   */
-  const reenviarCodigo = async () => {
-    setCanResend(false)
-    setTimeLeft(60)
-    setTimerActive(true)
-    await solicitarCodigo()
-  }
-
-  /**
-   * Verificar código
-   */
-  const verificarCodigo = async () => {
-    setLoading(true)
-    setError(null)
-    
-    try {
-      const response = await fetch(`${API_ENDPOINTS.recuperarPassword}?action=verificar`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ correo, codigo })
-      })
-      
-      const data = await response.json()
-      
-      if (data.success) {
-        setToken(data.token)
+        setSuccess('Correo verificado correctamente. Ahora ingresa tu nueva contraseña.')
         setStep('password')
-        setSuccess('Código verificado correctamente')
-        setTimerActive(false)
       } else {
-        setError(data.message || 'Código incorrecto')
+        setError(data.message || 'El correo no está registrado en el sistema')
       }
     } catch (err) {
-      setError('Error de conexión')
+      console.error('❌ Error en verificarCorreo:', err)
+      setError(`Error de conexión: ${err instanceof Error ? err.message : 'Error desconocido'}`)
     } finally {
       setLoading(false)
     }
@@ -183,7 +104,7 @@ function RecuperarPasswordPage() {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ 
-          token, 
+          correo, 
           nueva_password: nuevaPassword 
         })
       })
@@ -191,7 +112,7 @@ function RecuperarPasswordPage() {
       const data = await response.json()
       
       if (data.success) {
-        setSuccess('Contraseña actualizada exitosamente')
+        setSuccess('Contraseña actualizada exitosamente. Redirigiendo al login...')
         setTimeout(() => {
           navigate('/login')
         }, 2000)
@@ -205,15 +126,6 @@ function RecuperarPasswordPage() {
     }
   }
 
-  /**
-   * Formatear tiempo restante
-   */
-  const formatTime = (seconds: number): string => {
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${mins}:${secs.toString().padStart(2, '0')}`
-  }
-
   return (
     <div className="container mt-5 mb-5">
       <div className="row justify-content-center">
@@ -225,22 +137,17 @@ function RecuperarPasswordPage() {
                 <i className="fas fa-key fa-3x text-primary mb-3"></i>
                 <h2 className="card-title">Recuperar Contraseña</h2>
                 <p className="text-muted">
-                  {step === 'email' && 'Ingresa tu correo electrónico'}
-                  {step === 'code' && 'Verifica tu identidad'}
+                  {step === 'email' && 'Ingresa tu correo electrónico registrado'}
                   {step === 'password' && 'Crea tu nueva contraseña'}
                 </p>
               </div>
 
               {/* Indicador de progreso */}
               <div className="mb-4">
-                <div className="d-flex justify-content-between">
+                <div className="d-flex justify-content-around">
                   <div className={`step-indicator ${step === 'email' ? 'active' : 'completed'}`}>
                     <i className="fas fa-envelope"></i>
-                    <small>Correo</small>
-                  </div>
-                  <div className={`step-indicator ${step === 'code' ? 'active' : step === 'password' ? 'completed' : ''}`}>
-                    <i className="fas fa-shield-alt"></i>
-                    <small>Código</small>
+                    <small>Verificar Correo</small>
                   </div>
                   <div className={`step-indicator ${step === 'password' ? 'active' : ''}`}>
                     <i className="fas fa-lock"></i>
@@ -282,105 +189,40 @@ function RecuperarPasswordPage() {
                       required
                       disabled={loading}
                     />
+                    <small className="text-muted">
+                      Ingresa el correo asociado a tu cuenta
+                    </small>
                   </div>
 
                   <button
                     type="button"
                     className="btn btn-primary w-100"
-                    onClick={solicitarCodigo}
+                    onClick={verificarCorreo}
                     disabled={loading || !correo}
                   >
                     {loading ? (
                       <>
                         <span className="spinner-border spinner-border-sm me-2" />
-                        Enviando código...
+                        Verificando correo...
                       </>
                     ) : (
                       <>
-                        <i className="fas fa-paper-plane me-2"></i>
-                        Enviar Código
+                        <i className="fas fa-check-circle me-2"></i>
+                        Verificar Correo
                       </>
                     )}
                   </button>
                 </div>
               )}
 
-              {/* Paso 2: Verificar código */}
-              {step === 'code' && (
-                <div>
-                  <div className="mb-3">
-                    <label htmlFor="codigo" className="form-label">
-                      <i className="fas fa-shield-alt me-2"></i>
-                      Código de Verificación
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control text-center"
-                      id="codigo"
-                      value={codigo}
-                      onChange={(e) => setCodigo(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                      placeholder="000000"
-                      maxLength={6}
-                      required
-                      disabled={loading}
-                      style={{ fontSize: '1.5rem', letterSpacing: '0.5rem' }}
-                    />
-                    <small className="text-muted">
-                      Ingresa el código de 6 dígitos enviado a {correo}
-                    </small>
-                  </div>
-
-                  {/* Temporizador */}
-                  <div className="text-center mb-3">
-                    {timerActive ? (
-                      <div className="alert alert-info">
-                        <i className="fas fa-clock me-2"></i>
-                        Tiempo restante: <strong>{formatTime(timeLeft)}</strong>
-                      </div>
-                    ) : (
-                      <div className="alert alert-warning">
-                        <i className="fas fa-exclamation-triangle me-2"></i>
-                        El código ha expirado
-                      </div>
-                    )}
-                  </div>
-
-                  <button
-                    type="button"
-                    className="btn btn-primary w-100 mb-2"
-                    onClick={verificarCodigo}
-                    disabled={loading || codigo.length !== 6 || !timerActive}
-                  >
-                    {loading ? (
-                      <>
-                        <span className="spinner-border spinner-border-sm me-2" />
-                        Verificando...
-                      </>
-                    ) : (
-                      <>
-                        <i className="fas fa-check me-2"></i>
-                        Verificar Código
-                      </>
-                    )}
-                  </button>
-
-                  {canResend && (
-                    <button
-                      type="button"
-                      className="btn btn-outline-secondary w-100"
-                      onClick={reenviarCodigo}
-                      disabled={loading}
-                    >
-                      <i className="fas fa-redo me-2"></i>
-                      Enviar Código Nuevamente
-                    </button>
-                  )}
-                </div>
-              )}
-
-              {/* Paso 3: Nueva contraseña */}
+              {/* Paso 2: Nueva contraseña */}
               {step === 'password' && (
                 <div>
+                  <div className="alert alert-info mb-3">
+                    <i className="fas fa-info-circle me-2"></i>
+                    Se actualizará la contraseña para: <strong>{correo}</strong>
+                  </div>
+
                   <div className="mb-3">
                     <label htmlFor="nuevaPassword" className="form-label">
                       <i className="fas fa-lock me-2"></i>
@@ -444,7 +286,7 @@ function RecuperarPasswordPage() {
 
                   <button
                     type="button"
-                    className="btn btn-success w-100"
+                    className="btn btn-success w-100 mb-2"
                     onClick={actualizarPassword}
                     disabled={loading || !nuevaPassword || !confirmarPassword}
                   >
@@ -459,6 +301,22 @@ function RecuperarPasswordPage() {
                         Actualizar Contraseña
                       </>
                     )}
+                  </button>
+
+                  <button
+                    type="button"
+                    className="btn btn-outline-secondary w-100"
+                    onClick={() => {
+                      setStep('email')
+                      setNuevaPassword('')
+                      setConfirmarPassword('')
+                      setError(null)
+                      setSuccess(null)
+                    }}
+                    disabled={loading}
+                  >
+                    <i className="fas fa-arrow-left me-2"></i>
+                    Cambiar Correo
                   </button>
                 </div>
               )}
