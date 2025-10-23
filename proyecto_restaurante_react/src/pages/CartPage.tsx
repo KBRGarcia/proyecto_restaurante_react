@@ -81,8 +81,8 @@ function CartPage() {
               <p className="text-muted mb-4">
                 Agrega algunos productos deliciosos a tu carrito para comenzar
               </p>
-              <Link to="/menu" className="btn btn-primary btn-lg">
-                <i className="fas fa-utensils me-2"></i>
+              <Link to="/menu" className="btn btn-primary btn-lg text-white">
+                <i className="fas fa-utensils me-2 text-white"></i>
                 Ver Menú
               </Link>
             </div>

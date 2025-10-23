@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext.tsx'
+import { useCart } from '../contexts/CartContext.tsx'
 import { useTheme } from '../contexts/ThemeContext.tsx'
 import type { ColorPalette } from '../types'
 
@@ -11,6 +12,7 @@ import type { ColorPalette } from '../types'
  */
 function Navbar() {
   const { usuario, logout, estaAutenticado } = useAuth()
+  const { cantidadTotal } = useCart()
   const { theme, toggleThemeMode, setColorPalette } = useTheme()
   const navigate = useNavigate()
 
@@ -105,6 +107,31 @@ function Navbar() {
 
           {/* Usuario */}
           <ul className="navbar-nav">
+            {/* Icono de Carrito - Solo para usuarios NO admin */}
+            {usuario?.rol !== 'admin' && (
+              <li className="nav-item me-3">
+                <Link 
+                  to="/carrito" 
+                  className="nav-link position-relative d-flex align-items-center"
+                  title="Ver carrito de compras"
+                >
+                  <i className="fas fa-shopping-cart" style={{ fontSize: '1.25rem' }}></i>
+                  {cantidadTotal > 0 && (
+                    <span 
+                      className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-white"
+                      style={{ 
+                        fontSize: '0.65rem',
+                        padding: '0.25em 0.5em',
+                        marginLeft: '-0.5rem',
+                        minWidth: '1.5rem'
+                      }}
+                    >
+                      {cantidadTotal > 99 ? '99+' : cantidadTotal}
+                    </span>
+                  )}
+                </Link>
+              </li>
+            )}
 
             {estaAutenticado() ? (
               <li className="nav-item dropdown">
