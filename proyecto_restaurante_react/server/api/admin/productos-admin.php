@@ -88,7 +88,19 @@ function crearProducto($conn) {
         ];
     }
     
+    // Validar que se hayan seleccionado sucursales
+    if (empty($input['sucursal_ids']) || !is_array($input['sucursal_ids'])) {
+        http_response_code(400);
+        return [
+            'success' => false,
+            'message' => 'Debes seleccionar al menos una sucursal'
+        ];
+    }
+    
     try {
+        // Iniciar transacción
+        $conn->begin_transaction();
+        
         $stmt = $conn->prepare("
             INSERT INTO productos 
             (nombre, descripcion, precio, categoria_id, imagen, estado, tiempo_preparacion, ingredientes, es_especial)
@@ -118,31 +130,51 @@ function crearProducto($conn) {
             $es_especial
         );
         
-        if ($stmt->execute()) {
-            $producto_id = $conn->insert_id;
-            
-            // Obtener el producto recién creado con el nombre de categoría
-            $stmtGet = $conn->prepare("
-                SELECT p.*, c.nombre as categoria_nombre 
-                FROM productos p
-                LEFT JOIN categorias c ON p.categoria_id = c.id
-                WHERE p.id = ?
-            ");
-            $stmtGet->bind_param("i", $producto_id);
-            $stmtGet->execute();
-            $result = $stmtGet->get_result();
-            $producto = $result->fetch_assoc();
-            
-            return [
-                'success' => true,
-                'message' => 'Producto creado exitosamente',
-                'data' => $producto
-            ];
-        } else {
+        if (!$stmt->execute()) {
             throw new Exception('Error al crear el producto');
         }
         
+        $producto_id = $conn->insert_id;
+        
+        // Asignar producto a sucursales
+        $stmtSucursal = $conn->prepare("
+            INSERT INTO producto_sucursal (producto_id, sucursal_id, disponible)
+            VALUES (?, ?, TRUE)
+        ");
+        
+        foreach ($input['sucursal_ids'] as $sucursal_id) {
+            $sucursal_id = (int)$sucursal_id;
+            $stmtSucursal->bind_param("ii", $producto_id, $sucursal_id);
+            if (!$stmtSucursal->execute()) {
+                throw new Exception('Error al asignar producto a sucursal');
+            }
+        }
+        
+        // Confirmar transacción
+        $conn->commit();
+        
+        // Obtener el producto recién creado con el nombre de categoría
+        $stmtGet = $conn->prepare("
+            SELECT p.*, c.nombre as categoria_nombre 
+            FROM productos p
+            LEFT JOIN categorias c ON p.categoria_id = c.id
+            WHERE p.id = ?
+        ");
+        $stmtGet->bind_param("i", $producto_id);
+        $stmtGet->execute();
+        $result = $stmtGet->get_result();
+        $producto = $result->fetch_assoc();
+        
+        return [
+            'success' => true,
+            'message' => 'Producto creado exitosamente',
+            'data' => $producto
+        ];
+        
     } catch (Exception $e) {
+        // Revertir transacción en caso de error
+        $conn->rollback();
+        
         http_response_code(500);
         return [
             'success' => false,
@@ -186,7 +218,21 @@ function actualizarProducto($conn, $id) {
         ];
     }
     
+    // Validar sucursales si se proporcionan
+    if (isset($input['sucursal_ids'])) {
+        if (empty($input['sucursal_ids']) || !is_array($input['sucursal_ids'])) {
+            http_response_code(400);
+            return [
+                'success' => false,
+                'message' => 'Debes seleccionar al menos una sucursal'
+            ];
+        }
+    }
+    
     try {
+        // Iniciar transacción
+        $conn->begin_transaction();
+        
         $stmt = $conn->prepare("
             UPDATE productos 
             SET nombre = ?, 
@@ -225,29 +271,57 @@ function actualizarProducto($conn, $id) {
             $id
         );
         
-        if ($stmt->execute()) {
-            // Obtener el producto actualizado con el nombre de categoría
-            $stmtGet = $conn->prepare("
-                SELECT p.*, c.nombre as categoria_nombre 
-                FROM productos p
-                LEFT JOIN categorias c ON p.categoria_id = c.id
-                WHERE p.id = ?
-            ");
-            $stmtGet->bind_param("i", $id);
-            $stmtGet->execute();
-            $result = $stmtGet->get_result();
-            $producto = $result->fetch_assoc();
-            
-            return [
-                'success' => true,
-                'message' => 'Producto actualizado exitosamente',
-                'data' => $producto
-            ];
-        } else {
+        if (!$stmt->execute()) {
             throw new Exception('Error al actualizar el producto');
         }
         
+        // Actualizar asignación de sucursales si se proporcionan
+        if (isset($input['sucursal_ids'])) {
+            // Eliminar asignaciones anteriores
+            $stmtDelete = $conn->prepare("DELETE FROM producto_sucursal WHERE producto_id = ?");
+            $stmtDelete->bind_param("i", $id);
+            $stmtDelete->execute();
+            
+            // Insertar nuevas asignaciones
+            $stmtSucursal = $conn->prepare("
+                INSERT INTO producto_sucursal (producto_id, sucursal_id, disponible)
+                VALUES (?, ?, TRUE)
+            ");
+            
+            foreach ($input['sucursal_ids'] as $sucursal_id) {
+                $sucursal_id = (int)$sucursal_id;
+                $stmtSucursal->bind_param("ii", $id, $sucursal_id);
+                if (!$stmtSucursal->execute()) {
+                    throw new Exception('Error al asignar producto a sucursal');
+                }
+            }
+        }
+        
+        // Confirmar transacción
+        $conn->commit();
+        
+        // Obtener el producto actualizado con el nombre de categoría
+        $stmtGet = $conn->prepare("
+            SELECT p.*, c.nombre as categoria_nombre 
+            FROM productos p
+            LEFT JOIN categorias c ON p.categoria_id = c.id
+            WHERE p.id = ?
+        ");
+        $stmtGet->bind_param("i", $id);
+        $stmtGet->execute();
+        $result = $stmtGet->get_result();
+        $producto = $result->fetch_assoc();
+        
+        return [
+            'success' => true,
+            'message' => 'Producto actualizado exitosamente',
+            'data' => $producto
+        ];
+        
     } catch (Exception $e) {
+        // Revertir transacción en caso de error
+        $conn->rollback();
+        
         http_response_code(500);
         return [
             'success' => false,

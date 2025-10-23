@@ -7,7 +7,7 @@ import ErrorMessage from '../components/ErrorMessage.tsx'
 import { useCart } from '../contexts/CartContext.tsx'
 import { useAuth } from '../contexts/AuthContext.tsx'
 import { API_ENDPOINTS } from '../config.ts'
-import type { Producto, Categoria, ApiResponse } from '../types.ts'
+import type { Producto, Categoria, ApiResponse, Sucursal } from '../types.ts'
 
 /**
  * Página de Menú
@@ -29,23 +29,59 @@ function MenuPage() {
   const [showToast, setShowToast] = useState(false)
   const [lastAddedProduct, setLastAddedProduct] = useState<string>('')
   
+  // Estados para filtro de sucursales
+  const [sucursales, setSucursales] = useState<Sucursal[]>([])
+  const [sucursalesSeleccionadas, setSucursalesSeleccionadas] = useState<number[]>([])
+  
   // Estados para modo administrador
   const [showModal, setShowModal] = useState(false)
   const [productoEditar, setProductoEditar] = useState<Producto | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
   useEffect(() => {
-    cargarDatos()
+    cargarSucursales()
   }, [])
+
+  useEffect(() => {
+    if (sucursales.length > 0 && sucursalesSeleccionadas.length === 0) {
+      // Seleccionar todas las sucursales por defecto
+      setSucursalesSeleccionadas(sucursales.map(s => s.id))
+    }
+  }, [sucursales])
+
+  useEffect(() => {
+    if (sucursalesSeleccionadas.length > 0) {
+      cargarDatos()
+    }
+  }, [sucursalesSeleccionadas])
+
+  const cargarSucursales = async () => {
+    try {
+      const response = await fetch(API_ENDPOINTS.sucursales)
+      const data: ApiResponse<Sucursal[]> = await response.json()
+      
+      if (data.success && data.data) {
+        setSucursales(data.data)
+      }
+    } catch (err) {
+      console.error('Error al cargar sucursales:', err)
+    }
+  }
 
   const cargarDatos = async () => {
     setLoading(true)
     setError(null)
 
     try {
-      console.log('🔌 Conectando a:', API_ENDPOINTS.productos)
+      // Construir URL con filtro de sucursales
+      const sucursalesParam = sucursalesSeleccionadas.join(',')
+      const url = sucursalesParam 
+        ? `${API_ENDPOINTS.productos}?sucursales=${sucursalesParam}`
+        : API_ENDPOINTS.productos
       
-      const resProductos = await fetch(API_ENDPOINTS.productos)
+      console.log('🔌 Conectando a:', url)
+      
+      const resProductos = await fetch(url)
       
       if (!resProductos.ok) {
         throw new Error(`HTTP error! status: ${resProductos.status}`)
@@ -200,6 +236,38 @@ function MenuPage() {
   // Determinar si el usuario es admin
   const esAdmin = usuario?.rol === 'admin'
 
+  /**
+   * Toggle de selección de sucursal
+   */
+  const toggleSucursal = (sucursalId: number) => {
+    setSucursalesSeleccionadas(prev => {
+      if (prev.includes(sucursalId)) {
+        // Si ya está seleccionada, quitarla (pero mantener al menos una)
+        const nuevasSeleccionadas = prev.filter(id => id !== sucursalId)
+        return nuevasSeleccionadas.length > 0 ? nuevasSeleccionadas : prev
+      } else {
+        // Si no está seleccionada, agregarla
+        return [...prev, sucursalId]
+      }
+    })
+  }
+
+  /**
+   * Seleccionar todas las sucursales
+   */
+  const seleccionarTodasSucursales = () => {
+    setSucursalesSeleccionadas(sucursales.map(s => s.id))
+  }
+
+  /**
+   * Deseleccionar todas menos una (para evitar filtro vacío)
+   */
+  const limpiarFiltroSucursales = () => {
+    if (sucursales.length > 0) {
+      setSucursalesSeleccionadas([sucursales[0].id])
+    }
+  }
+
   if (loading) {
     return (
       <div className="container mt-5">
@@ -253,7 +321,66 @@ function MenuPage() {
         )}
       </div>
 
-      {/* Filtros */}
+      {/* Filtro de Sucursales */}
+      {sucursales.length > 0 && (
+        <div className="card mb-4 shadow-sm">
+          <div className="card-header bg-transparent">
+            <div className="d-flex justify-content-between align-items-center">
+              <h6 className="mb-0">
+                <i className="fas fa-store me-2 text-primary"></i>
+                Filtrar por Sucursal
+              </h6>
+              <div className="btn-group btn-group-sm">
+                <button
+                  className="btn btn-outline-primary"
+                  onClick={seleccionarTodasSucursales}
+                  disabled={sucursalesSeleccionadas.length === sucursales.length}
+                >
+                  <i className="fas fa-check-double me-1 text-white"></i>
+                  Todas
+                </button>
+                <button
+                  className="btn btn-outline-secondary"
+                  onClick={limpiarFiltroSucursales}
+                  disabled={sucursalesSeleccionadas.length === 1}
+                >
+                  <i className="fas fa-times me-1 text-white"></i>
+                  Limpiar
+                </button>
+              </div>
+            </div>
+          </div>
+          <div className="card-body">
+            <div className="d-flex flex-wrap gap-2">
+              {sucursales.map(sucursal => (
+                <button
+                  key={sucursal.id}
+                  className={`btn btn-sm ${
+                    sucursalesSeleccionadas.includes(sucursal.id)
+                      ? 'btn-primary'
+                      : 'btn-outline-secondary'
+                  }`}
+                  onClick={() => toggleSucursal(sucursal.id)}
+                >
+                  <i className={`fas fa-${sucursalesSeleccionadas.includes(sucursal.id) ? 'check-circle' : 'circle'} me-1`}></i>
+                  {sucursal.nombre}
+                  {sucursal.es_principal && (
+                    <span className="badge bg-warning text-dark ms-1">
+                      <i className="fas fa-star"></i>
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+            <small className="text-muted mt-2 d-block">
+              <i className="fas fa-info-circle me-1"></i>
+              Mostrando productos de {sucursalesSeleccionadas.length} {sucursalesSeleccionadas.length === 1 ? 'sucursal' : 'sucursales'}
+            </small>
+          </div>
+        </div>
+      )}
+
+      {/* Filtros de Categorías */}
       {categorias.length > 0 && (
         <FilterBar
           categorias={categorias}
@@ -315,6 +442,7 @@ function MenuPage() {
         onSave={handleGuardarProducto}
         producto={productoEditar}
         categorias={categorias}
+        sucursales={sucursales}
       />
 
       {/* Toast de notificación */}

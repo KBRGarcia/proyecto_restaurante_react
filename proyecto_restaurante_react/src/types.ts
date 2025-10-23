@@ -99,8 +99,6 @@ export interface Producto {
   precio: number
   categoria_id: number
   imagen: string | null
-  disponible: boolean
-  destacado: boolean
   fecha_creacion: string
   categoria?: Categoria
   estado?: 'activo' | 'inactivo' | 'agotado'
@@ -108,6 +106,8 @@ export interface Producto {
   ingredientes?: string
   es_especial?: boolean
   categoria_nombre?: string
+  sucursal_ids?: number[]
+  sucursal_nombres?: string
 }
 
 export interface Categoria {
