@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { API_ENDPOINTS } from '../config'
 import { useNotification } from '../contexts/NotificationContext'
 import LoadingSpinner from './LoadingSpinner'
+import ReceiptImage from './ReceiptImage'
+import { useImageDownload } from '../hooks/useImageDownload'
 import type { Orden, OrdenDetalle } from '../types.ts'
 
 /**
@@ -19,11 +21,13 @@ interface OrderDetailsModalProps {
 
 function OrderDetailsModal({ orden, onClose, onOrdenActualizada }: OrderDetailsModalProps) {
   const { success, error: showError } = useNotification()
+  const { downloadImage, copyImageToClipboard, isGenerating } = useImageDownload()
   const [detallesOrden, setDetallesOrden] = useState<OrdenDetalle[]>([])
   const [loadingDetalles, setLoadingDetalles] = useState(false)
   const [errorDetalles, setErrorDetalles] = useState<string | null>(null)
   const [cancelando, setCancelando] = useState(false)
   const [mostrarModalConfirmacion, setMostrarModalConfirmacion] = useState(false)
+  const [mostrarRecibo, setMostrarRecibo] = useState(false)
 
   /**
    * Cargar detalles de productos de la orden desde la API
@@ -73,6 +77,46 @@ function OrderDetailsModal({ orden, onClose, onOrdenActualizada }: OrderDetailsM
     } finally {
       setLoadingDetalles(false)
     }
+  }
+
+  /**
+   * Descargar recibo como imagen
+   */
+  const handleDownloadReceipt = async () => {
+    if (!orden || detallesOrden.length === 0) {
+      showError(
+        'Error',
+        'No se pueden generar recibos sin productos',
+        4000
+      )
+      return
+    }
+
+    await downloadImage('receipt-content', {
+      filename: `recibo_orden_${orden.id}`,
+      quality: 0.95,
+      backgroundColor: '#ffffff',
+      scale: 2
+    })
+  }
+
+  /**
+   * Copiar recibo al portapapeles
+   */
+  const handleCopyReceipt = async () => {
+    if (!orden || detallesOrden.length === 0) {
+      showError(
+        'Error',
+        'No se pueden generar recibos sin productos',
+        4000
+      )
+      return
+    }
+
+    await copyImageToClipboard('receipt-content', {
+      backgroundColor: '#ffffff',
+      scale: 2
+    })
   }
 
   /**
@@ -496,22 +540,103 @@ function OrderDetailsModal({ orden, onClose, onOrdenActualizada }: OrderDetailsM
             )}
             <button 
               type="button" 
-              className="btn btn-primary"
-              onClick={() => {
-                // TODO: Implementar descarga de factura
-                showError(
-                  'Función en Desarrollo',
-                  'La descarga de recibos estará disponible próximamente.',
-                  4000
-                )
-              }}
+              className="btn btn-outline-primary me-2"
+              onClick={() => setMostrarRecibo(!mostrarRecibo)}
+              disabled={detallesOrden.length === 0}
             >
-              <i className="fas fa-download me-2"></i>
-              Descargar Recibo
+              <i className={`fas fa-${mostrarRecibo ? 'eye-slash' : 'eye'} me-2`}></i>
+              {mostrarRecibo ? 'Ocultar Recibo' : 'Ver Recibo'}
+            </button>
+            {/*<button 
+              type="button" 
+              className="btn btn-primary me-2"
+              onClick={handleDownloadReceipt}
+              disabled={isGenerating || detallesOrden.length === 0}
+            >
+              {isGenerating ? (
+                <>
+                  <span className="spinner-border spinner-border-sm me-2"></span>
+                  Generando...
+                </>
+              ) : (
+                <>
+                  <i className="fas fa-download me-2"></i>
+                  Descargar Recibo
+                </>
+              )}
+            </button>*/}
+            <button 
+              type="button" 
+              className="btn btn-outline-secondary"
+              onClick={handleCopyReceipt}
+              disabled={isGenerating || detallesOrden.length === 0}
+            >
+              <i className="fas fa-copy me-2"></i>
+              Copiar Imagen
             </button>
           </div>
         </div>
       </div>
+
+      {/* Vista Previa del Recibo */}
+      {mostrarRecibo && orden && detallesOrden.length > 0 && (
+        <div 
+          className="modal fade show d-block" 
+          style={{ backgroundColor: 'rgba(0,0,0,0.7)', zIndex: 1060 }}
+          onClick={() => setMostrarRecibo(false)}
+        >
+          <div 
+            className="modal-dialog modal-dialog-centered modal-dialog-scrollable" 
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-content">
+              <div className="modal-header bg-success text-white">
+                <h5 className="modal-title text-white">
+                  <i className="fas fa-receipt me-2"></i>
+                  Vista Previa del Recibo
+                </h5>
+                <button 
+                  type="button" 
+                  className="btn-close btn-close-white" 
+                  onClick={() => setMostrarRecibo(false)}
+                ></button>
+              </div>
+              <div className="modal-body text-center">
+                <ReceiptImage orden={orden} detallesOrden={detallesOrden} />
+                <div className="mt-3">
+                  <button 
+                    type="button" 
+                    className="btn btn-success me-2"
+                    onClick={handleDownloadReceipt}
+                    disabled={isGenerating}
+                  >
+                    {isGenerating ? (
+                      <>
+                        <span className="spinner-border spinner-border-sm me-2"></span>
+                        Generando...
+                      </>
+                    ) : (
+                      <>
+                        <i className="fas fa-download me-2"></i>
+                        Descargar Imagen
+                      </>
+                    )}
+                  </button>
+                  <button 
+                    type="button" 
+                    className="btn btn-outline-secondary"
+                    onClick={handleCopyReceipt}
+                    disabled={isGenerating}
+                  >
+                    <i className="fas fa-copy me-2"></i>
+                    Copiar al Portapapeles
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal de Confirmación de Cancelación */}
       {mostrarModalConfirmacion && (
