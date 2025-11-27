@@ -42,14 +42,14 @@ try {
         ];
         
         // Contar productos
-        $countQuery = $conn->query("SELECT COUNT(*) as total FROM productos");
+        $countQuery = $conn->query("SELECT COUNT(*) as total FROM products");
         if ($countQuery) {
             $count = $countQuery->fetch_assoc();
             $resultado['database']['productos_count'] = $count['total'];
         }
         
         // Contar categorías
-        $catQuery = $conn->query("SELECT COUNT(*) as total FROM categorias");
+        $catQuery = $conn->query("SELECT COUNT(*) as total FROM categories");
         if ($catQuery) {
             $count = $catQuery->fetch_assoc();
             $resultado['database']['categorias_count'] = $count['total'];

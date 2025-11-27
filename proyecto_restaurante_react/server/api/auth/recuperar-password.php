@@ -78,7 +78,7 @@ function verificarCorreo($conn) {
     }
     
     // Verificar que el correo existe en la base de datos
-    $stmt = $conn->prepare("SELECT id, nombre FROM usuarios WHERE correo = ? AND estado = 'activo'");
+    $stmt = $conn->prepare("SELECT id, name as nombre FROM users WHERE email = ? AND status = 'active'");
     $stmt->bind_param("s", $correo);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -127,7 +127,7 @@ function actualizarPassword($conn) {
     }
     
     // Verificar que el correo existe en la base de datos
-    $stmt = $conn->prepare("SELECT id FROM usuarios WHERE correo = ? AND estado = 'activo'");
+    $stmt = $conn->prepare("SELECT id FROM users WHERE email = ? AND status = 'active'");
     $stmt->bind_param("s", $correo);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -148,7 +148,7 @@ function actualizarPassword($conn) {
     $password_hash = password_hash($nueva_password, PASSWORD_DEFAULT);
     
     // Actualizar contraseña del usuario
-    $stmt = $conn->prepare("UPDATE usuarios SET password = ? WHERE correo = ?");
+    $stmt = $conn->prepare("UPDATE users SET password = ? WHERE email = ?");
     $stmt->bind_param("ss", $password_hash, $correo);
     
     if (!$stmt->execute()) {

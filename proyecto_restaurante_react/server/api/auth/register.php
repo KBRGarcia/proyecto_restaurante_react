@@ -35,6 +35,9 @@ try {
     $numero_telefono = trim($input['numero_telefono'] ?? '');
     $password = $input['password'] ?? '';
     
+    // Combinar código de área y número de teléfono
+    $phone_number = !empty($codigo_area) && !empty($numero_telefono) ? $codigo_area . $numero_telefono : null;
+    
     // Validaciones de campos obligatorios
     if (empty($nombre) || empty($apellido) || empty($correo) || empty($password)) {
         throw new Exception('Nombre, apellido, correo y contraseña son requeridos');
@@ -72,7 +75,7 @@ try {
     }
     
     // Verificar si el correo ya existe
-    $stmt = $conn->prepare("SELECT id FROM usuarios WHERE correo = ?");
+    $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
     $stmt->bind_param("s", $correo);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -85,14 +88,14 @@ try {
     $passwordHash = password_hash($password, PASSWORD_DEFAULT);
     
     // Insertar nuevo usuario
-    $rol = 'cliente'; // Rol por defecto
-    $estado = 'activo';
+    $rol = 'client'; // Rol por defecto
+    $estado = 'active';
     
     $stmt = $conn->prepare("
-        INSERT INTO usuarios (nombre, apellido, correo, codigo_area, numero_telefono, password, rol, estado, fecha_registro) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
+        INSERT INTO users (name, last_name, email, phone_number, password, role, status, registration_date) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
     ");
-    $stmt->bind_param("ssssssss", $nombre, $apellido, $correo, $codigo_area, $numero_telefono, $passwordHash, $rol, $estado);
+    $stmt->bind_param("sssssss", $nombre, $apellido, $correo, $phone_number, $passwordHash, $rol, $estado);
     
     if (!$stmt->execute()) {
         throw new Exception('Error al crear la cuenta');

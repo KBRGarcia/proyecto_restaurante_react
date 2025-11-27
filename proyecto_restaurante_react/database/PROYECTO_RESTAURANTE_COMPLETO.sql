@@ -28,7 +28,7 @@ USE proyecto_restaurante_react;
 -- 2. TABLAS PRINCIPALES
 -- =====================================================
 
--- Tabla de usuarios con campos adicionales
+-- Tabla de usuarios con campos adicionales --------- CREADA TABAL USERS -------------
 CREATE TABLE IF NOT EXISTS usuarios (
   id INT AUTO_INCREMENT PRIMARY KEY,
   nombre VARCHAR(100) NOT NULL,
@@ -73,14 +73,14 @@ CREATE TABLE IF NOT EXISTS productos (
   nombre VARCHAR(100) NOT NULL,
   descripcion TEXT,
   precio DECIMAL(10,2) NOT NULL,
-  categoria_id INT,
+  category_id INT,
   imagen VARCHAR(255),
   estado ENUM('activo','inactivo','agotado') DEFAULT 'activo',
   tiempo_preparacion INT DEFAULT 15, -- en minutos
   ingredientes TEXT,
   es_especial BOOLEAN DEFAULT FALSE,
   fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (categoria_id) REFERENCES categorias(id) ON DELETE SET NULL
+  FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Tabla de órdenes principales con timestamps de seguimiento

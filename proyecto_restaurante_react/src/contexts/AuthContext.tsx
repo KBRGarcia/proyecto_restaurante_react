@@ -105,9 +105,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
         // Actualizar estado del usuario
         setUsuario(data.usuario)
         
+        // Mostrar advertencia si existe
+        if ((data as any).warning) {
+          console.warn('Advertencia:', (data as any).warning)
+        }
+        
         return { success: true, usuario: data.usuario, message: 'Login exitoso' }
       } else {
         const errorMsg = data.message || 'Error al iniciar sesión'
+        // Mostrar detalles adicionales si están disponibles
+        if ((data as any).error_detail) {
+          console.error('Error detallado:', (data as any).error_detail)
+        }
         setError(errorMsg)
         return { success: false, message: errorMsg }
       }

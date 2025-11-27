@@ -102,36 +102,36 @@ try {
 function obtenerEstadisticas($conn) {
     try {
         // Total de usuarios (solo clientes)
-        $sql = "SELECT COUNT(*) as total FROM usuarios WHERE rol = 'cliente'";
+        $sql = "SELECT COUNT(*) as total FROM users WHERE role = 'client'";
         $result = $conn->query($sql);
         $totalUsuarios = $result ? $result->fetch_assoc()['total'] : 0;
         
         // Total de órdenes
-        $sql = "SELECT COUNT(*) as total FROM ordenes";
+        $sql = "SELECT COUNT(*) as total FROM orders";
         $result = $conn->query($sql);
         $totalOrdenes = $result ? $result->fetch_assoc()['total'] : 0;
         
         // Total de ingresos (solo órdenes entregadas)
-        $sql = "SELECT COALESCE(SUM(total), 0) as total FROM ordenes WHERE estado = 'entregado'";
+        $sql = "SELECT COALESCE(SUM(total), 0) as total FROM orders WHERE status = 'delivered'";
         $result = $conn->query($sql);
         $totalIngresos = $result ? (float)$result->fetch_assoc()['total'] : 0;
         
         // Órdenes de hoy
-        $sql = "SELECT COUNT(*) as total FROM ordenes WHERE DATE(fecha_orden) = CURDATE()";
+        $sql = "SELECT COUNT(*) as total FROM orders WHERE DATE(order_date) = CURDATE()";
         $result = $conn->query($sql);
         $ordenesHoy = $result ? $result->fetch_assoc()['total'] : 0;
         
         // Ingresos de hoy
-        $sql = "SELECT COALESCE(SUM(total), 0) as total FROM ordenes 
-                WHERE DATE(fecha_orden) = CURDATE() AND estado = 'entregado'";
+        $sql = "SELECT COALESCE(SUM(total), 0) as total FROM orders 
+                WHERE DATE(order_date) = CURDATE() AND status = 'delivered'";
         $result = $conn->query($sql);
         $ingresosHoy = $result ? (float)$result->fetch_assoc()['total'] : 0;
         
         // Nuevos usuarios este mes
-        $sql = "SELECT COUNT(*) as total FROM usuarios 
-                WHERE MONTH(fecha_registro) = MONTH(CURDATE()) 
-                AND YEAR(fecha_registro) = YEAR(CURDATE())
-                AND rol = 'cliente'";
+        $sql = "SELECT COUNT(*) as total FROM users 
+                WHERE MONTH(registration_date) = MONTH(CURDATE()) 
+                AND YEAR(registration_date) = YEAR(CURDATE())
+                AND role = 'client'";
         $result = $conn->query($sql);
         $nuevosUsuarios = $result ? $result->fetch_assoc()['total'] : 0;
         
@@ -174,20 +174,19 @@ function obtenerUsuarios($conn) {
     try {
         $sql = "SELECT 
                     u.id,
-                    u.nombre,
-                    u.apellido,
-                    u.correo,
-                    u.codigo_area,
-                    u.numero_telefono,
-                    u.rol,
-                    u.estado,
-                    u.fecha_registro,
+                    u.name as nombre,
+                    u.last_name as apellido,
+                    u.email as correo,
+                    u.phone_number as numero_telefono,
+                    u.role as rol,
+                    u.status as estado,
+                    u.registration_date as fecha_registro,
                     COALESCE(SUM(o.total), 0) as total_gastado,
                     COUNT(DISTINCT o.id) as total_ordenes
-                FROM usuarios u
-                LEFT JOIN ordenes o ON u.id = o.usuario_id AND o.estado = 'entregado'
-                WHERE u.rol = 'cliente'
-                GROUP BY u.id, u.nombre, u.apellido, u.correo, u.codigo_area, u.numero_telefono, u.rol, u.estado, u.fecha_registro
+                FROM users u
+                LEFT JOIN orders o ON u.id = o.user_id AND o.status = 'delivered'
+                WHERE u.role = 'client'
+                GROUP BY u.id, u.name, u.last_name, u.email, u.phone_number, u.role, u.status, u.registration_date
                 ORDER BY total_gastado DESC";
         
         $result = $conn->query($sql);
@@ -226,15 +225,15 @@ function obtenerTopUsuarios($conn) {
     try {
         $sql = "SELECT 
                     u.id,
-                    u.nombre,
-                    u.apellido,
-                    u.correo,
+                    u.name as nombre,
+                    u.last_name as apellido,
+                    u.email as correo,
                     COALESCE(SUM(o.total), 0) as total_gastado,
                     COUNT(DISTINCT o.id) as total_ordenes
-                FROM usuarios u
-                LEFT JOIN ordenes o ON u.id = o.usuario_id AND o.estado = 'entregado'
-                WHERE u.rol = 'cliente'
-                GROUP BY u.id, u.nombre, u.apellido, u.correo
+                FROM users u
+                LEFT JOIN orders o ON u.id = o.user_id AND o.status = 'delivered'
+                WHERE u.role = 'client'
+                GROUP BY u.id, u.name, u.last_name, u.email
                 HAVING total_gastado > 0
                 ORDER BY total_gastado DESC
                 LIMIT 3";
@@ -275,28 +274,28 @@ function obtenerOrdenesRecientes($conn) {
     try {
         $sql = "SELECT 
                     o.id,
-                    o.usuario_id,
-                    o.estado,
-                    o.tipo_servicio,
+                    o.user_id as usuario_id,
+                    o.status as estado,
+                    o.service_type as tipo_servicio,
                     o.subtotal,
-                    o.impuestos,
+                    o.taxes as impuestos,
                     o.total,
-                    o.direccion_entrega,
-                    o.telefono_contacto,
-                    o.notas_especiales,
-                    o.fecha_orden,
-                    o.fecha_entrega_estimada,
-                    o.fecha_pendiente,
-                    o.fecha_preparando,
-                    o.fecha_listo,
-                    o.fecha_en_camino,
-                    o.fecha_entregado,
-                    o.fecha_cancelado,
-                    u.nombre as usuario_nombre,
-                    u.apellido as usuario_apellido
-                FROM ordenes o
-                JOIN usuarios u ON o.usuario_id = u.id
-                ORDER BY o.fecha_orden DESC
+                    o.delivery_address as direccion_entrega,
+                    o.contact_phone as telefono_contacto,
+                    o.special_notes as notas_especiales,
+                    o.order_date as fecha_orden,
+                    o.estimated_delivery_date as fecha_entrega_estimada,
+                    o.pending_date as fecha_pendiente,
+                    o.preparing_date as fecha_preparando,
+                    o.ready_date as fecha_listo,
+                    o.on_the_way_date as fecha_en_camino,
+                    o.delivered_date as fecha_entregado,
+                    o.canceled_date as fecha_cancelado,
+                    u.name as usuario_nombre,
+                    u.last_name as usuario_apellido
+                FROM orders o
+                JOIN users u ON o.user_id = u.id
+                ORDER BY o.order_date DESC
                 LIMIT 10";
         
         $result = $conn->query($sql);
@@ -349,7 +348,7 @@ function banearUsuario($conn) {
     }
     
     // Verificar que el usuario existe y no es admin
-    $sql = "SELECT estado, rol FROM usuarios WHERE id = ?";
+    $sql = "SELECT status as estado, role as rol FROM users WHERE id = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param('i', $usuario_id);
     $stmt->execute();
@@ -370,9 +369,9 @@ function banearUsuario($conn) {
     }
     
     // Cambiar estado
-    $nuevoEstado = $usuario['estado'] === 'activo' ? 'inactivo' : 'activo';
+    $nuevoEstado = $usuario['estado'] === 'active' ? 'inactive' : 'active';
     
-    $sql = "UPDATE usuarios SET estado = ? WHERE id = ?";
+    $sql = "UPDATE users SET status = ? WHERE id = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param('si', $nuevoEstado, $usuario_id);
     
@@ -412,7 +411,7 @@ function eliminarUsuario($conn) {
     }
     
     // Verificar que el usuario existe y no es admin
-    $sql = "SELECT rol FROM usuarios WHERE id = ?";
+    $sql = "SELECT role as rol FROM users WHERE id = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param('i', $usuario_id);
     $stmt->execute();
@@ -434,7 +433,7 @@ function eliminarUsuario($conn) {
     
     // Eliminar usuario (las órdenes se mantienen por integridad referencial)
     // En producción, considerar hacer un soft delete o mover a tabla de usuarios eliminados
-    $sql = "DELETE FROM usuarios WHERE id = ?";
+    $sql = "DELETE FROM users WHERE id = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param('i', $usuario_id);
     

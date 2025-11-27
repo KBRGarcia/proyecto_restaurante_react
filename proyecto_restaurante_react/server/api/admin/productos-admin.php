@@ -102,8 +102,8 @@ function crearProducto($conn) {
         $conn->begin_transaction();
         
         $stmt = $conn->prepare("
-            INSERT INTO productos 
-            (nombre, descripcion, precio, categoria_id, imagen, estado, tiempo_preparacion, ingredientes, es_especial)
+            INSERT INTO products 
+            (name, description, price, category_id, image, status, preparation_time, ingredients, is_special)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
         
@@ -112,7 +112,11 @@ function crearProducto($conn) {
         $precio = $input['precio'];
         $categoria_id = $input['categoria_id'];
         $imagen = $input['imagen'] ?? null;
-        $estado = $input['estado'] ?? 'activo';
+        $estado = $input['estado'] ?? 'active';
+        // Convertir estado de español a inglés si es necesario
+        if ($estado === 'activo') $estado = 'active';
+        if ($estado === 'inactivo') $estado = 'inactive';
+        if ($estado === 'agotado') $estado = 'out of stock';
         $tiempo_preparacion = $input['tiempo_preparacion'] ?? 15;
         $ingredientes = $input['ingredientes'] ?? '';
         $es_especial = isset($input['es_especial']) ? (int)$input['es_especial'] : 0;
@@ -155,9 +159,9 @@ function crearProducto($conn) {
         
         // Obtener el producto recién creado con el nombre de categoría
         $stmtGet = $conn->prepare("
-            SELECT p.*, c.nombre as categoria_nombre 
-            FROM productos p
-            LEFT JOIN categorias c ON p.categoria_id = c.id
+            SELECT p.*, c.name as categoria_nombre 
+            FROM products p
+            LEFT JOIN categories c ON p.category_id = c.id
             WHERE p.id = ?
         ");
         $stmtGet->bind_param("i", $producto_id);
@@ -190,7 +194,7 @@ function actualizarProducto($conn, $id) {
     $input = json_decode(file_get_contents('php://input'), true);
     
     // Validar que el producto existe
-    $stmtCheck = $conn->prepare("SELECT id FROM productos WHERE id = ?");
+    $stmtCheck = $conn->prepare("SELECT id FROM products WHERE id = ?");
     $stmtCheck->bind_param("i", $id);
     $stmtCheck->execute();
     if ($stmtCheck->get_result()->num_rows === 0) {
@@ -234,16 +238,16 @@ function actualizarProducto($conn, $id) {
         $conn->begin_transaction();
         
         $stmt = $conn->prepare("
-            UPDATE productos 
-            SET nombre = ?, 
-                descripcion = ?, 
-                precio = ?, 
-                categoria_id = ?, 
-                imagen = ?, 
-                estado = ?, 
-                tiempo_preparacion = ?,
-                ingredientes = ?,
-                es_especial = ?
+            UPDATE products 
+            SET name = ?, 
+                description = ?, 
+                price = ?, 
+                category_id = ?, 
+                image = ?, 
+                status = ?, 
+                preparation_time = ?,
+                ingredients = ?,
+                is_special = ?
             WHERE id = ?
         ");
         
@@ -252,7 +256,11 @@ function actualizarProducto($conn, $id) {
         $precio = $input['precio'];
         $categoria_id = $input['categoria_id'];
         $imagen = $input['imagen'] ?? null;
-        $estado = $input['estado'] ?? 'activo';
+        $estado = $input['estado'] ?? 'active';
+        // Convertir estado de español a inglés si es necesario
+        if ($estado === 'activo') $estado = 'active';
+        if ($estado === 'inactivo') $estado = 'inactive';
+        if ($estado === 'agotado') $estado = 'out of stock';
         $tiempo_preparacion = $input['tiempo_preparacion'] ?? 15;
         $ingredientes = $input['ingredientes'] ?? '';
         $es_especial = isset($input['es_especial']) ? (int)$input['es_especial'] : 0;
@@ -302,9 +310,9 @@ function actualizarProducto($conn, $id) {
         
         // Obtener el producto actualizado con el nombre de categoría
         $stmtGet = $conn->prepare("
-            SELECT p.*, c.nombre as categoria_nombre 
-            FROM productos p
-            LEFT JOIN categorias c ON p.categoria_id = c.id
+            SELECT p.*, c.name as categoria_nombre 
+            FROM products p
+            LEFT JOIN categories c ON p.category_id = c.id
             WHERE p.id = ?
         ");
         $stmtGet->bind_param("i", $id);
@@ -335,7 +343,7 @@ function actualizarProducto($conn, $id) {
  */
 function eliminarProducto($conn, $id) {
     // Validar que el producto existe
-    $stmtCheck = $conn->prepare("SELECT id FROM productos WHERE id = ?");
+    $stmtCheck = $conn->prepare("SELECT id FROM products WHERE id = ?");
     $stmtCheck->bind_param("i", $id);
     $stmtCheck->execute();
     if ($stmtCheck->get_result()->num_rows === 0) {
@@ -347,8 +355,8 @@ function eliminarProducto($conn, $id) {
     }
     
     try {
-        // En lugar de eliminar, cambiar estado a 'inactivo' (soft delete)
-        $stmt = $conn->prepare("UPDATE productos SET estado = 'inactivo' WHERE id = ?");
+        // En lugar de eliminar, cambiar estado a 'inactive' (soft delete)
+        $stmt = $conn->prepare("UPDATE products SET status = 'inactive' WHERE id = ?");
         $stmt->bind_param("i", $id);
         
         if ($stmt->execute()) {

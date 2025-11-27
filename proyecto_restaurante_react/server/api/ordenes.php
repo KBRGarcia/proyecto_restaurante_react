@@ -102,27 +102,27 @@ function obtenerOrdenesUsuario($conn, $usuario) {
         // Query para obtener órdenes del usuario
         $sql = "SELECT 
                     id,
-                    usuario_id,
-                    estado,
-                    tipo_servicio,
+                    user_id as usuario_id,
+                    status as estado,
+                    service_type as tipo_servicio,
                     subtotal,
-                    impuestos,
+                    taxes as impuestos,
                     total,
-                    direccion_entrega,
-                    telefono_contacto,
-                    notas_especiales,
-                    fecha_orden,
-                    fecha_entrega_estimada,
-                    empleado_asignado_id,
-                    fecha_pendiente,
-                    fecha_preparando,
-                    fecha_listo,
-                    fecha_en_camino,
-                    fecha_entregado,
-                    fecha_cancelado
-                FROM ordenes
-                WHERE usuario_id = ?
-                ORDER BY fecha_orden DESC";
+                    delivery_address as direccion_entrega,
+                    contact_phone as telefono_contacto,
+                    special_notes as notas_especiales,
+                    order_date as fecha_orden,
+                    estimated_delivery_date as fecha_entrega_estimada,
+                    assigned_employee_id as empleado_asignado_id,
+                    pending_date as fecha_pendiente,
+                    preparing_date as fecha_preparando,
+                    ready_date as fecha_listo,
+                    on_the_way_date as fecha_en_camino,
+                    delivered_date as fecha_entregado,
+                    canceled_date as fecha_cancelado
+                FROM orders
+                WHERE user_id = ?
+                ORDER BY order_date DESC";
         
         $stmt = $conn->prepare($sql);
         
@@ -180,26 +180,26 @@ function obtenerOrdenDetalle($conn, $usuario, $orden_id) {
         // Obtener información de la orden
         $sql = "SELECT 
                     o.id,
-                    o.usuario_id,
-                    o.estado,
-                    o.tipo_servicio,
+                    o.user_id as usuario_id,
+                    o.status as estado,
+                    o.service_type as tipo_servicio,
                     o.subtotal,
-                    o.impuestos,
+                    o.taxes as impuestos,
                     o.total,
-                    o.direccion_entrega,
-                    o.telefono_contacto,
-                    o.notas_especiales,
-                    o.fecha_orden,
-                    o.fecha_entrega_estimada,
-                    o.empleado_asignado_id,
-                    o.fecha_pendiente,
-                    o.fecha_preparando,
-                    o.fecha_listo,
-                    o.fecha_en_camino,
-                    o.fecha_entregado,
-                    o.fecha_cancelado
-                FROM ordenes o
-                WHERE o.id = ? AND o.usuario_id = ?";
+                    o.delivery_address as direccion_entrega,
+                    o.contact_phone as telefono_contacto,
+                    o.special_notes as notas_especiales,
+                    o.order_date as fecha_orden,
+                    o.estimated_delivery_date as fecha_entrega_estimada,
+                    o.assigned_employee_id as empleado_asignado_id,
+                    o.pending_date as fecha_pendiente,
+                    o.preparing_date as fecha_preparando,
+                    o.ready_date as fecha_listo,
+                    o.on_the_way_date as fecha_en_camino,
+                    o.delivered_date as fecha_entregado,
+                    o.canceled_date as fecha_cancelado
+                FROM orders o
+                WHERE o.id = ? AND o.user_id = ?";
         
         $stmt = $conn->prepare($sql);
         
@@ -230,17 +230,17 @@ function obtenerOrdenDetalle($conn, $usuario, $orden_id) {
         // Obtener detalles de productos
         $sql_detalles = "SELECT 
                             od.id,
-                            od.producto_id,
-                            od.cantidad,
-                            od.precio_unitario,
+                            od.product_id as producto_id,
+                            od.quantity as cantidad,
+                            od.unit_price as precio_unitario,
                             od.subtotal,
-                            od.notas_producto,
-                            p.nombre as producto_nombre,
-                            p.descripcion as producto_descripcion,
-                            p.imagen as producto_imagen
-                        FROM orden_detalles od
-                        JOIN productos p ON od.producto_id = p.id
-                        WHERE od.orden_id = ?";
+                            od.product_notes as notas_producto,
+                            p.name as producto_nombre,
+                            p.description as producto_descripcion,
+                            p.image as producto_imagen
+                        FROM order_details od
+                        JOIN products p ON od.product_id = p.id
+                        WHERE od.order_id = ?";
         
         $stmt_detalles = $conn->prepare($sql_detalles);
         $stmt_detalles->bind_param("i", $orden_id);
@@ -292,6 +292,10 @@ function crearOrden($conn, $usuario) {
         
         $usuario_id = $usuario['id'];
         $tipo_servicio = $data['tipo_servicio'];
+        
+        // Convertir tipo_servicio de español a inglés
+        $service_type = ($tipo_servicio === 'domicilio') ? 'delivery' : (($tipo_servicio === 'recoger') ? 'pickup' : $tipo_servicio);
+        
         $direccion_entrega = $data['direccion_entrega'] ?? null;
         $telefono_contacto = $data['telefono_contacto'] ?? null;
         $notas_especiales = $data['notas_especiales'] ?? null;
@@ -309,22 +313,23 @@ function crearOrden($conn, $usuario) {
         $conn->begin_transaction();
         
         // Insertar orden
-        $sql = "INSERT INTO ordenes (
-                    usuario_id, 
-                    tipo_servicio, 
+        $sql = "INSERT INTO orders (
+                    user_id, 
+                    service_type, 
                     subtotal, 
-                    impuestos, 
+                    taxes, 
                     total, 
-                    direccion_entrega, 
-                    telefono_contacto, 
-                    notas_especiales
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                    delivery_address, 
+                    contact_phone, 
+                    special_notes,
+                    pending_date
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())";
         
         $stmt = $conn->prepare($sql);
         $stmt->bind_param(
             "isdddsss",
             $usuario_id,
-            $tipo_servicio,
+            $service_type,
             $subtotal,
             $impuestos,
             $total,
@@ -340,13 +345,13 @@ function crearOrden($conn, $usuario) {
         $orden_id = $conn->insert_id;
         
         // Insertar detalles
-        $sql_detalle = "INSERT INTO orden_detalles (
-                            orden_id, 
-                            producto_id, 
-                            cantidad, 
-                            precio_unitario, 
+        $sql_detalle = "INSERT INTO order_details (
+                            order_id, 
+                            product_id, 
+                            quantity, 
+                            unit_price, 
                             subtotal, 
-                            notas_producto
+                            product_notes
                         ) VALUES (?, ?, ?, ?, ?, ?)";
         
         $stmt_detalle = $conn->prepare($sql_detalle);
@@ -404,7 +409,7 @@ function actualizarOrden($conn, $usuario, $orden_id) {
         }
         
         // Solo admin y empleado pueden actualizar órdenes
-        if ($usuario['rol'] !== 'admin' && $usuario['rol'] !== 'empleado') {
+        if ($usuario['rol'] !== 'admin' && $usuario['rol'] !== 'employee') {
             ob_clean();
             http_response_code(403);
             echo json_encode([
@@ -422,31 +427,44 @@ function actualizarOrden($conn, $usuario, $orden_id) {
             throw new Exception('Estado requerido');
         }
         
+        // Convertir estado de español a inglés
+        $estado_map = [
+            'pendiente' => 'pending',
+            'preparando' => 'preparing',
+            'listo' => 'ready',
+            'en_camino' => 'on_the_way',
+            'entregado' => 'delivered',
+            'cancelado' => 'canceled'
+        ];
+        $nuevo_estado_en = $estado_map[$nuevo_estado] ?? $nuevo_estado;
+        
         // Actualizar estado y timestamp correspondiente
         $campo_timestamp = '';
-        switch ($nuevo_estado) {
-            case 'preparando':
-                $campo_timestamp = 'fecha_preparando';
+        switch ($nuevo_estado_en) {
+            case 'preparing':
+                $campo_timestamp = 'preparing_date';
                 break;
-            case 'listo':
-                $campo_timestamp = 'fecha_listo';
+            case 'ready':
+                $campo_timestamp = 'ready_date';
                 break;
-            case 'en_camino':
-                $campo_timestamp = 'fecha_en_camino';
+            case 'on_the_way':
+                $campo_timestamp = 'on_the_way_date';
                 break;
-            case 'entregado':
-                $campo_timestamp = 'fecha_entregado';
+            case 'delivered':
+                $campo_timestamp = 'delivered_date';
                 break;
-            case 'cancelado':
-                $campo_timestamp = 'fecha_cancelado';
+            case 'canceled':
+                $campo_timestamp = 'canceled_date';
                 break;
         }
         
         if ($campo_timestamp) {
-            $sql = "UPDATE ordenes SET estado = ?, $campo_timestamp = NOW() WHERE id = ?";
+            $sql = "UPDATE orders SET status = ?, $campo_timestamp = NOW() WHERE id = ?";
         } else {
-            $sql = "UPDATE ordenes SET estado = ? WHERE id = ?";
+            $sql = "UPDATE orders SET status = ? WHERE id = ?";
         }
+        
+        $nuevo_estado = $nuevo_estado_en;
         
         $stmt = $conn->prepare($sql);
         if ($campo_timestamp) {
@@ -490,15 +508,15 @@ function cancelarOrden($conn, $usuario, $orden_id) {
         }
         
         $usuario_id = $usuario['id'];
-        $es_admin = ($usuario['rol'] === 'admin' || $usuario['rol'] === 'empleado');
+        $es_admin = ($usuario['rol'] === 'admin' || $usuario['rol'] === 'employee');
         
         // Verificar que la orden existe y pertenece al usuario (o es admin)
         if ($es_admin) {
-            $sql = "SELECT estado, usuario_id FROM ordenes WHERE id = ?";
+            $sql = "SELECT status as estado, user_id as usuario_id FROM orders WHERE id = ?";
             $stmt = $conn->prepare($sql);
             $stmt->bind_param("i", $orden_id);
         } else {
-            $sql = "SELECT estado, usuario_id FROM ordenes WHERE id = ? AND usuario_id = ?";
+            $sql = "SELECT status as estado, user_id as usuario_id FROM orders WHERE id = ? AND user_id = ?";
             $stmt = $conn->prepare($sql);
             $stmt->bind_param("ii", $orden_id, $usuario_id);
         }
@@ -519,10 +537,22 @@ function cancelarOrden($conn, $usuario, $orden_id) {
         
         $orden = $result->fetch_assoc();
         
+        // Convertir estado de inglés a español para validación
+        $estado_es = $orden['estado'];
+        $estado_map_inv = [
+            'pending' => 'pendiente',
+            'preparing' => 'preparando',
+            'ready' => 'listo',
+            'on_the_way' => 'en_camino',
+            'delivered' => 'entregado',
+            'canceled' => 'cancelado'
+        ];
+        $estado_es = $estado_map_inv[$estado_es] ?? $estado_es;
+        
         // Validar que se puede cancelar según el rol
         if ($es_admin) {
             // Admin puede cancelar cualquier orden excepto las ya entregadas
-            if ($orden['estado'] === 'entregado') {
+            if ($orden['estado'] === 'delivered') {
                 ob_clean();
                 http_response_code(400);
                 echo json_encode([
@@ -534,7 +564,7 @@ function cancelarOrden($conn, $usuario, $orden_id) {
             }
         } else {
             // Usuario solo puede cancelar órdenes pendientes o preparando
-            if (!in_array($orden['estado'], ['pendiente', 'preparando'])) {
+            if (!in_array($orden['estado'], ['pending', 'preparing'])) {
                 ob_clean();
                 http_response_code(400);
                 echo json_encode([
@@ -547,7 +577,7 @@ function cancelarOrden($conn, $usuario, $orden_id) {
         }
         
         // Actualizar estado a cancelado con timestamp
-        $sql_update = "UPDATE ordenes SET estado = 'cancelado', fecha_cancelado = NOW() WHERE id = ?";
+        $sql_update = "UPDATE orders SET status = 'canceled', canceled_date = NOW() WHERE id = ?";
         $stmt_update = $conn->prepare($sql_update);
         $stmt_update->bind_param("i", $orden_id);
         

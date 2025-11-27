@@ -39,7 +39,7 @@ if (file_exists("../includes/db.php")) {
             ];
         } else {
             // Probar consulta simple
-            $result = $conn->query("SELECT COUNT(*) as total FROM productos");
+            $result = $conn->query("SELECT COUNT(*) as total FROM products");
             
             if ($result) {
                 $row = $result->fetch_assoc();

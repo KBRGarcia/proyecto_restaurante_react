@@ -26,7 +26,7 @@ try {
         $token = str_replace('Bearer ', '', $authHeader);
         
         // Eliminar sesión de la base de datos
-        $stmt = $conn->prepare("DELETE FROM sessions WHERE token = ?");
+        $stmt = $conn->prepare("DELETE FROM api_tokens WHERE token = ?");
         $stmt->bind_param("s", $token);
         $stmt->execute();
         $stmt->close();

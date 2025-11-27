@@ -38,9 +38,9 @@ try {
     
     // Buscar usuario en la base de datos
     $stmt = $conn->prepare("
-        SELECT id, nombre, apellido, correo, password, rol, codigo_area, numero_telefono, estado 
-        FROM usuarios 
-        WHERE correo = ? 
+        SELECT id, name, last_name, email, password, role, phone_number, status 
+        FROM users 
+        WHERE email = ? 
         LIMIT 1
     ");
     $stmt->bind_param("s", $correo);
@@ -59,41 +59,84 @@ try {
     }
     
     // Verificar que la cuenta esté activa
-    if ($usuario['estado'] !== 'activo') {
+    if ($usuario['status'] !== 'active') {
         throw new Exception('Cuenta inactiva. Contacta al administrador');
     }
     
     // Generar token simple (en producción usar JWT)
     $token = bin2hex(random_bytes(32));
     
-    // Guardar token en base de datos (crear tabla sessions si no existe)
-    $stmt = $conn->prepare("
-        INSERT INTO sessions (usuario_id, token, expires_at) 
-        VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 7 DAY))
-        ON DUPLICATE KEY UPDATE token = VALUES(token), expires_at = VALUES(expires_at)
-    ");
-    $stmt->bind_param("is", $usuario['id'], $token);
-    $stmt->execute();
+    // Verificar si la tabla api_tokens existe
+    $check_table = $conn->query("SHOW TABLES LIKE 'api_tokens'");
+    $tabla_api_tokens_existe = $check_table && $check_table->num_rows > 0;
+    $error_token = null;
+    
+    if ($tabla_api_tokens_existe) {
+        // Guardar token en base de datos (usar tabla api_tokens)
+        $stmt_token = $conn->prepare("
+            INSERT INTO api_tokens (user_id, token, expires_at, created_at) 
+            VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 7 DAY), NOW())
+            ON DUPLICATE KEY UPDATE token = VALUES(token), expires_at = VALUES(expires_at), updated_at = NOW()
+        ");
+        
+        if ($stmt_token) {
+            $stmt_token->bind_param("is", $usuario['id'], $token);
+            
+            if (!$stmt_token->execute()) {
+                // No lanzar excepción, solo registrar el error
+                $error_token = 'Error guardando token: ' . $stmt_token->error;
+                error_log($error_token);
+            }
+            
+            $stmt_token->close();
+        } else {
+            $error_token = 'Error preparando consulta de token: ' . $conn->error;
+            error_log($error_token);
+        }
+    } else {
+        // Si la tabla no existe, solo continuar (el token se validará en el frontend)
+        // En producción, esto debería ser un error crítico
+        $error_token = 'La tabla api_tokens no existe. Ejecuta el script: 27-11-2025_01-api_tokens_table.sql';
+        error_log('ADVERTENCIA: ' . $error_token);
+    }
     
     // No enviar el password al cliente
     unset($usuario['password']);
     
+    // Mapear campos nuevos a formato esperado por el frontend
+    $usuario_response = [
+        'id' => $usuario['id'],
+        'nombre' => $usuario['name'],
+        'apellido' => $usuario['last_name'],
+        'correo' => $usuario['email'],
+        'rol' => $usuario['role'],
+        'estado' => $usuario['status'],
+        'telefono' => $usuario['phone_number'] ?? null
+    ];
+    
     // Respuesta exitosa
-    echo json_encode([
+    $response = [
         'success' => true,
         'message' => 'Inicio de sesión exitoso',
         'token' => $token,
-        'usuario' => $usuario
-    ]);
+        'usuario' => $usuario_response
+    ];
     
-    $stmt->close();
+    // Advertencia si hay problemas con la tabla
+    if ($error_token) {
+        $response['warning'] = $error_token;
+    }
+    
+    echo json_encode($response, JSON_UNESCAPED_UNICODE);
     
 } catch (Exception $e) {
     http_response_code(400);
     echo json_encode([
         'success' => false,
-        'message' => $e->getMessage()
-    ]);
+        'message' => $e->getMessage(),
+        'error_detail' => isset($conn) ? $conn->error : null,
+        'sql_state' => isset($conn) ? $conn->sqlstate : null
+    ], JSON_UNESCAPED_UNICODE);
 } finally {
     if (isset($conn)) {
         $conn->close();

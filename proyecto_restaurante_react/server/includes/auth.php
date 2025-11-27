@@ -31,10 +31,10 @@ function verificarAuth() {
     // En producción, usar JWT real con firma y expiración
     global $conn;
     
-    // Buscar sesión activa con este token
-    $stmt = $conn->prepare("SELECT s.*, u.id, u.nombre, u.apellido, u.correo, u.rol, u.estado, u.codigo_area, u.numero_telefono, u.direccion, u.foto_perfil, u.fecha_registro 
-                            FROM sessions s 
-                            JOIN usuarios u ON s.usuario_id = u.id 
+    // Buscar sesión activa con este token (usar tabla api_tokens)
+    $stmt = $conn->prepare("SELECT s.*, u.id, u.name, u.last_name, u.email, u.role, u.status, u.phone_number, u.address, u.profile_picture, u.registration_date 
+                            FROM api_tokens s 
+                            JOIN users u ON s.user_id = u.id 
                             WHERE s.token = ? AND s.expires_at > NOW()");
     
     if (!$stmt) {
@@ -58,7 +58,7 @@ function verificarAuth() {
     $session = $result->fetch_assoc();
     
     // Verificar que el usuario esté activo
-    if ($session['estado'] !== 'activo') {
+    if ($session['status'] !== 'active') {
         return [
             'success' => false,
             'message' => 'Usuario inactivo'
@@ -70,15 +70,15 @@ function verificarAuth() {
         'success' => true,
         'usuario' => [
             'id' => $session['id'],
-            'nombre' => $session['nombre'],
-            'apellido' => $session['apellido'],
-            'correo' => $session['correo'],
-            'rol' => $session['rol'],
-            'estado' => $session['estado'],
-            'telefono' => $session['codigo_area'] . $session['numero_telefono'],
-            'direccion' => $session['direccion'],
-            'foto_perfil' => $session['foto_perfil'],
-            'fecha_registro' => $session['fecha_registro']
+            'nombre' => $session['name'],
+            'apellido' => $session['last_name'],
+            'correo' => $session['email'],
+            'rol' => $session['role'],
+            'estado' => $session['status'],
+            'telefono' => $session['phone_number'],
+            'direccion' => $session['address'],
+            'foto_perfil' => $session['profile_picture'],
+            'fecha_registro' => $session['registration_date']
         ]
     ];
 }
@@ -101,7 +101,7 @@ function verificarAdmin() {
 function verificarEmpleadoOAdmin() {
     verificarLogin();
     $rol = $_SESSION['usuario']['rol'];
-    if ($rol !== 'admin' && $rol !== 'empleado') {
+    if ($rol !== 'admin' && $rol !== 'employee') {
         header("Location: index.php");
         exit();
     }
@@ -112,11 +112,11 @@ function esAdmin() {
 }
 
 function esEmpleado() {
-    return isset($_SESSION['usuario']) && $_SESSION['usuario']['rol'] === 'empleado';
+    return isset($_SESSION['usuario']) && $_SESSION['usuario']['rol'] === 'employee';
 }
 
 function esCliente() {
-    return isset($_SESSION['usuario']) && $_SESSION['usuario']['rol'] === 'cliente';
+    return isset($_SESSION['usuario']) && $_SESSION['usuario']['rol'] === 'client';
 }
 
 function obtenerUsuarioActual() {
@@ -194,9 +194,9 @@ function tienePermiso($permiso) {
     switch ($usuario['rol']) {
         case 'admin':
             return in_array($permiso, array_merge($permisos_admin, $permisos_empleado, $permisos_cliente));
-        case 'empleado':
+        case 'employee':
             return in_array($permiso, array_merge($permisos_empleado, $permisos_cliente));
-        case 'cliente':
+        case 'client':
             return in_array($permiso, $permisos_cliente);
         default:
             return false;
@@ -215,10 +215,10 @@ function redirigirSegunRol() {
         case 'admin':
             header("Location: dashboard.php");
             break;
-        case 'empleado':
+        case 'employee':
             header("Location: ordenes.php");
             break;
-        case 'cliente':
+        case 'client':
             header("Location: index.php");
             break;
         default:
@@ -245,10 +245,10 @@ function obtenerPermisosUsuario($rol) {
         case 'admin':
             $permisos = ['all']; // Administrador tiene todos los permisos
             break;
-        case 'empleado':
+        case 'employee':
             $permisos = ['ver_ordenes', 'actualizar_ordenes', 'ver_mesas', 'hacer_pedidos', 'ver_menu'];
             break;
-        case 'cliente':
+        case 'client':
             $permisos = ['hacer_pedidos', 'ver_menu', 'hacer_reservaciones'];
             break;
     }
@@ -258,14 +258,14 @@ function obtenerPermisosUsuario($rol) {
 
 // Función para verificar si el usuario está activo
 function verificarUsuarioActivo($conn, $usuario_id) {
-    $stmt = $conn->prepare("SELECT estado FROM usuarios WHERE id = ?");
+    $stmt = $conn->prepare("SELECT status FROM users WHERE id = ?");
     $stmt->bind_param("i", $usuario_id);
     $stmt->execute();
     $result = $stmt->get_result();
     
     if ($result->num_rows > 0) {
         $usuario = $result->fetch_assoc();
-        return $usuario['estado'] === 'activo';
+        return $usuario['status'] === 'active';
     }
     
     return false;

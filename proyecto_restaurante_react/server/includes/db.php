@@ -7,7 +7,7 @@
 $host = "localhost";
 $user = "root";
 $pass = "";
-$db   = "proyecto_restaurante_react";
+$db   = "proyecto_restaurante_filament_react";
 
 // Crear conexión
 $conn = new mysqli($host, $user, $pass, $db);

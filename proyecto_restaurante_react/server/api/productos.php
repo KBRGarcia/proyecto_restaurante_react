@@ -48,12 +48,16 @@ if (!isset($conn) || $conn->connect_error) {
 $conn->set_charset("utf8mb4");
 
 try {
+    // Verificar si la tabla producto_sucursal existe
+    $check_table = $conn->query("SHOW TABLES LIKE 'producto_sucursal'");
+    $tabla_producto_sucursal_existe = $check_table && $check_table->num_rows > 0;
+    
     // Obtener filtro de sucursales si existe
     $sucursales_filtro = isset($_GET['sucursales']) ? $_GET['sucursales'] : null;
     
     // Construir query base
-    if ($sucursales_filtro) {
-        // Filtrar por sucursales específicas
+    if ($sucursales_filtro && $tabla_producto_sucursal_existe) {
+        // Filtrar por sucursales específicas (solo si la tabla existe)
         // Convertir string de IDs a array y validar
         $sucursal_ids = array_filter(
             array_map('intval', explode(',', $sucursales_filtro)),
@@ -70,65 +74,100 @@ try {
         // Query con JOIN a producto_sucursal
         $sql = "SELECT DISTINCT 
                     p.id,
-                    p.nombre,
-                    p.descripcion,
-                    p.precio,
-                    p.categoria_id,
-                    p.imagen,
-                    p.estado,
-                    p.fecha_creacion,
-                    p.tiempo_preparacion,
-                    p.ingredientes,
-                    p.es_especial,
-                    c.nombre as categoria_nombre,
+                    p.name as nombre,
+                    p.description as descripcion,
+                    p.price as precio,
+                    p.category_id as categoria_id,
+                    p.image as imagen,
+                    p.status as estado,
+                    p.created_at as fecha_creacion,
+                    p.preparation_time as tiempo_preparacion,
+                    p.ingredients as ingredientes,
+                    p.is_special as es_especial,
+                    c.name as categoria_nombre,
                     GROUP_CONCAT(DISTINCT b.id) as sucursal_ids,
-                    GROUP_CONCAT(DISTINCT b.nombre SEPARATOR ', ') as sucursal_nombres
-                FROM productos p 
-                LEFT JOIN categorias c ON p.categoria_id = c.id
+                    GROUP_CONCAT(DISTINCT b.name SEPARATOR ', ') as sucursal_nombres
+                FROM products p 
+                LEFT JOIN categories c ON p.category_id = c.id
                 INNER JOIN producto_sucursal ps ON p.id = ps.producto_id
                 LEFT JOIN branches b ON ps.sucursal_id = b.id
-                WHERE p.estado = 'activo' 
+                WHERE p.status = 'active' 
                     AND ps.disponible = TRUE
                     AND ps.sucursal_id IN ($placeholders)
-                    AND b.activo = TRUE
+                    AND b.active = TRUE
                 GROUP BY p.id
-                ORDER BY p.es_especial DESC, p.id DESC";
+                ORDER BY p.is_special DESC, p.id DESC";
         
         $stmt = $conn->prepare($sql);
+        
+        if (!$stmt) {
+            throw new Exception('Error preparando consulta: ' . $conn->error);
+        }
         
         // Bind parameters dinámicamente
         $types = str_repeat('i', count($sucursal_ids));
         $stmt->bind_param($types, ...$sucursal_ids);
         
-        $stmt->execute();
+        if (!$stmt->execute()) {
+            throw new Exception('Error ejecutando consulta: ' . $stmt->error);
+        }
+        
         $result = $stmt->get_result();
         
     } else {
-        // Sin filtro: mostrar todos los productos con sus sucursales
-        $sql = "SELECT DISTINCT
-                    p.id,
-                    p.nombre,
-                    p.descripcion,
-                    p.precio,
-                    p.categoria_id,
-                    p.imagen,
-                    p.estado,
-                    p.fecha_creacion,
-                    p.tiempo_preparacion,
-                    p.ingredientes,
-                    p.es_especial,
-                    c.nombre as categoria_nombre,
-                    GROUP_CONCAT(DISTINCT ps.sucursal_id) as sucursal_ids,
-                    GROUP_CONCAT(DISTINCT b.nombre SEPARATOR ', ') as sucursal_nombres
-                FROM productos p 
-                LEFT JOIN categorias c ON p.categoria_id = c.id
-                LEFT JOIN producto_sucursal ps ON p.id = ps.producto_id
-                LEFT JOIN branches b ON ps.sucursal_id = b.id AND b.activo = TRUE
-                WHERE p.estado = 'activo'
-                GROUP BY p.id
-                ORDER BY p.es_especial DESC, p.id DESC";
+        // Sin filtro o tabla producto_sucursal no existe: mostrar todos los productos
+        if ($tabla_producto_sucursal_existe) {
+            // Query con JOIN a producto_sucursal (sin filtro)
+            $sql = "SELECT DISTINCT
+                        p.id,
+                        p.name as nombre,
+                        p.description as descripcion,
+                        p.price as precio,
+                        p.category_id as categoria_id,
+                        p.image as imagen,
+                        p.status as estado,
+                        p.created_at as fecha_creacion,
+                        p.preparation_time as tiempo_preparacion,
+                        p.ingredients as ingredientes,
+                        p.is_special as es_especial,
+                        c.name as categoria_nombre,
+                        GROUP_CONCAT(DISTINCT ps.sucursal_id) as sucursal_ids,
+                        GROUP_CONCAT(DISTINCT b.name SEPARATOR ', ') as sucursal_nombres
+                    FROM products p 
+                    LEFT JOIN categories c ON p.category_id = c.id
+                    LEFT JOIN producto_sucursal ps ON p.id = ps.producto_id
+                    LEFT JOIN branches b ON ps.sucursal_id = b.id AND b.active = TRUE
+                    WHERE p.status = 'active'
+                    GROUP BY p.id
+                    ORDER BY p.is_special DESC, p.id DESC";
+        } else {
+            // Query sin producto_sucursal (fallback)
+            $sql = "SELECT 
+                        p.id,
+                        p.name as nombre,
+                        p.description as descripcion,
+                        p.price as precio,
+                        p.category_id as categoria_id,
+                        p.image as imagen,
+                        p.status as estado,
+                        p.created_at as fecha_creacion,
+                        p.preparation_time as tiempo_preparacion,
+                        p.ingredients as ingredientes,
+                        p.is_special as es_especial,
+                        c.name as categoria_nombre,
+                        NULL as sucursal_ids,
+                        NULL as sucursal_nombres
+                    FROM products p 
+                    LEFT JOIN categories c ON p.category_id = c.id
+                    WHERE p.status = 'active'
+                    ORDER BY p.is_special DESC, p.id DESC";
+        }
         
         $result = $conn->query($sql);
+        
+        if (!$result) {
+            throw new Exception('Error al obtener productos: ' . $conn->error);
+        }
     }
     
     if ($result) {
@@ -147,7 +186,7 @@ try {
             // Convertir valores numéricos
             $row['id'] = (int) $row['id'];
             $row['precio'] = (float) $row['precio'];
-            $row['categoria_id'] = (int) $row['categoria_id'];
+            $row['categoria_id'] = $row['categoria_id'] ? (int) $row['categoria_id'] : null;
             $row['tiempo_preparacion'] = (int) $row['tiempo_preparacion'];
             
             $productos[] = $row;
@@ -156,8 +195,9 @@ try {
         echo json_encode([
             'success' => true,
             'data' => $productos,
-            'filtro_aplicado' => $sucursales_filtro ? true : false,
-            'total' => count($productos)
+            'filtro_aplicado' => ($sucursales_filtro && $tabla_producto_sucursal_existe) ? true : false,
+            'total' => count($productos),
+            'warning' => !$tabla_producto_sucursal_existe ? 'La tabla producto_sucursal no existe. Ejecuta el script SQL: 27-11-2025_02-producto_sucursal_table.sql' : null
         ], JSON_UNESCAPED_UNICODE);
     } else {
         throw new Exception('Error al obtener productos: ' . $conn->error);
@@ -166,7 +206,9 @@ try {
     http_response_code(500);
     echo json_encode([
         'success' => false,
-        'message' => $e->getMessage()
+        'message' => $e->getMessage(),
+        'error_detail' => $conn->error ?? null,
+        'sql_state' => $conn->sqlstate ?? null
     ], JSON_UNESCAPED_UNICODE);
 }
 

@@ -59,30 +59,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $stmt = $conn->prepare("
                 SELECT 
                     id,
-                    nombre,
-                    direccion,
-                    ciudad,
-                    estado,
-                    codigo_postal,
-                    telefono,
+                    name as nombre,
+                    address as direccion,
+                    city as ciudad,
+                    state as estado,
+                    postal_code as codigo_postal,
+                    phone as telefono,
                     email,
-                    TIME_FORMAT(horario_apertura, '%H:%i') as horario_apertura,
-                    TIME_FORMAT(horario_cierre, '%H:%i') as horario_cierre,
-                    dias_operacion,
-                    latitud,
-                    longitud,
-                    es_principal,
-                    tiene_delivery,
-                    tiene_estacionamiento,
-                    capacidad_personas,
-                    imagen,
-                    descripcion,
-                    activo,
-                    DATE_FORMAT(fecha_apertura, '%Y-%m-%d') as fecha_apertura,
-                    gerente,
-                    DATE_FORMAT(fecha_creacion, '%Y-%m-%d %H:%i:%s') as fecha_creacion
+                    TIME_FORMAT(opening_time, '%H:%i') as horario_apertura,
+                    TIME_FORMAT(closing_time, '%H:%i') as horario_cierre,
+                    operation_days as dias_operacion,
+                    latitude as latitud,
+                    longitude as longitud,
+                    is_main as es_principal,
+                    has_delivery as tiene_delivery,
+                    has_parking as tiene_estacionamiento,
+                    capacity_people as capacidad_personas,
+                    image as imagen,
+                    description as descripcion,
+                    active as activo,
+                    DATE_FORMAT(opening_date, '%Y-%m-%d') as fecha_apertura,
+                    manager as gerente,
+                    DATE_FORMAT(creation_date, '%Y-%m-%d %H:%i:%s') as fecha_creacion
                 FROM branches 
-                WHERE id = ? AND activo = TRUE
+                WHERE id = ? AND active = TRUE
             ");
             
             $stmt->bind_param("i", $id);
@@ -122,31 +122,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $sql = "
                 SELECT 
                     id,
-                    nombre,
-                    direccion,
-                    ciudad,
-                    estado,
-                    codigo_postal,
-                    telefono,
+                    name as nombre,
+                    address as direccion,
+                    city as ciudad,
+                    state as estado,
+                    postal_code as codigo_postal,
+                    phone as telefono,
                     email,
-                    TIME_FORMAT(horario_apertura, '%H:%i') as horario_apertura,
-                    TIME_FORMAT(horario_cierre, '%H:%i') as horario_cierre,
-                    dias_operacion,
-                    latitud,
-                    longitud,
-                    es_principal,
-                    tiene_delivery,
-                    tiene_estacionamiento,
-                    capacidad_personas,
-                    imagen,
-                    descripcion,
-                    activo,
-                    DATE_FORMAT(fecha_apertura, '%Y-%m-%d') as fecha_apertura,
-                    gerente,
-                    DATE_FORMAT(fecha_creacion, '%Y-%m-%d %H:%i:%s') as fecha_creacion
+                    TIME_FORMAT(opening_time, '%H:%i') as horario_apertura,
+                    TIME_FORMAT(closing_time, '%H:%i') as horario_cierre,
+                    operation_days as dias_operacion,
+                    latitude as latitud,
+                    longitude as longitud,
+                    is_main as es_principal,
+                    has_delivery as tiene_delivery,
+                    has_parking as tiene_estacionamiento,
+                    capacity_people as capacidad_personas,
+                    image as imagen,
+                    description as descripcion,
+                    active as activo,
+                    DATE_FORMAT(opening_date, '%Y-%m-%d') as fecha_apertura,
+                    manager as gerente,
+                    DATE_FORMAT(creation_date, '%Y-%m-%d %H:%i:%s') as fecha_creacion
                 FROM branches 
-                WHERE activo = TRUE
-                ORDER BY es_principal DESC, ciudad ASC, nombre ASC
+                WHERE active = TRUE
+                ORDER BY is_main DESC, city ASC, name ASC
             ";
             
             $result = $conn->query($sql);

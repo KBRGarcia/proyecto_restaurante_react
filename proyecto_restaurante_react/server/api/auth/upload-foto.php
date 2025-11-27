@@ -20,9 +20,9 @@ require_once '../../includes/db.php';
 // Función para verificar el token y obtener el usuario
 function verificarToken($conn, $token) {
     $stmt = $conn->prepare("
-        SELECT u.id, u.nombre, u.apellido, u.correo, u.rol, u.estado
-        FROM sessions s
-        JOIN usuarios u ON s.usuario_id = u.id
+        SELECT u.id, u.name as nombre, u.last_name as apellido, u.email as correo, u.role as rol, u.status as estado
+        FROM api_tokens s
+        JOIN users u ON s.user_id = u.id
         WHERE s.token = ? AND s.expires_at > NOW()
         LIMIT 1
     ");
@@ -38,7 +38,7 @@ function verificarToken($conn, $token) {
     $usuario = $result->fetch_assoc();
     $stmt->close();
     
-    if ($usuario['estado'] !== 'activo') {
+    if ($usuario['estado'] !== 'active') {
         throw new Exception('Cuenta inactiva');
     }
     
@@ -88,7 +88,7 @@ try {
     }
     
     // Actualizar foto de perfil en la base de datos
-    $stmt = $conn->prepare("UPDATE usuarios SET foto_perfil = ? WHERE id = ?");
+    $stmt = $conn->prepare("UPDATE users SET profile_picture = ? WHERE id = ?");
     $stmt->bind_param("si", $foto_base64, $usuario['id']);
     
     if (!$stmt->execute()) {

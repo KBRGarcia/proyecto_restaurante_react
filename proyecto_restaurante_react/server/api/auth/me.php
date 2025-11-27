@@ -22,9 +22,9 @@ require_once '../../includes/db.php';
 // Función para verificar el token y obtener el usuario
 function verificarToken($conn, $token) {
     $stmt = $conn->prepare("
-        SELECT u.id, u.nombre, u.apellido, u.correo, u.rol, u.codigo_area, u.numero_telefono, u.direccion, u.foto_perfil, u.estado, u.fecha_registro, u.password
-        FROM sessions s
-        JOIN usuarios u ON s.usuario_id = u.id
+        SELECT u.id, u.name, u.last_name, u.email, u.role, u.phone_number, u.address, u.profile_picture, u.status, u.registration_date, u.password
+        FROM api_tokens s
+        JOIN users u ON s.user_id = u.id
         WHERE s.token = ? AND s.expires_at > NOW()
         LIMIT 1
     ");
@@ -40,11 +40,25 @@ function verificarToken($conn, $token) {
     $usuario = $result->fetch_assoc();
     $stmt->close();
     
-    if ($usuario['estado'] !== 'activo') {
+    if ($usuario['status'] !== 'active') {
         throw new Exception('Cuenta inactiva');
     }
     
-    return $usuario;
+    // Mapear campos nuevos a formato esperado por el frontend
+    return [
+        'id' => $usuario['id'],
+        'nombre' => $usuario['name'],
+        'apellido' => $usuario['last_name'],
+        'correo' => $usuario['email'],
+        'rol' => $usuario['role'],
+        'codigo_area' => null, // Ya no existe, se combina en phone_number
+        'numero_telefono' => $usuario['phone_number'],
+        'direccion' => $usuario['address'],
+        'foto_perfil' => $usuario['profile_picture'],
+        'estado' => $usuario['status'],
+        'fecha_registro' => $usuario['registration_date'],
+        'password' => $usuario['password']
+    ];
 }
 
 try {
@@ -100,13 +114,21 @@ try {
             $numero_telefono = isset($input['numero_telefono']) ? trim($input['numero_telefono']) : null;
             $direccion = isset($input['direccion']) ? trim($input['direccion']) : null;
             
+            // Combinar código de área y número de teléfono si se proporcionan
+            $phone_number = null;
+            if (!empty($codigo_area) && !empty($numero_telefono)) {
+                $phone_number = $codigo_area . $numero_telefono;
+            } elseif (!empty($input['numero_telefono'])) {
+                $phone_number = $input['numero_telefono'];
+            }
+            
             // Actualizar en base de datos
             $stmt = $conn->prepare("
-                UPDATE usuarios 
-                SET nombre = ?, apellido = ?, codigo_area = ?, numero_telefono = ?, direccion = ?
+                UPDATE users 
+                SET name = ?, last_name = ?, phone_number = ?, address = ?
                 WHERE id = ?
             ");
-            $stmt->bind_param("sssssi", $nombre, $apellido, $codigo_area, $numero_telefono, $direccion, $usuario['id']);
+            $stmt->bind_param("ssssi", $nombre, $apellido, $phone_number, $direccion, $usuario['id']);
             
             if (!$stmt->execute()) {
                 throw new Exception('Error al actualizar el perfil');
@@ -162,7 +184,7 @@ try {
             $passwordHash = password_hash($input['passwordNueva'], PASSWORD_DEFAULT);
             
             // Actualizar en base de datos
-            $stmt = $conn->prepare("UPDATE usuarios SET password = ? WHERE id = ?");
+            $stmt = $conn->prepare("UPDATE users SET password = ? WHERE id = ?");
             $stmt->bind_param("si", $passwordHash, $usuario['id']);
             
             if (!$stmt->execute()) {
