@@ -18,7 +18,7 @@
 // Configurar reporte de errores para desarrollo
 // En producción, usar error_reporting(0) y log_errors
 error_reporting(E_ALL);
-ini_set('display_errors', '0'); // No mostrar errores en pantalla (solo en logs)
+ini_set('display_errors', '1'); // Mostrar errores para debugging
 ini_set('log_errors', '1');
 
 // Iniciar buffer de salida para capturar cualquier output
@@ -89,11 +89,16 @@ try {
             break;
     }
 } catch (Exception $e) {
+    ob_clean();
     http_response_code(500);
     echo json_encode([
         'success' => false,
-        'message' => 'Error del servidor: ' . $e->getMessage()
+        'message' => 'Error del servidor: ' . $e->getMessage(),
+        'error' => $e->getMessage(),
+        'file' => $e->getFile(),
+        'line' => $e->getLine()
     ]);
+    ob_end_flush();
 }
 
 /**
@@ -104,28 +109,43 @@ function obtenerEstadisticas($conn) {
         // Total de usuarios (solo clientes)
         $sql = "SELECT COUNT(*) as total FROM users WHERE role = 'client'";
         $result = $conn->query($sql);
-        $totalUsuarios = $result ? $result->fetch_assoc()['total'] : 0;
+        if (!$result) {
+            throw new Exception('Error en consulta de usuarios: ' . $conn->error);
+        }
+        $totalUsuarios = $result->fetch_assoc()['total'];
         
         // Total de órdenes
         $sql = "SELECT COUNT(*) as total FROM orders";
         $result = $conn->query($sql);
-        $totalOrdenes = $result ? $result->fetch_assoc()['total'] : 0;
+        if (!$result) {
+            throw new Exception('Error en consulta de órdenes: ' . $conn->error);
+        }
+        $totalOrdenes = $result->fetch_assoc()['total'];
         
         // Total de ingresos (solo órdenes entregadas)
         $sql = "SELECT COALESCE(SUM(total), 0) as total FROM orders WHERE status = 'delivered'";
         $result = $conn->query($sql);
-        $totalIngresos = $result ? (float)$result->fetch_assoc()['total'] : 0;
+        if (!$result) {
+            throw new Exception('Error en consulta de ingresos: ' . $conn->error);
+        }
+        $totalIngresos = (float)$result->fetch_assoc()['total'];
         
         // Órdenes de hoy
         $sql = "SELECT COUNT(*) as total FROM orders WHERE DATE(order_date) = CURDATE()";
         $result = $conn->query($sql);
-        $ordenesHoy = $result ? $result->fetch_assoc()['total'] : 0;
+        if (!$result) {
+            throw new Exception('Error en consulta de órdenes hoy: ' . $conn->error);
+        }
+        $ordenesHoy = $result->fetch_assoc()['total'];
         
         // Ingresos de hoy
         $sql = "SELECT COALESCE(SUM(total), 0) as total FROM orders 
                 WHERE DATE(order_date) = CURDATE() AND status = 'delivered'";
         $result = $conn->query($sql);
-        $ingresosHoy = $result ? (float)$result->fetch_assoc()['total'] : 0;
+        if (!$result) {
+            throw new Exception('Error en consulta de ingresos hoy: ' . $conn->error);
+        }
+        $ingresosHoy = (float)$result->fetch_assoc()['total'];
         
         // Nuevos usuarios este mes
         $sql = "SELECT COUNT(*) as total FROM users 
@@ -133,7 +153,10 @@ function obtenerEstadisticas($conn) {
                 AND YEAR(registration_date) = YEAR(CURDATE())
                 AND role = 'client'";
         $result = $conn->query($sql);
-        $nuevosUsuarios = $result ? $result->fetch_assoc()['total'] : 0;
+        if (!$result) {
+            throw new Exception('Error en consulta de nuevos usuarios: ' . $conn->error);
+        }
+        $nuevosUsuarios = $result->fetch_assoc()['total'];
         
         // Promedio por orden (solo entregadas)
         $promedioOrden = $totalOrdenes > 0 ? $totalIngresos / $totalOrdenes : 0;
@@ -161,7 +184,10 @@ function obtenerEstadisticas($conn) {
         echo json_encode([
             'success' => false,
             'message' => 'Error al obtener estadísticas',
-            'error' => $e->getMessage()
+            'error' => $e->getMessage(),
+            'sql_error' => $conn->error ?? null,
+            'file' => $e->getFile(),
+            'line' => $e->getLine()
         ]);
         ob_end_flush();
     }
@@ -177,7 +203,7 @@ function obtenerUsuarios($conn) {
                     u.name as nombre,
                     u.last_name as apellido,
                     u.email as correo,
-                    u.phone_number as numero_telefono,
+                    u.phone_number as telefono,
                     u.role as rol,
                     u.status as estado,
                     u.registration_date as fecha_registro,
@@ -348,7 +374,7 @@ function banearUsuario($conn) {
     }
     
     // Verificar que el usuario existe y no es admin
-    $sql = "SELECT status as estado, role as rol FROM users WHERE id = ?";
+    $sql = "SELECT status, role FROM users WHERE id = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param('i', $usuario_id);
     $stmt->execute();
@@ -362,14 +388,14 @@ function banearUsuario($conn) {
     
     $usuario = $result->fetch_assoc();
     
-    if ($usuario['rol'] === 'admin') {
+    if ($usuario['role'] === 'admin') {
         http_response_code(403);
         echo json_encode(['success' => false, 'message' => 'No se puede banear a un administrador']);
         return;
     }
     
     // Cambiar estado
-    $nuevoEstado = $usuario['estado'] === 'active' ? 'inactive' : 'active';
+    $nuevoEstado = $usuario['status'] === 'active' ? 'inactive' : 'active';
     
     $sql = "UPDATE users SET status = ? WHERE id = ?";
     $stmt = $conn->prepare($sql);
@@ -411,7 +437,7 @@ function eliminarUsuario($conn) {
     }
     
     // Verificar que el usuario existe y no es admin
-    $sql = "SELECT role as rol FROM users WHERE id = ?";
+    $sql = "SELECT role FROM users WHERE id = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param('i', $usuario_id);
     $stmt->execute();
@@ -425,7 +451,7 @@ function eliminarUsuario($conn) {
     
     $usuario = $result->fetch_assoc();
     
-    if ($usuario['rol'] === 'admin') {
+    if ($usuario['role'] === 'admin') {
         http_response_code(403);
         echo json_encode(['success' => false, 'message' => 'No se puede eliminar a un administrador']);
         return;
