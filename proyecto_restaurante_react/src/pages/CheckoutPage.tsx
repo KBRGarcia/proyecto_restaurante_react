@@ -91,6 +91,7 @@ function CheckoutPage() {
     cedula: '',
     telefono: '',
     banco: 'provincial',
+    tipoCedula: 'V',
     numeroReferencia: '',
     fechaPago: ''
   })
@@ -100,6 +101,7 @@ function CheckoutPage() {
     numero_cuenta: '',
     cedula: '',
     nombre_titular: '',
+    tipoCedula: 'V',
     telefono: '',
     numeroReferencia: '',
     fechaPago: ''

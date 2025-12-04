@@ -17,6 +17,7 @@ import type { Orden, EstadoOrden, TipoServicio } from '../types.ts'
 function MisOrdenesPage() {
   const [ordenes, setOrdenes] = useState<Orden[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [filtroEstado, setFiltroEstado] = useState<EstadoOrden | 'todas'>('todas')
   const [filtroTipo, setFiltroTipo] = useState<TipoServicio | 'todos'>('todos')
   const [ordenSeleccionada, setOrdenSeleccionada] = useState<Orden | null>(null)
@@ -32,6 +33,7 @@ function MisOrdenesPage() {
 
   const cargarOrdenes = async () => {
     setLoading(true)
+    setError(null)
     
     try {
       const token = localStorage.getItem('token')
@@ -39,6 +41,7 @@ function MisOrdenesPage() {
       if (!token) {
         console.error('No hay token de autenticación')
         setOrdenes([])
+        setError('No estás autenticado. Por favor inicia sesión.')
         setLoading(false)
         return
       }
@@ -58,23 +61,51 @@ function MisOrdenesPage() {
       if (!response.ok) {
         const errorText = await response.text()
         console.error('Error al cargar órdenes:', errorText)
-        throw new Error(`Error ${response.status}: ${errorText}`)
+        setError(`Error al cargar órdenes: ${response.status}`)
+        setOrdenes([])
+        setLoading(false)
+        return
       }
 
       const data = await response.json()
       console.log('Datos de órdenes recibidos:', data)
 
       if (data.success) {
-        setOrdenes(data.data || [])
+        try {
+          // Validar y limpiar datos de órdenes
+          const ordenesValidas = (data.data || []).map((orden: Orden) => {
+            // Validar fecha_orden
+            let fechaOrdenValida = orden.fecha_orden || new Date().toISOString()
+            if (fechaOrdenValida && isNaN(new Date(fechaOrdenValida).getTime())) {
+              fechaOrdenValida = new Date().toISOString()
+            }
+            
+            return {
+              ...orden,
+              // Asegurar que los campos requeridos existan
+              id: orden.id || 0,
+              estado: orden.estado || 'pendiente',
+              tipo_servicio: orden.tipo_servicio || 'recoger',
+              total: orden.total || 0,
+              fecha_orden: fechaOrdenValida
+            }
+          }).filter((orden: Orden) => orden.id > 0) // Filtrar órdenes sin ID válido
+          
+          setOrdenes(ordenesValidas)
+        } catch (parseError) {
+          console.error('Error al procesar datos de órdenes:', parseError)
+          setError('Error al procesar los datos de las órdenes')
+          setOrdenes([])
+        }
       } else {
         console.error('Respuesta no exitosa:', data)
+        setError(data.message || 'Error al cargar las órdenes')
         setOrdenes([])
       }
     } catch (error) {
       console.error('Error detallado al cargar órdenes:', error)
+      setError(error instanceof Error ? error.message : 'Error desconocido al cargar órdenes')
       setOrdenes([])
-      // No mostramos alert para no interrumpir la experiencia del usuario
-      // Si no hay órdenes, simplemente mostrará el mensaje de "No hay órdenes"
     } finally {
       setLoading(false)
     }
@@ -85,6 +116,11 @@ function MisOrdenesPage() {
    */
   const ordenesFiltradas = ordenes
     .filter(orden => {
+      // Validar que la orden tenga los campos necesarios
+      if (!orden || !orden.id) {
+        return false
+      }
+      
       // Filtro por estado
       if (filtroEstado !== 'todas' && orden.estado !== filtroEstado) {
         return false
@@ -96,40 +132,81 @@ function MisOrdenesPage() {
       return true
     })
     .sort((a, b) => {
-      // Ordenamiento
-      switch (ordenamiento) {
-        case 'reciente':
-          return new Date(b.fecha_orden).getTime() - new Date(a.fecha_orden).getTime()
-        case 'antiguo':
-          return new Date(a.fecha_orden).getTime() - new Date(b.fecha_orden).getTime()
-        case 'mayor':
-          return b.total - a.total
-        case 'menor':
-          return a.total - b.total
-        default:
-          return 0
+      // Ordenamiento con validación de datos
+      try {
+        switch (ordenamiento) {
+          case 'reciente':
+            const fechaA = a.fecha_orden ? new Date(a.fecha_orden).getTime() : 0
+            const fechaB = b.fecha_orden ? new Date(b.fecha_orden).getTime() : 0
+            // Si alguna fecha es inválida, ponerla al final
+            if (isNaN(fechaA) && isNaN(fechaB)) return 0
+            if (isNaN(fechaA)) return 1
+            if (isNaN(fechaB)) return -1
+            return fechaB - fechaA
+          case 'antiguo':
+            const fechaA2 = a.fecha_orden ? new Date(a.fecha_orden).getTime() : 0
+            const fechaB2 = b.fecha_orden ? new Date(b.fecha_orden).getTime() : 0
+            if (isNaN(fechaA2) && isNaN(fechaB2)) return 0
+            if (isNaN(fechaA2)) return 1
+            if (isNaN(fechaB2)) return -1
+            return fechaA2 - fechaB2
+          case 'mayor':
+            const totalA = a.total || 0
+            const totalB = b.total || 0
+            return totalB - totalA
+          case 'menor':
+            const totalA2 = a.total || 0
+            const totalB2 = b.total || 0
+            return totalA2 - totalB2
+          default:
+            return 0
+        }
+      } catch (error) {
+        console.error('Error al ordenar órdenes:', error)
+        return 0
       }
     })
 
   /**
-   * Calcular estadísticas
+   * Calcular estadísticas con validación
    */
   const estadisticas = {
     total: ordenes.length,
-    pendientes: ordenes.filter(o => o.estado === 'pendiente').length,
-    preparando: ordenes.filter(o => o.estado === 'preparando').length,
-    listos: ordenes.filter(o => o.estado === 'listo').length,
-    entregados: ordenes.filter(o => o.estado === 'entregado').length,
-    cancelados: ordenes.filter(o => o.estado === 'cancelado').length,
+    pendientes: ordenes.filter(o => o && o.estado === 'pendiente').length,
+    preparando: ordenes.filter(o => o && o.estado === 'preparando').length,
+    listos: ordenes.filter(o => o && o.estado === 'listo').length,
+    entregados: ordenes.filter(o => o && o.estado === 'entregado').length,
+    cancelados: ordenes.filter(o => o && o.estado === 'cancelado').length,
     totalGastado: ordenes
-      .filter(o => o.estado !== 'cancelado')
-      .reduce((sum, o) => sum + o.total, 0),
+      .filter(o => o && o.estado !== 'cancelado')
+      .reduce((sum, o) => sum + (o.total || 0), 0),
   }
 
   if (loading) {
     return (
       <div className="container mt-5">
         <LoadingSpinner mensaje="Cargando tus órdenes..." />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="container mt-5 mb-5">
+        <div className="card shadow-sm">
+          <div className="card-body text-center py-5">
+            <i className="fas fa-exclamation-triangle fa-4x text-warning mb-3"></i>
+            <h4>Error al cargar órdenes</h4>
+            <p className="text-muted mb-4">{error}</p>
+            <button 
+              className="btn btn-primary"
+              onClick={cargarOrdenes}
+            >
+              <i className="fas fa-redo me-2"></i>
+              Intentar de nuevo
+            </button>
+          </div>
+        </div>
       </div>
     )
   }

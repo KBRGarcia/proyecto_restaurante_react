@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useState, useEffect, type FormEvent } from 'react'
 import type { MetodoPagoNacional, DatosPagoMovil, DatosTransferencia, DatosPagoFisico, BancoVenezuela } from '../types.ts'
 
 /**
@@ -25,8 +25,16 @@ function NationalPaymentDataModal({
   const [errores, setErrores] = useState<Record<string, string>>({})
 
   // Estados para Pago Móvil
-  const [datosPagoMovil, setDatosPagoMovil] = useState<DatosPagoMovil>(
-    datosExistentes as DatosPagoMovil || {
+  const [datosPagoMovil, setDatosPagoMovil] = useState<DatosPagoMovil>(() => {
+    const existentes = datosExistentes as DatosPagoMovil
+    return existentes && metodoPago === 'pago_movil' ? {
+      cedula: existentes.cedula || '',
+      telefono: existentes.telefono || '',
+      banco: existentes.banco || 'provincial',
+      tipoCedula: existentes.tipoCedula || 'V',
+      numeroReferencia: existentes.numeroReferencia || '',
+      fechaPago: existentes.fechaPago || ''
+    } : {
       cedula: '',
       telefono: '',
       banco: 'provincial',
@@ -34,19 +42,31 @@ function NationalPaymentDataModal({
       numeroReferencia: '',
       fechaPago: ''
     }
-  )
+  })
 
   // Estados para Transferencia
-  const [datosTransferencia, setDatosTransferencia] = useState<DatosTransferencia>(
-    datosExistentes as DatosTransferencia || {
-      cedula: '',
-      telefono: '',
+  const [datosTransferencia, setDatosTransferencia] = useState<DatosTransferencia>(() => {
+    const existentes = datosExistentes as DatosTransferencia
+    return existentes && metodoPago === 'transferencia' ? {
+      banco: existentes.banco || 'provincial',
+      numero_cuenta: existentes.numero_cuenta || '',
+      cedula: existentes.cedula || '',
+      nombre_titular: existentes.nombre_titular || '',
+      tipoCedula: existentes.tipoCedula || 'V',
+      telefono: existentes.telefono || '',
+      numeroReferencia: existentes.numeroReferencia || '',
+      fechaPago: existentes.fechaPago || ''
+    } : {
       banco: 'provincial',
+      numero_cuenta: '',
+      cedula: '',
+      nombre_titular: '',
       tipoCedula: 'V',
+      telefono: '',
       numeroReferencia: '',
       fechaPago: ''
     }
-  )
+  })
 
   // Estados para Pago Físico
   const [datosPagoFisico] = useState<DatosPagoFisico>(
@@ -57,6 +77,33 @@ function NationalPaymentDataModal({
       limiteTiempo: 3
     }
   )
+
+  // Actualizar estados cuando cambie el método de pago o datos existentes
+  useEffect(() => {
+    if (metodoPago === 'pago_movil' && datosExistentes && 'cedula' in datosExistentes) {
+      const existentes = datosExistentes as DatosPagoMovil
+      setDatosPagoMovil({
+        cedula: existentes.cedula || '',
+        telefono: existentes.telefono || '',
+        banco: existentes.banco || 'provincial',
+        tipoCedula: existentes.tipoCedula || 'V',
+        numeroReferencia: existentes.numeroReferencia || '',
+        fechaPago: existentes.fechaPago || ''
+      })
+    } else if (metodoPago === 'transferencia' && datosExistentes && 'cedula' in datosExistentes) {
+      const existentes = datosExistentes as DatosTransferencia
+      setDatosTransferencia({
+        banco: existentes.banco || 'provincial',
+        numero_cuenta: existentes.numero_cuenta || '',
+        cedula: existentes.cedula || '',
+        nombre_titular: existentes.nombre_titular || '',
+        tipoCedula: existentes.tipoCedula || 'V',
+        telefono: existentes.telefono || '',
+        numeroReferencia: existentes.numeroReferencia || '',
+        fechaPago: existentes.fechaPago || ''
+      })
+    }
+  }, [metodoPago, datosExistentes])
 
   // Lista de bancos venezolanos
   const bancosVenezuela: { id: BancoVenezuela; nombre: string; codigo: string }[] = [
@@ -73,51 +120,51 @@ function NationalPaymentDataModal({
     const nuevosErrores: Record<string, string> = {}
 
     if (metodoPago === 'pago_movil') {
-      if (!datosPagoMovil.tipoCedula) {
+      if (!datosPagoMovil.tipoCedula || (typeof datosPagoMovil.tipoCedula === 'string' && datosPagoMovil.tipoCedula.trim() === '')) {
         nuevosErrores.tipoCedula = 'El tipo de identificación es requerido'
       }
-      if (!datosPagoMovil.cedula.trim()) {
+      if (!datosPagoMovil.cedula || !datosPagoMovil.cedula.trim()) {
         nuevosErrores.cedula = 'El número de cédula es requerido'
-      } else if (!/^\d{7,8}$/.test(datosPagoMovil.cedula)) {
+      } else if (!/^\d{7,8}$/.test(datosPagoMovil.cedula.trim())) {
         nuevosErrores.cedula = 'Formato de cédula inválido (7-8 dígitos)'
       }
       
-      if (!datosPagoMovil.telefono.trim()) {
+      if (!datosPagoMovil.telefono || !datosPagoMovil.telefono.trim()) {
         nuevosErrores.telefono = 'El teléfono es requerido'
-      } else if (!/^0\d{10}$/.test(datosPagoMovil.telefono)) {
+      } else if (!/^0\d{10}$/.test(datosPagoMovil.telefono.trim())) {
         nuevosErrores.telefono = 'Formato de teléfono inválido (04142583614)'
       }
       
-      if (!datosPagoMovil.numeroReferencia?.trim()) {
+      if (!datosPagoMovil.numeroReferencia || !datosPagoMovil.numeroReferencia.trim()) {
         nuevosErrores.numeroReferencia = 'El número de referencia es requerido'
       }
       
-      if (!datosPagoMovil.fechaPago) {
+      if (!datosPagoMovil.fechaPago || datosPagoMovil.fechaPago.trim() === '') {
         nuevosErrores.fechaPago = 'La fecha del pago es requerida'
       }
     }
 
     if (metodoPago === 'transferencia') {
-      if (!datosTransferencia.tipoCedula) {
+      if (!datosTransferencia.tipoCedula || (typeof datosTransferencia.tipoCedula === 'string' && datosTransferencia.tipoCedula.trim() === '')) {
         nuevosErrores.tipoCedula = 'El tipo de identificación es requerido'
       }
-      if (!datosTransferencia.cedula.trim()) {
+      if (!datosTransferencia.cedula || !datosTransferencia.cedula.trim()) {
         nuevosErrores.cedula = 'El número de cédula es requerido'
-      } else if (!/^\d{7,8}$/.test(datosTransferencia.cedula)) {
+      } else if (!/^\d{7,8}$/.test(datosTransferencia.cedula.trim())) {
         nuevosErrores.cedula = 'Formato de cédula inválido (7-8 dígitos)'
       }
       
-      if (!datosTransferencia.telefono?.trim()) {
+      if (!datosTransferencia.telefono || !datosTransferencia.telefono.trim()) {
         nuevosErrores.telefono = 'El teléfono es requerido'
-      } else if (!/^0\d{10}$/.test(datosTransferencia.telefono)) {
+      } else if (!/^0\d{10}$/.test(datosTransferencia.telefono.trim())) {
         nuevosErrores.telefono = 'Formato de teléfono inválido (04142583614)'
       }
       
-      if (!datosTransferencia.numeroReferencia?.trim()) {
+      if (!datosTransferencia.numeroReferencia || !datosTransferencia.numeroReferencia.trim()) {
         nuevosErrores.numeroReferencia = 'El número de referencia es requerido'
       }
       
-      if (!datosTransferencia.fechaPago) {
+      if (!datosTransferencia.fechaPago || datosTransferencia.fechaPago.trim() === '') {
         nuevosErrores.fechaPago = 'La fecha del pago es requerida'
       }
     }
@@ -253,7 +300,8 @@ function NationalPaymentDataModal({
                               className={`form-select ${errores.tipoCedula ? 'is-invalid' : ''}`}
                               value={datosPagoMovil.tipoCedula || 'V'}
                               onChange={(e) => {
-                                setDatosPagoMovil({ ...datosPagoMovil, tipoCedula: e.target.value as 'V' | 'E' | 'J' })
+                                const nuevoTipo = e.target.value as 'V' | 'E' | 'J'
+                                setDatosPagoMovil({ ...datosPagoMovil, tipoCedula: nuevoTipo })
                                 if (errores.tipoCedula) setErrores({ ...errores, tipoCedula: '' })
                               }}
                             >
@@ -420,7 +468,8 @@ function NationalPaymentDataModal({
                               className={`form-select ${errores.tipoCedula ? 'is-invalid' : ''}`}
                               value={datosTransferencia.tipoCedula || 'V'}
                               onChange={(e) => {
-                                setDatosTransferencia({ ...datosTransferencia, tipoCedula: e.target.value as 'V' | 'E' | 'J' })
+                                const nuevoTipo = e.target.value as 'V' | 'E' | 'J'
+                                setDatosTransferencia({ ...datosTransferencia, tipoCedula: nuevoTipo })
                                 if (errores.tipoCedula) setErrores({ ...errores, tipoCedula: '' })
                               }}
                             >

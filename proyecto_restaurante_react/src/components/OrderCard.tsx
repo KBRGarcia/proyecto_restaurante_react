@@ -17,8 +17,8 @@ function OrderCard({ orden, onVerDetalles }: OrderCardProps) {
   /**
    * Obtener configuración de badge según el estado
    */
-  const getEstadoConfig = (estado: EstadoOrden) => {
-    const configs = {
+  const getEstadoConfig = (estado: EstadoOrden | string) => {
+    const configs: Record<string, { color: string; icon: string; texto: string; descripcion: string }> = {
       pendiente: { 
         color: 'warning', 
         icon: 'clock', 
@@ -56,14 +56,21 @@ function OrderCard({ orden, onVerDetalles }: OrderCardProps) {
         descripcion: 'Este pedido fue cancelado'
       },
     }
-    return configs[estado]
+    
+    // Devolver configuración o valor por defecto
+    return configs[estado] || {
+      color: 'secondary',
+      icon: 'question-circle',
+      texto: estado || 'Desconocido',
+      descripcion: 'Estado desconocido'
+    }
   }
 
   /**
    * Obtener configuración de tipo de servicio
    */
-  const getTipoServicioConfig = (tipo: TipoServicio) => {
-    const configs = {
+  const getTipoServicioConfig = (tipo: TipoServicio | string) => {
+    const configs: Record<string, { icon: string; texto: string; color: string }> = {
       domicilio: { 
         icon: 'motorcycle', 
         texto: 'A Domicilio',
@@ -75,25 +82,61 @@ function OrderCard({ orden, onVerDetalles }: OrderCardProps) {
         color: 'info'
       },
     }
-    return configs[tipo]
+    
+    // Devolver configuración o valor por defecto
+    return configs[tipo] || {
+      icon: 'question-circle',
+      texto: tipo || 'Desconocido',
+      color: 'secondary'
+    }
   }
 
   /**
-   * Formatear fecha legible
+   * Formatear fecha legible con validación
    */
-  const formatearFecha = (fecha: string): string => {
-    const date = new Date(fecha)
-    return date.toLocaleDateString('es-MX', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
+  const formatearFecha = (fecha: string | undefined | null): string => {
+    if (!fecha) {
+      return 'Fecha no disponible'
+    }
+    
+    try {
+      const date = new Date(fecha)
+      
+      // Validar que la fecha sea válida
+      if (isNaN(date.getTime())) {
+        return 'Fecha inválida'
+      }
+      
+      return date.toLocaleDateString('es-MX', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    } catch (error) {
+      console.error('Error al formatear fecha:', error)
+      return 'Fecha inválida'
+    }
   }
 
-  const estadoConfig = getEstadoConfig(orden.estado)
-  const tipoConfig = getTipoServicioConfig(orden.tipo_servicio)
+  // Validar que la orden tenga los datos necesarios
+  if (!orden || !orden.id) {
+    return null
+  }
+
+  // Validar y obtener configuraciones con valores por defecto
+  const estado = orden.estado || 'pendiente'
+  const tipoServicio = orden.tipo_servicio || 'recoger'
+  
+  const estadoConfig = getEstadoConfig(estado)
+  const tipoConfig = getTipoServicioConfig(tipoServicio)
+  
+  // Validación adicional para asegurar que las configuraciones sean válidas
+  if (!estadoConfig || !tipoConfig) {
+    console.error('Error: Configuración inválida', { estado, tipoServicio, estadoConfig, tipoConfig })
+    return null
+  }
 
   return (
     <div className="card mb-3 shadow-sm hover-lift order-card">
