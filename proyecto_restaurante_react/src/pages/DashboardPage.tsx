@@ -40,6 +40,15 @@ function DashboardPage() {
   const [actualizandoOrden, setActualizandoOrden] = useState(false)
 
   /**
+   * Normalizar estado del usuario (mapear 'active'/'inactive' a 'activo'/'inactivo')
+   */
+  const normalizarEstado = (estado: string): 'activo' | 'inactivo' | 'baneado' => {
+    if (estado === 'active') return 'activo'
+    if (estado === 'inactive') return 'inactivo'
+    return estado as 'activo' | 'inactivo' | 'baneado'
+  }
+
+  /**
    * Cargar datos del dashboard
    * En producción, estos datos vendrían de la API
    */
@@ -97,7 +106,12 @@ function DashboardPage() {
         const usuariosData = await usuariosRes.json()
         console.log('Datos de usuarios:', usuariosData)
         if (usuariosData.success) {
-          setUsuarios(usuariosData.data)
+          // Normalizar estados de usuarios (mapear 'active'/'inactive' a 'activo'/'inactivo')
+          const usuariosNormalizados = usuariosData.data.map((u: UsuarioAdmin) => ({
+            ...u,
+            estado: normalizarEstado(u.estado)
+          }))
+          setUsuarios(usuariosNormalizados)
         }
       }
 
@@ -182,14 +196,16 @@ function DashboardPage() {
 
         if (data.success) {
           // Actualizar estado local
+          // El backend devuelve 'active' o 'inactive', normalizamos a 'activo' o 'inactivo'
+          const estadoNormalizado = normalizarEstado(data.nuevo_estado)
           setUsuarios(prev => prev.map(u =>
             u.id === usuarioSeleccionado.id
-              ? { ...u, estado: data.nuevo_estado }
+              ? { ...u, estado: estadoNormalizado }
               : u
           ))
           success(
             'Estado Actualizado',
-            `Usuario ${data.nuevo_estado === 'inactivo' ? 'baneado' : 'desbaneado'} exitosamente.`,
+            `Usuario ${estadoNormalizado === 'inactivo' ? 'baneado' : 'desbaneado'} exitosamente.`,
             5000
           )
         } else {
