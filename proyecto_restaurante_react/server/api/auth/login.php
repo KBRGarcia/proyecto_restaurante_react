@@ -63,15 +63,15 @@ try {
         throw new Exception('Cuenta inactiva. Contacta al administrador');
     }
     
-    // Generar token simple (en producción usar JWT)
-    $token = bin2hex(random_bytes(32));
-    
     // Verificar si la tabla api_tokens existe
     $check_table = $conn->query("SHOW TABLES LIKE 'api_tokens'");
     $tabla_api_tokens_existe = $check_table && $check_table->num_rows > 0;
     $error_token = null;
     
     if ($tabla_api_tokens_existe) {
+        // Generar token simple (en producción usar JWT)
+        $token = bin2hex(random_bytes(32));
+        
         // Guardar token en base de datos (usar tabla api_tokens)
         $stmt_token = $conn->prepare("
             INSERT INTO api_tokens (user_id, token, expires_at, created_at) 
@@ -94,9 +94,14 @@ try {
             error_log($error_token);
         }
     } else {
-        // Si la tabla no existe, solo continuar (el token se validará en el frontend)
-        // En producción, esto debería ser un error crítico
-        $error_token = 'La tabla api_tokens no existe. Ejecuta el script: 27-11-2025_01-api_tokens_table.sql';
+        // Si la tabla no existe, generar token codificado con información del usuario
+        // Formato: {user_id}:{email_hash}:{random_token}
+        // Esto permite validar el token sin necesidad de la tabla api_tokens
+        $email_hash = md5($usuario['email']);
+        $random_token = bin2hex(random_bytes(16));
+        $token = $usuario['id'] . ':' . $email_hash . ':' . $random_token;
+        
+        $error_token = 'La tabla api_tokens no existe. Usando token codificado temporal. Ejecuta el script: 27-11-2025_01-api_tokens_table.sql para mayor seguridad.';
         error_log('ADVERTENCIA: ' . $error_token);
     }
     

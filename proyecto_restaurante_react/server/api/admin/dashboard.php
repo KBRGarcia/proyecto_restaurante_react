@@ -18,7 +18,7 @@
 // Configurar reporte de errores para desarrollo
 // En producción, usar error_reporting(0) y log_errors
 error_reporting(E_ALL);
-ini_set('display_errors', '1'); // Mostrar errores para debugging
+ini_set('display_errors', '0'); // Desactivar para evitar HTML en respuestas JSON
 ini_set('log_errors', '1');
 
 // Iniciar buffer de salida para capturar cualquier output

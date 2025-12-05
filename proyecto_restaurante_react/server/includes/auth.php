@@ -31,56 +31,139 @@ function verificarAuth() {
     // En producción, usar JWT real con firma y expiración
     global $conn;
     
-    // Buscar sesión activa con este token (usar tabla api_tokens)
-    $stmt = $conn->prepare("SELECT s.*, u.id, u.name, u.last_name, u.email, u.role, u.status, u.phone_number, u.address, u.profile_picture, u.registration_date 
-                            FROM api_tokens s 
-                            JOIN users u ON s.user_id = u.id 
-                            WHERE s.token = ? AND s.expires_at > NOW()");
+    // Verificar si la tabla api_tokens existe
+    $check_table = $conn->query("SHOW TABLES LIKE 'api_tokens'");
+    $tabla_api_tokens_existe = $check_table && $check_table->num_rows > 0;
     
-    if (!$stmt) {
+    if ($tabla_api_tokens_existe) {
+        // Buscar sesión activa con este token (usar tabla api_tokens)
+        $stmt = $conn->prepare("SELECT s.*, u.id, u.name, u.last_name, u.email, u.role, u.status, u.phone_number, u.address, u.profile_picture, u.registration_date 
+                                FROM api_tokens s 
+                                JOIN users u ON s.user_id = u.id 
+                                WHERE s.token = ? AND s.expires_at > NOW()");
+        
+        if (!$stmt) {
+            return [
+                'success' => false,
+                'message' => 'Error en la consulta: ' . $conn->error
+            ];
+        }
+        
+        $stmt->bind_param("s", $token);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result->num_rows === 0) {
+            return [
+                'success' => false,
+                'message' => 'Token inválido o expirado'
+            ];
+        }
+        
+        $session = $result->fetch_assoc();
+        
+        // Verificar que el usuario esté activo
+        if ($session['status'] !== 'active') {
+            return [
+                'success' => false,
+                'message' => 'Usuario inactivo'
+            ];
+        }
+        
+        // Retornar datos del usuario
         return [
-            'success' => false,
-            'message' => 'Error en la consulta: ' . $conn->error
+            'success' => true,
+            'usuario' => [
+                'id' => $session['id'],
+                'nombre' => $session['name'],
+                'apellido' => $session['last_name'],
+                'correo' => $session['email'],
+                'rol' => $session['role'],
+                'estado' => $session['status'],
+                'telefono' => $session['phone_number'],
+                'direccion' => $session['address'],
+                'foto_perfil' => $session['profile_picture'],
+                'fecha_registro' => $session['registration_date']
+            ]
         ];
-    }
-    
-    $stmt->bind_param("s", $token);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    
-    if ($result->num_rows === 0) {
+    } else {
+        // Fallback: Si la tabla api_tokens no existe, usar validación basada en token codificado
+        // El token puede tener dos formatos:
+        // 1. Formato codificado: {user_id}:{email_hash}:{random_token} (generado por login.php cuando no existe api_tokens)
+        // 2. Formato hexadecimal simple: token de 64+ caracteres hex
+        
+        // PRIMERO: Intentar decodificar el formato con separador ':' (formato generado por login.php)
+        $tokenParts = explode(':', $token);
+        
+        if (count($tokenParts) >= 2 && is_numeric($tokenParts[0])) {
+            // Token con formato codificado: user_id:hash:token
+            $user_id = (int)$tokenParts[0];
+            $email_hash = $tokenParts[1] ?? '';
+            
+            // Buscar usuario directamente por ID
+            $stmt = $conn->prepare("SELECT id, name, last_name, email, role, status, phone_number, address, profile_picture, registration_date 
+                                    FROM users 
+                                    WHERE id = ? AND status = 'active'");
+            
+            if (!$stmt) {
+                return [
+                    'success' => false,
+                    'message' => 'Error en la consulta: ' . $conn->error
+                ];
+            }
+            
+            $stmt->bind_param("i", $user_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            
+            if ($result->num_rows > 0) {
+                $usuario = $result->fetch_assoc();
+                
+                // Verificar que el hash del email coincida (validación adicional)
+                if (!empty($email_hash) && md5($usuario['email']) !== $email_hash) {
+                    return [
+                        'success' => false,
+                        'message' => 'Token inválido'
+                    ];
+                }
+                
+                return [
+                    'success' => true,
+                    'usuario' => [
+                        'id' => $usuario['id'],
+                        'nombre' => $usuario['name'],
+                        'apellido' => $usuario['last_name'],
+                        'correo' => $usuario['email'],
+                        'rol' => $usuario['role'],
+                        'estado' => $usuario['status'],
+                        'telefono' => $usuario['phone_number'],
+                        'direccion' => $usuario['address'],
+                        'foto_perfil' => $usuario['profile_picture'],
+                        'fecha_registro' => $usuario['registration_date']
+                    ]
+                ];
+            }
+        }
+        
+        // SEGUNDO: Si no es formato codificado, verificar si es token hexadecimal simple
+        // El token debe tener formato válido (64 caracteres hex mínimo)
+        if (strlen($token) >= 64 && ctype_xdigit($token)) {
+            // Token hexadecimal válido pero no se puede validar sin tabla api_tokens
+            error_log('ADVERTENCIA: Token hexadecimal detectado pero tabla api_tokens no existe. Se recomienda crear la tabla api_tokens.');
+            return [
+                'success' => false,
+                'message' => 'Token inválido. Se requiere la tabla api_tokens para validar tokens hexadecimales.'
+            ];
+        }
+        
+        // Si no se pudo decodificar ni validar, retornar error
+        error_log('ADVERTENCIA: Token no válido o tabla api_tokens no existe. Token recibido: ' . substr($token, 0, 20) . '...');
+        
         return [
             'success' => false,
             'message' => 'Token inválido o expirado'
         ];
     }
-    
-    $session = $result->fetch_assoc();
-    
-    // Verificar que el usuario esté activo
-    if ($session['status'] !== 'active') {
-        return [
-            'success' => false,
-            'message' => 'Usuario inactivo'
-        ];
-    }
-    
-    // Retornar datos del usuario
-    return [
-        'success' => true,
-        'usuario' => [
-            'id' => $session['id'],
-            'nombre' => $session['name'],
-            'apellido' => $session['last_name'],
-            'correo' => $session['email'],
-            'rol' => $session['role'],
-            'estado' => $session['status'],
-            'telefono' => $session['phone_number'],
-            'direccion' => $session['address'],
-            'foto_perfil' => $session['profile_picture'],
-            'fecha_registro' => $session['registration_date']
-        ]
-    ];
 }
 
 function verificarLogin() {

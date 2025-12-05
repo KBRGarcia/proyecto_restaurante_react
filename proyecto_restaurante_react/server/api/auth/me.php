@@ -21,24 +21,69 @@ require_once '../../includes/db.php';
 
 // Función para verificar el token y obtener el usuario
 function verificarToken($conn, $token) {
-    $stmt = $conn->prepare("
-        SELECT u.id, u.name, u.last_name, u.email, u.role, u.phone_number, u.address, u.profile_picture, u.status, u.registration_date, u.password
-        FROM api_tokens s
-        JOIN users u ON s.user_id = u.id
-        WHERE s.token = ? AND s.expires_at > NOW()
-        LIMIT 1
-    ");
-    $stmt->bind_param("s", $token);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    // Verificar si la tabla api_tokens existe
+    $check_table = $conn->query("SHOW TABLES LIKE 'api_tokens'");
+    $tabla_api_tokens_existe = $check_table && $check_table->num_rows > 0;
     
-    if ($result->num_rows === 0) {
+    if ($tabla_api_tokens_existe) {
+        $stmt = $conn->prepare("
+            SELECT u.id, u.name, u.last_name, u.email, u.role, u.phone_number, u.address, u.profile_picture, u.status, u.registration_date, u.password
+            FROM api_tokens s
+            JOIN users u ON s.user_id = u.id
+            WHERE s.token = ? AND s.expires_at > NOW()
+            LIMIT 1
+        ");
+        $stmt->bind_param("s", $token);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result->num_rows === 0) {
+            $stmt->close();
+            throw new Exception('Token inválido o expirado');
+        }
+        
+        $usuario = $result->fetch_assoc();
         $stmt->close();
-        throw new Exception('Token inválido o expirado');
+    } else {
+        // Fallback: Si la tabla no existe, usar token codificado
+        // Formato: {user_id}:{email_hash}:{random_token}
+        if (strlen($token) < 64) {
+            throw new Exception('Token inválido');
+        }
+        
+        $tokenParts = explode(':', $token);
+        
+        if (count($tokenParts) >= 2 && is_numeric($tokenParts[0])) {
+            $user_id = (int)$tokenParts[0];
+            $email_hash = $tokenParts[1] ?? '';
+            
+            // Buscar usuario directamente por ID
+            $stmt = $conn->prepare("
+                SELECT id, name, last_name, email, role, phone_number, address, profile_picture, status, registration_date, password
+                FROM users 
+                WHERE id = ? AND status = 'active'
+                LIMIT 1
+            ");
+            $stmt->bind_param("i", $user_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            
+            if ($result->num_rows === 0) {
+                $stmt->close();
+                throw new Exception('Token inválido o usuario no encontrado');
+            }
+            
+            $usuario = $result->fetch_assoc();
+            $stmt->close();
+            
+            // Verificar que el hash del email coincida
+            if (!empty($email_hash) && md5($usuario['email']) !== $email_hash) {
+                throw new Exception('Token inválido');
+            }
+        } else {
+            throw new Exception('Token inválido');
+        }
     }
-    
-    $usuario = $result->fetch_assoc();
-    $stmt->close();
     
     if ($usuario['status'] !== 'active') {
         throw new Exception('Cuenta inactiva');

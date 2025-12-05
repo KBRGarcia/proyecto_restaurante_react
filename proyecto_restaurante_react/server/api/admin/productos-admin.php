@@ -140,18 +140,29 @@ function crearProducto($conn) {
         
         $producto_id = $conn->insert_id;
         
-        // Asignar producto a sucursales
-        $stmtSucursal = $conn->prepare("
-            INSERT INTO producto_sucursal (producto_id, sucursal_id, disponible)
-            VALUES (?, ?, TRUE)
-        ");
-        
-        foreach ($input['sucursal_ids'] as $sucursal_id) {
-            $sucursal_id = (int)$sucursal_id;
-            $stmtSucursal->bind_param("ii", $producto_id, $sucursal_id);
-            if (!$stmtSucursal->execute()) {
-                throw new Exception('Error al asignar producto a sucursal');
+        // Asignar producto a sucursales (usar tabla product_branches)
+        // Verificar si la tabla existe
+        $checkTable = $conn->query("SHOW TABLES LIKE 'product_branches'");
+        if ($checkTable && $checkTable->num_rows > 0) {
+            $stmtSucursal = $conn->prepare("
+                INSERT INTO product_branches (product_id, branch_id, available)
+                VALUES (?, ?, TRUE)
+            ");
+            
+            if (!$stmtSucursal) {
+                throw new Exception('Error al preparar consulta de sucursales: ' . $conn->error);
             }
+            
+            foreach ($input['sucursal_ids'] as $sucursal_id) {
+                $sucursal_id = (int)$sucursal_id;
+                $stmtSucursal->bind_param("ii", $producto_id, $sucursal_id);
+                if (!$stmtSucursal->execute()) {
+                    throw new Exception('Error al asignar producto a sucursal: ' . $stmtSucursal->error);
+                }
+            }
+        } else {
+            // Si la tabla no existe, registrar un warning pero no fallar
+            error_log('ADVERTENCIA: La tabla product_branches no existe. El producto se creó pero no se asignó a sucursales.');
         }
         
         // Confirmar transacción
@@ -283,25 +294,34 @@ function actualizarProducto($conn, $id) {
             throw new Exception('Error al actualizar el producto');
         }
         
-        // Actualizar asignación de sucursales si se proporcionan
+        // Actualizar asignación de sucursales si se proporcionan (usar tabla product_branches)
         if (isset($input['sucursal_ids'])) {
-            // Eliminar asignaciones anteriores
-            $stmtDelete = $conn->prepare("DELETE FROM producto_sucursal WHERE producto_id = ?");
-            $stmtDelete->bind_param("i", $id);
-            $stmtDelete->execute();
-            
-            // Insertar nuevas asignaciones
-            $stmtSucursal = $conn->prepare("
-                INSERT INTO producto_sucursal (producto_id, sucursal_id, disponible)
-                VALUES (?, ?, TRUE)
-            ");
-            
-            foreach ($input['sucursal_ids'] as $sucursal_id) {
-                $sucursal_id = (int)$sucursal_id;
-                $stmtSucursal->bind_param("ii", $id, $sucursal_id);
-                if (!$stmtSucursal->execute()) {
-                    throw new Exception('Error al asignar producto a sucursal');
+            $checkTable = $conn->query("SHOW TABLES LIKE 'product_branches'");
+            if ($checkTable && $checkTable->num_rows > 0) {
+                // Eliminar asignaciones anteriores
+                $stmtDelete = $conn->prepare("DELETE FROM product_branches WHERE product_id = ?");
+                $stmtDelete->bind_param("i", $id);
+                $stmtDelete->execute();
+                
+                // Insertar nuevas asignaciones
+                $stmtSucursal = $conn->prepare("
+                    INSERT INTO product_branches (product_id, branch_id, available)
+                    VALUES (?, ?, TRUE)
+                ");
+                
+                if (!$stmtSucursal) {
+                    throw new Exception('Error al preparar consulta de sucursales: ' . $conn->error);
                 }
+                
+                foreach ($input['sucursal_ids'] as $sucursal_id) {
+                    $sucursal_id = (int)$sucursal_id;
+                    $stmtSucursal->bind_param("ii", $id, $sucursal_id);
+                    if (!$stmtSucursal->execute()) {
+                        throw new Exception('Error al asignar producto a sucursal: ' . $stmtSucursal->error);
+                    }
+                }
+            } else {
+                error_log('ADVERTENCIA: La tabla product_branches no existe. Las asignaciones de sucursales no se actualizaron.');
             }
         }
         

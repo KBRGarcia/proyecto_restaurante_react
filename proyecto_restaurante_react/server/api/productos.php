@@ -48,8 +48,8 @@ if (!isset($conn) || $conn->connect_error) {
 $conn->set_charset("utf8mb4");
 
 try {
-    // Verificar si la tabla producto_sucursal existe
-    $check_table = $conn->query("SHOW TABLES LIKE 'producto_sucursal'");
+    // Verificar si la tabla product_branches existe
+    $check_table = $conn->query("SHOW TABLES LIKE 'product_branches'");
     $tabla_producto_sucursal_existe = $check_table && $check_table->num_rows > 0;
     
     // Obtener filtro de sucursales si existe
@@ -71,7 +71,7 @@ try {
         // Crear placeholders para prepared statement
         $placeholders = implode(',', array_fill(0, count($sucursal_ids), '?'));
         
-        // Query con JOIN a producto_sucursal
+        // Query con JOIN a product_branches
         $sql = "SELECT DISTINCT 
                     p.id,
                     p.name as nombre,
@@ -89,11 +89,11 @@ try {
                     GROUP_CONCAT(DISTINCT b.name SEPARATOR ', ') as sucursal_nombres
                 FROM products p 
                 LEFT JOIN categories c ON p.category_id = c.id
-                INNER JOIN producto_sucursal ps ON p.id = ps.producto_id
-                LEFT JOIN branches b ON ps.sucursal_id = b.id
+                INNER JOIN product_branches ps ON p.id = ps.product_id
+                LEFT JOIN branches b ON ps.branch_id = b.id
                 WHERE p.status = 'active' 
-                    AND ps.disponible = TRUE
-                    AND ps.sucursal_id IN ($placeholders)
+                    AND ps.available = TRUE
+                    AND ps.branch_id IN ($placeholders)
                     AND b.active = TRUE
                 GROUP BY p.id
                 ORDER BY p.is_special DESC, p.id DESC";
@@ -117,7 +117,7 @@ try {
     } else {
         // Sin filtro o tabla producto_sucursal no existe: mostrar todos los productos
         if ($tabla_producto_sucursal_existe) {
-            // Query con JOIN a producto_sucursal (sin filtro)
+            // Query con JOIN a product_branches (sin filtro)
             $sql = "SELECT DISTINCT
                         p.id,
                         p.name as nombre,
@@ -131,12 +131,12 @@ try {
                         p.ingredients as ingredientes,
                         p.is_special as es_especial,
                         c.name as categoria_nombre,
-                        GROUP_CONCAT(DISTINCT ps.sucursal_id) as sucursal_ids,
+                        GROUP_CONCAT(DISTINCT ps.branch_id) as sucursal_ids,
                         GROUP_CONCAT(DISTINCT b.name SEPARATOR ', ') as sucursal_nombres
                     FROM products p 
                     LEFT JOIN categories c ON p.category_id = c.id
-                    LEFT JOIN producto_sucursal ps ON p.id = ps.producto_id
-                    LEFT JOIN branches b ON ps.sucursal_id = b.id AND b.active = TRUE
+                    LEFT JOIN product_branches ps ON p.id = ps.product_id
+                    LEFT JOIN branches b ON ps.branch_id = b.id AND b.active = TRUE
                     WHERE p.status = 'active'
                     GROUP BY p.id
                     ORDER BY p.is_special DESC, p.id DESC";
@@ -197,7 +197,7 @@ try {
             'data' => $productos,
             'filtro_aplicado' => ($sucursales_filtro && $tabla_producto_sucursal_existe) ? true : false,
             'total' => count($productos),
-            'warning' => !$tabla_producto_sucursal_existe ? 'La tabla producto_sucursal no existe. Ejecuta el script SQL: 27-11-2025_02-producto_sucursal_table.sql' : null
+            'warning' => !$tabla_producto_sucursal_existe ? 'La tabla product_branches no existe. Verifica la estructura de la base de datos.' : null
         ], JSON_UNESCAPED_UNICODE);
     } else {
         throw new Exception('Error al obtener productos: ' . $conn->error);
